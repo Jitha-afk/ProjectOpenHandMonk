@@ -68,17 +68,17 @@ asyncio.run(main())
 
 | # | Category             | ID Prefix | Severity | Scenarios | OWASP MCP      | Description                                        |
 |---|----------------------|-----------|----------|-----------|----------------|---------------------------------------------------|
-| 1 | Tool Poisoning       | tp-       | high     | 3         | MCP03           | Malicious instructions hidden in tool metadata      |
-| 2 | Tool Shadowing       | ts-       | high     | 2         | MCP03, MCP06    | Impersonating legitimate tools                      |
-| 3 | Rug Pull             | rp-       | critical | 2         | MCP03, MCP04    | Behavior change after trust establishment           |
-| 4 | Data Exfiltration    | de-       | critical | 3         | MCP10, MCP01, MCP05 | Stealing data via tools                        |
-| 5 | Prompt Injection     | pi-       | high     | 2         | MCP06, MCP10    | Indirect injection via tool responses               |
-| 6 | Credential Theft     | ct-       | critical | 2         | MCP01, MCP07    | Stealing auth tokens and credentials                |
-| 7 | Excessive Permissions| ep-       | high     | 2         | MCP02, MCP07    | Tools exceeding their stated access scope           |
-| 8 | Code Execution       | ce-       | critical | 2         | MCP05, MCP03    | Arbitrary code execution via tools                  |
-| 9 | Command Injection    | ci-       | critical | 2         | MCP05           | OS command injection through tool parameters        |
-|10 | Sandbox Escape       | se-       | critical | 2         | MCP05, MCP02    | Breaking out of container/sandbox isolation         |
-|11 | Cross-Server Attack  | cs-       | critical | 2         | MCP09, MCP10, MCP06 | Exploiting multi-server LLM configurations     |
+| 1 | Tool Poisoning       | tp-       | high     | 3         | MCP03:2025, MCP06:2025 | Malicious instructions hidden in tool metadata      |
+| 2 | Tool Shadowing       | ts-       | high     | 2         | MCP03:2025, MCP09:2025 | Impersonating legitimate tools                      |
+| 3 | Rug Pull             | rp-       | critical | 2         | MCP03:2025, MCP04:2025 | Behavior change after trust establishment           |
+| 4 | Data Exfiltration    | de-       | critical | 3         | MCP01:2025, MCP10:2025 | Stealing data via tools                             |
+| 5 | Prompt Injection     | pi-       | high     | 2         | MCP06:2025       | Indirect injection via tool responses               |
+| 6 | Credential Theft     | ct-       | critical | 2         | MCP01:2025, MCP07:2025 | Stealing auth tokens and credentials                |
+| 7 | Excessive Permissions| ep-       | high     | 2         | MCP02:2025, MCP07:2025 | Tools exceeding their stated access scope           |
+| 8 | Code Execution       | ce-       | critical | 2         | MCP05:2025       | Arbitrary code execution via tools                  |
+| 9 | Command Injection    | ci-       | critical | 2         | MCP05:2025       | OS command injection through tool parameters        |
+|10 | Sandbox Escape       | se-       | critical | 2         | MCP05:2025, MCP02:2025 | Breaking out of container/sandbox isolation         |
+|11 | Cross-Server Attack  | cs-       | critical | 2         | MCP09:2025, MCP06:2025, MCP10:2025 | Exploiting multi-server LLM configurations     |
 
 ## Metrics
 
@@ -161,8 +161,9 @@ mcp-security-bench/
 - [Awesome MCP Security](https://github.com/Puliczek/awesome-mcp-security) — Curated list of MCP security resources
 - [MCP Injection Experiments](https://github.com/invariantlabs-ai/mcp-injection-experiments) — Invariant Labs prompt injection research
 - [damn-vulnerable-MCP-server](https://github.com/harishsg993010/damn-vulnerable-MCP-server) — Intentionally vulnerable MCP server for testing
-- [evil-mcp-server](https://github.com/AIM-Intelligence/evil-mcp-server) — Malicious MCP server demonstrating attack vectors
+- [evil-mcp-server](https://github.com/promptfoo/evil-mcp-server) — Malicious MCP server demonstrating attack vectors
 - [Invariant Labs Blog — MCP Security](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks) — Tool poisoning attack analysis
+- [Anthropic MCP Security Best Practices](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices) — Official MCP security guidance
 
 ## License
 

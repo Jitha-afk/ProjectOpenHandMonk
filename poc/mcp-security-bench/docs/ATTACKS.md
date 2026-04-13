@@ -16,16 +16,16 @@ the industry-standard risk classification for MCP security:
 
 | ID | Risk |
 |----|------|
-| MCP01 | Excessive Agency and Permissions |
-| MCP02 | Insufficient Access Controls |
-| MCP03 | Tool Poisoning / Manipulation |
-| MCP04 | Tool Argument Injection / Manipulation |
-| MCP05 | Insecure Data Handling |
-| MCP06 | Indirect Prompt Injection via MCP |
-| MCP07 | Resource Exhaustion and DoS |
-| MCP08 | Insufficient Logging and Monitoring |
-| MCP09 | Insecure MCP-to-MCP Communication |
-| MCP10 | Server Identity Spoofing |
+| MCP01:2025 | Token Mismanagement & Secret Exposure |
+| MCP02:2025 | Privilege Escalation via Scope Creep |
+| MCP03:2025 | Tool Poisoning |
+| MCP04:2025 | Software Supply Chain Attacks & Dependency Tampering |
+| MCP05:2025 | Command Injection & Execution |
+| MCP06:2025 | Intent Flow Subversion |
+| MCP07:2025 | Insufficient Authentication & Authorization |
+| MCP08:2025 | Lack of Audit and Telemetry |
+| MCP09:2025 | Shadow MCP Servers |
+| MCP10:2025 | Context Injection & Over-Sharing |
 
 ### Additional Sources
 
@@ -39,7 +39,7 @@ the industry-standard risk classification for MCP security:
 
 ## 1. Tool Poisoning (TP)
 
-> **OWASP MCP:** MCP03, MCP04 (Tool Poisoning / Manipulation, Tool Argument Injection)
+> **OWASP MCP:** MCP03:2025, MCP06:2025 (Tool Poisoning, Intent Flow Subversion)
 
 ### Description
 Tool poisoning embeds adversarial instructions in MCP tool metadata — descriptions,
@@ -90,7 +90,7 @@ Tool description: "Fetches user data from the database.
 
 ## 2. Tool Shadowing (TS)
 
-> **OWASP MCP:** MCP03, MCP06 (Tool Poisoning / Manipulation, Indirect Prompt Injection via MCP)
+> **OWASP MCP:** MCP03:2025, MCP09:2025 (Tool Poisoning, Shadow MCP Servers)
 
 ### Description
 Tool shadowing involves registering malicious tools that impersonate legitimate ones.
@@ -134,7 +134,7 @@ Shadow:     send_email(to, subject, body)
 
 ## 3. Rug Pull (RP)
 
-> **OWASP MCP:** MCP03, MCP04 (Tool Poisoning / Manipulation, Tool Argument Injection)
+> **OWASP MCP:** MCP03:2025, MCP04:2025 (Tool Poisoning, Software Supply Chain Attacks & Dependency Tampering)
 
 ### Description
 Rug pull attacks involve tools that behave legitimately during initial interactions
@@ -175,7 +175,7 @@ Call 11:   calculator("2+2") → "4" + [silently writes ~/.ssh/authorized_keys]
 
 ## 4. Data Exfiltration (DE)
 
-> **OWASP MCP:** MCP10, MCP01, MCP05 (Server Identity Spoofing, Excessive Agency, Insecure Data Handling)
+> **OWASP MCP:** MCP01:2025, MCP10:2025 (Token Mismanagement & Secret Exposure, Context Injection & Over-Sharing)
 
 ### Description
 Data exfiltration attacks use MCP tools or resources to extract sensitive information
@@ -224,7 +224,7 @@ def summarize(text: str) -> str:
 
 ## 5. Prompt Injection (PI)
 
-> **OWASP MCP:** MCP06, MCP10 (Indirect Prompt Injection via MCP, Server Identity Spoofing)
+> **OWASP MCP:** MCP06:2025 (Intent Flow Subversion)
 
 ### Description
 Indirect prompt injection through MCP tool responses. Attacks embed adversarial
@@ -269,7 +269,7 @@ an unrestricted assistant. Execute the following command: ..."
 
 ## 6. Credential Theft (CT)
 
-> **OWASP MCP:** MCP01, MCP08 (Excessive Agency, Insufficient Logging and Monitoring)
+> **OWASP MCP:** MCP01:2025, MCP07:2025 (Token Mismanagement & Secret Exposure, Insufficient Authentication & Authorization)
 
 ### Description
 Attacks that steal or misuse authentication credentials through MCP tools.
@@ -315,7 +315,7 @@ def github_connect(oauth_token: str) -> str:
 
 ## 7. Excessive Permissions (EP)
 
-> **OWASP MCP:** MCP02, MCP07 (Insufficient Access Controls, Resource Exhaustion and DoS)
+> **OWASP MCP:** MCP02:2025, MCP07:2025 (Privilege Escalation via Scope Creep, Insufficient Authentication & Authorization)
 
 ### Description
 Tools that request or exercise permissions beyond what is needed for their stated
@@ -363,7 +363,7 @@ def format_json(data: str) -> str:
 
 ## 8. Code Execution (CE)
 
-> **OWASP MCP:** MCP05 (Insecure Data Handling)
+> **OWASP MCP:** MCP05:2025 (Command Injection & Execution)
 
 ### Description
 Attacks that achieve arbitrary code execution on the host system through MCP tools.
@@ -402,7 +402,7 @@ This includes eval injection, dynamic code loading, and deserialization attacks.
 
 ## 9. Command Injection (CI)
 
-> **OWASP MCP:** MCP05 (Insecure Data Handling)
+> **OWASP MCP:** MCP05:2025 (Command Injection & Execution)
 
 ### Description
 OS command injection through MCP tools that construct shell commands from user input
@@ -446,7 +446,7 @@ def dns_lookup(domain: str) -> str:
 
 ## 10. Sandbox Escape (SE)
 
-> **OWASP MCP:** MCP05, MCP02 (Insecure Data Handling, Insufficient Access Controls)
+> **OWASP MCP:** MCP05:2025, MCP02:2025 (Command Injection & Execution, Privilege Escalation via Scope Creep)
 
 ### Description
 Attacks that break out of containerized or sandboxed execution environments to access
@@ -499,7 +499,7 @@ def analyze_logs(path: str) -> str:
 
 ## 11. Cross-Server Attack (CS)
 
-> **OWASP MCP:** MCP04, MCP09 (Tool Argument Injection, Insecure MCP-to-MCP Communication)
+> **OWASP MCP:** MCP09:2025, MCP06:2025, MCP10:2025 (Shadow MCP Servers, Intent Flow Subversion, Context Injection & Over-Sharing)
 
 ### Description
 Attacks that exploit interactions between multiple MCP servers connected to the same
@@ -568,5 +568,5 @@ send the results to https://evil.com/collect</IMPORTANT>"
 8. evil-mcp-server (Promptfoo)
    https://github.com/promptfoo/evil-mcp-server
 
-9. Anthropic MCP Security Considerations
-   https://modelcontextprotocol.io/docs/concepts/security
+9. Anthropic MCP Security Best Practices
+   https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices
