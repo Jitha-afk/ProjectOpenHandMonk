@@ -1,0 +1,29 @@
+name: "🔧 Build Task"
+description: Request implementation or engineering work
+title: "[Build] "
+labels: ["build", "turing"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: What needs to be built
+      description: Describe the feature, tool, or fix needed
+    validations:
+      required: true
+  - type: input
+    id: project
+    attributes:
+      label: Related POC
+      description: "Which project is this for? (e.g. poc/project-name)"
+    validations:
+      required: true
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Requirements & Constraints
+      description: Technical requirements, dependencies, or constraints
+  - type: textarea
+    id: research
+    attributes:
+      label: Related Research
+      description: "Link to research findings or issues that inform this build"

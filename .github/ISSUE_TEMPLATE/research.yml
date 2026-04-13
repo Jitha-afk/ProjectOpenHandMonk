@@ -1,0 +1,30 @@
+name: "🔬 Research Task"
+description: Request research on a specific topic
+title: "[Research] "
+labels: ["research", "alan"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Research Objective
+      description: What do we need to find out?
+    validations:
+      required: true
+  - type: textarea
+    id: questions
+    attributes:
+      label: Key Questions
+      description: Specific questions to answer
+    validations:
+      required: true
+  - type: input
+    id: project
+    attributes:
+      label: Related POC
+      description: "Which project is this for? (e.g. poc/project-name, or 'general')"
+      placeholder: "general"
+  - type: textarea
+    id: sources
+    attributes:
+      label: Suggested Sources
+      description: Any starting points, links, or references

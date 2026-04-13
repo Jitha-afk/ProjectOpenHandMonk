@@ -1,0 +1,34 @@
+name: "💡 New Idea"
+description: Propose a new idea for the team to explore
+title: "[Idea] "
+labels: ["idea"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+      description: Brief description of the idea
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: Why is this worth exploring?
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Small (a few hours)
+        - Medium (a few days)
+        - Large (a week+)
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional context
+      description: Links, references, sketches, anything useful

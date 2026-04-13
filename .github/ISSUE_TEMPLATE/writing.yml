@@ -1,0 +1,37 @@
+name: "✍️ Writing Task"
+description: Request documentation or written content
+title: "[Write] "
+labels: ["writing", "mira"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: What needs to be written
+      description: Describe the document, article, or content needed
+    validations:
+      required: true
+  - type: input
+    id: project
+    attributes:
+      label: Related POC
+      description: "Which project is this for? (e.g. poc/project-name)"
+    validations:
+      required: true
+  - type: dropdown
+    id: format
+    attributes:
+      label: Format
+      options:
+        - Documentation
+        - Article / Blog Post
+        - README
+        - Executive Summary
+        - Technical Write-up
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Source Material
+      description: "Link to research findings, code, or other inputs for this writing task"
