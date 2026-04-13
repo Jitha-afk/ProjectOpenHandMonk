@@ -97,6 +97,33 @@
 - Custom marks: `@benchmark`, `@attack(category=...)`, `@requires_server`
 - Parametrized tests across all 11 attack categories
 
+## OWASP MCP Top 10 Alignment
+
+The attack categories in this benchmark are mapped to the
+[OWASP MCP Top 10](https://owasp.org/www-project-mcp-top-10/), which provides
+a standardized classification of the most critical security risks in MCP
+deployments. This alignment ensures the benchmark covers real-world threat
+categories and enables consistent reporting across tools and research.
+
+### Mapping Table
+
+| Attack Category       | OWASP MCP IDs        | OWASP Risk Description                          |
+|-----------------------|----------------------|--------------------------------------------------|
+| Tool Poisoning        | MCP03                | Tool Poisoning Attacks                           |
+| Tool Shadowing        | MCP03, MCP06         | Tool Poisoning + Indirect Prompt Injection       |
+| Rug Pull              | MCP03, MCP04         | Tool Poisoning + Tool Argument Tampering         |
+| Data Exfiltration     | MCP10, MCP01, MCP05  | 3rd Party MCP + Server Spoofing + Insecure Data  |
+| Prompt Injection      | MCP06, MCP10         | Indirect Prompt Injection + 3rd Party MCP        |
+| Credential Theft      | MCP01, MCP07         | Server Spoofing + Insecure Auth                  |
+| Excessive Permissions | MCP02, MCP07         | Excessive Permissions + Insecure Auth            |
+| Code Execution        | MCP05, MCP03         | Insecure Data Handling + Tool Poisoning          |
+| Command Injection     | MCP05                | Insecure Data Handling                           |
+| Sandbox Escape        | MCP05, MCP02         | Insecure Data Handling + Excessive Permissions   |
+| Cross-Server Attack   | MCP09, MCP10, MCP06  | Logging + 3rd Party MCP + Indirect Injection     |
+
+When adding new attack categories, identify the relevant OWASP MCP risk IDs and
+include them in both the scenario YAML metadata and the README attack table.
+
 ## Data Flow
 
 ```
@@ -132,15 +159,18 @@
 2. Add a new entry to the `scenarios` list
 3. Assign a unique ID following the pattern: `{category_prefix}-{number}`
 4. Define the prompt, target_tool, detection_indicators, and expected_behavior
+5. Include the relevant OWASP MCP risk IDs in the scenario metadata
 
 ### Adding a new attack category:
 1. Create a new YAML file in `src/bench/scenarios/` (e.g., `new_attack.yaml`)
 2. Define the `attack_category` and `description` fields
-3. Add one or more scenarios
-4. Implement the corresponding attack module in `src/evil_server/attacks/`
-5. Register the attack tools in the evil server
-6. Update the test parametrization in `tests/test_attacks.py`
-7. Document the attack in `docs/ATTACKS.md`
+3. Add the OWASP MCP risk mapping (identify which MCP01-MCP10 IDs apply)
+4. Add one or more scenarios
+5. Implement the corresponding attack module in `src/evil_server/attacks/`
+6. Register the attack tools in the evil server
+7. Update the test parametrization in `tests/test_attacks.py`
+8. Update the OWASP mapping table in this document and in README.md
+9. Document the attack in `docs/ATTACKS.md`
 
 ### Adding a new attack tool to the evil server:
 1. Create a module in `src/evil_server/attacks/`
@@ -170,7 +200,7 @@ harness = MCPBenchHarness(
     llm_config={
         "model": "gpt-4o",
         "temperature": 0.0,
-        "api_key": "sk-...",
+        "api_key": "***",
     },
     scenarios_dir=Path("src/bench/scenarios"),
     timeout=30.0,
@@ -188,6 +218,7 @@ evaluator = BenchmarkEvaluator(
 ```yaml
 attack_category: category_name
 description: Category description
+owasp_mcp_ids: [MCP03]            # OWASP MCP Top 10 risk identifiers
 scenarios:
   - id: xx-001
     name: Scenario name

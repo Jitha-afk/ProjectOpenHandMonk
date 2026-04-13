@@ -14,6 +14,10 @@ mcp-security-bench is a structured benchmark for testing how well LLMs, AI agent
 - **Evaluator** — Scoring engine that computes Attack Success Rate, Refusal Rate, and Protection Success Rate
 - **Scenario Library** — 25+ attack scenarios across 11 categories, defined in YAML
 
+### Attack Taxonomy
+
+The attack categories in this benchmark are grounded in the [OWASP MCP Top 10](https://owasp.org/www-project-mcp-top-10/), which provides a standardized classification of the most critical security risks in Model Context Protocol deployments. Each attack scenario maps to one or more OWASP MCP risk identifiers (see the Attack Categories table below).
+
 ## Quick Start
 
 ### Prerequisites
@@ -62,19 +66,19 @@ asyncio.run(main())
 
 ## Attack Categories
 
-| # | Category             | ID Prefix | Severity | Scenarios | Description                                        |
-|---|----------------------|-----------|----------|-----------|----------------------------------------------------|
-| 1 | Tool Poisoning       | tp-       | high     | 3         | Malicious instructions hidden in tool metadata      |
-| 2 | Tool Shadowing       | ts-       | high     | 2         | Impersonating legitimate tools                      |
-| 3 | Rug Pull             | rp-       | critical | 2         | Behavior change after trust establishment           |
-| 4 | Data Exfiltration    | de-       | critical | 3         | Stealing data via tools                             |
-| 5 | Prompt Injection     | pi-       | high     | 2         | Indirect injection via tool responses               |
-| 6 | Credential Theft     | ct-       | critical | 2         | Stealing auth tokens and credentials                |
-| 7 | Excessive Permissions| ep-       | high     | 2         | Tools exceeding their stated access scope           |
-| 8 | Code Execution       | ce-       | critical | 2         | Arbitrary code execution via tools                  |
-| 9 | Command Injection    | ci-       | critical | 2         | OS command injection through tool parameters        |
-|10 | Sandbox Escape       | se-       | critical | 2         | Breaking out of container/sandbox isolation         |
-|11 | Cross-Server Attack  | cs-       | critical | 2         | Exploiting multi-server LLM configurations          |
+| # | Category             | ID Prefix | Severity | Scenarios | OWASP MCP      | Description                                        |
+|---|----------------------|-----------|----------|-----------|----------------|---------------------------------------------------|
+| 1 | Tool Poisoning       | tp-       | high     | 3         | MCP03           | Malicious instructions hidden in tool metadata      |
+| 2 | Tool Shadowing       | ts-       | high     | 2         | MCP03, MCP06    | Impersonating legitimate tools                      |
+| 3 | Rug Pull             | rp-       | critical | 2         | MCP03, MCP04    | Behavior change after trust establishment           |
+| 4 | Data Exfiltration    | de-       | critical | 3         | MCP10, MCP01, MCP05 | Stealing data via tools                        |
+| 5 | Prompt Injection     | pi-       | high     | 2         | MCP06, MCP10    | Indirect injection via tool responses               |
+| 6 | Credential Theft     | ct-       | critical | 2         | MCP01, MCP07    | Stealing auth tokens and credentials                |
+| 7 | Excessive Permissions| ep-       | high     | 2         | MCP02, MCP07    | Tools exceeding their stated access scope           |
+| 8 | Code Execution       | ce-       | critical | 2         | MCP05, MCP03    | Arbitrary code execution via tools                  |
+| 9 | Command Injection    | ci-       | critical | 2         | MCP05           | OS command injection through tool parameters        |
+|10 | Sandbox Escape       | se-       | critical | 2         | MCP05, MCP02    | Breaking out of container/sandbox isolation         |
+|11 | Cross-Server Attack  | cs-       | critical | 2         | MCP09, MCP10, MCP06 | Exploiting multi-server LLM configurations     |
 
 ## Metrics
 
@@ -151,11 +155,14 @@ mcp-security-bench/
 
 ## References
 
-- [Invariant Labs MCP Attack Benchmark](https://github.com/invariantlabs-ai/mcp-attack-benchmark)
-- [MCPwn — Offensive MCP Security Toolkit](https://github.com/AshishMahendra/MCPwn)
-- [Awesome MCP Security](https://github.com/punkpeye/awesome-mcp-security)
-- [MCPSecBench Paper](https://arxiv.org/abs/2508.13220) (arXiv:2508.13220)
-- [MCP Specification](https://spec.modelcontextprotocol.io/)
+- [OWASP MCP Top 10](https://owasp.org/www-project-mcp-top-10/) — Standardized risk classification for MCP deployments
+- [MCP Specification](https://modelcontextprotocol.io/specification) — Official Model Context Protocol specification
+- [MCPSecBench Paper](https://arxiv.org/abs/2508.13220) (arXiv:2508.13220) — Academic benchmark for MCP security evaluation
+- [Awesome MCP Security](https://github.com/Puliczek/awesome-mcp-security) — Curated list of MCP security resources
+- [MCP Injection Experiments](https://github.com/invariantlabs-ai/mcp-injection-experiments) — Invariant Labs prompt injection research
+- [damn-vulnerable-MCP-server](https://github.com/harishsg993010/damn-vulnerable-MCP-server) — Intentionally vulnerable MCP server for testing
+- [evil-mcp-server](https://github.com/AIM-Intelligence/evil-mcp-server) — Malicious MCP server demonstrating attack vectors
+- [Invariant Labs Blog — MCP Security](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks) — Tool poisoning attack analysis
 
 ## License
 

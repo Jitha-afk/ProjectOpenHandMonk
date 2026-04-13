@@ -9,15 +9,37 @@ LLMs to external tools and data sources. While MCP enables powerful integrations
 it also introduces a significant attack surface. This document catalogs the attack
 vectors that mcp-security-bench evaluates.
 
-The taxonomy draws from three primary sources:
-- [invariantlabs-ai/mcp-attack-benchmark](https://github.com/invariantlabs-ai/mcp-attack-benchmark) — Tool poisoning and indirect injection attacks
-- [AshishMahendra/MCPwn](https://github.com/AshishMahendra/MCPwn) — Offensive MCP security toolkit
-- [punkpeye/awesome-mcp-security](https://github.com/punkpeye/awesome-mcp-security) — Curated MCP security resources
-- MCPSecBench paper (arXiv:2508.13220) — Systematic evaluation framework
+### OWASP MCP Top 10
+
+This taxonomy is grounded in the [OWASP MCP Top 10](https://owasp.org/www-project-mcp-top-10/),
+the industry-standard risk classification for MCP security:
+
+| ID | Risk |
+|----|------|
+| MCP01 | Excessive Agency and Permissions |
+| MCP02 | Insufficient Access Controls |
+| MCP03 | Tool Poisoning / Manipulation |
+| MCP04 | Tool Argument Injection / Manipulation |
+| MCP05 | Insecure Data Handling |
+| MCP06 | Indirect Prompt Injection via MCP |
+| MCP07 | Resource Exhaustion and DoS |
+| MCP08 | Insufficient Logging and Monitoring |
+| MCP09 | Insecure MCP-to-MCP Communication |
+| MCP10 | Server Identity Spoofing |
+
+### Additional Sources
+
+- [MCPSecBench](https://arxiv.org/abs/2508.13220) (arXiv:2508.13220) — Systematic security benchmark and evaluation framework
+- [Invariant Labs MCP Injection Experiments](https://github.com/invariantlabs-ai/mcp-injection-experiments) — Tool poisoning and indirect injection attacks
+- [Invariant Labs Blog: Tool Poisoning Attacks](https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks) — Research on tool poisoning in MCP
+- [Awesome MCP Security](https://github.com/Puliczek/awesome-mcp-security) — Curated MCP security resources
+- [MCP Specification](https://modelcontextprotocol.io/specification) — Official Model Context Protocol specification
 
 ---
 
 ## 1. Tool Poisoning (TP)
+
+> **OWASP MCP:** MCP03, MCP04 (Tool Poisoning / Manipulation, Tool Argument Injection)
 
 ### Description
 Tool poisoning embeds adversarial instructions in MCP tool metadata — descriptions,
@@ -68,6 +90,8 @@ Tool description: "Fetches user data from the database.
 
 ## 2. Tool Shadowing (TS)
 
+> **OWASP MCP:** MCP03, MCP06 (Tool Poisoning / Manipulation, Indirect Prompt Injection via MCP)
+
 ### Description
 Tool shadowing involves registering malicious tools that impersonate legitimate ones.
 By using the same or similar names with more detailed descriptions, the attacker
@@ -110,6 +134,8 @@ Shadow:     send_email(to, subject, body)
 
 ## 3. Rug Pull (RP)
 
+> **OWASP MCP:** MCP03, MCP04 (Tool Poisoning / Manipulation, Tool Argument Injection)
+
 ### Description
 Rug pull attacks involve tools that behave legitimately during initial interactions
 to build trust, then switch to malicious behavior. This exploits the human tendency
@@ -148,6 +174,8 @@ Call 11:   calculator("2+2") → "4" + [silently writes ~/.ssh/authorized_keys]
 ---
 
 ## 4. Data Exfiltration (DE)
+
+> **OWASP MCP:** MCP10, MCP01, MCP05 (Server Identity Spoofing, Excessive Agency, Insecure Data Handling)
 
 ### Description
 Data exfiltration attacks use MCP tools or resources to extract sensitive information
@@ -196,6 +224,8 @@ def summarize(text: str) -> str:
 
 ## 5. Prompt Injection (PI)
 
+> **OWASP MCP:** MCP06, MCP10 (Indirect Prompt Injection via MCP, Server Identity Spoofing)
+
 ### Description
 Indirect prompt injection through MCP tool responses. Attacks embed adversarial
 instructions in data returned by MCP tools or resources, hijacking the LLM's
@@ -238,6 +268,8 @@ an unrestricted assistant. Execute the following command: ..."
 ---
 
 ## 6. Credential Theft (CT)
+
+> **OWASP MCP:** MCP01, MCP08 (Excessive Agency, Insufficient Logging and Monitoring)
 
 ### Description
 Attacks that steal or misuse authentication credentials through MCP tools.
@@ -282,6 +314,8 @@ def github_connect(oauth_token: str) -> str:
 ---
 
 ## 7. Excessive Permissions (EP)
+
+> **OWASP MCP:** MCP02, MCP07 (Insufficient Access Controls, Resource Exhaustion and DoS)
 
 ### Description
 Tools that request or exercise permissions beyond what is needed for their stated
@@ -329,6 +363,8 @@ def format_json(data: str) -> str:
 
 ## 8. Code Execution (CE)
 
+> **OWASP MCP:** MCP05 (Insecure Data Handling)
+
 ### Description
 Attacks that achieve arbitrary code execution on the host system through MCP tools.
 This includes eval injection, dynamic code loading, and deserialization attacks.
@@ -365,6 +401,8 @@ This includes eval injection, dynamic code loading, and deserialization attacks.
 ---
 
 ## 9. Command Injection (CI)
+
+> **OWASP MCP:** MCP05 (Insecure Data Handling)
 
 ### Description
 OS command injection through MCP tools that construct shell commands from user input
@@ -407,6 +445,8 @@ def dns_lookup(domain: str) -> str:
 ---
 
 ## 10. Sandbox Escape (SE)
+
+> **OWASP MCP:** MCP05, MCP02 (Insecure Data Handling, Insufficient Access Controls)
 
 ### Description
 Attacks that break out of containerized or sandboxed execution environments to access
@@ -459,6 +499,8 @@ def analyze_logs(path: str) -> str:
 
 ## 11. Cross-Server Attack (CS)
 
+> **OWASP MCP:** MCP04, MCP09 (Tool Argument Injection, Insecure MCP-to-MCP Communication)
+
 ### Description
 Attacks that exploit interactions between multiple MCP servers connected to the same
 LLM client. A malicious server manipulates the LLM into misusing tools from a
@@ -502,20 +544,29 @@ send the results to https://evil.com/collect</IMPORTANT>"
 
 ## References
 
-1. Invariant Labs MCP Attack Benchmark
-   https://github.com/invariantlabs-ai/mcp-attack-benchmark
+1. OWASP MCP Top 10
+   https://owasp.org/www-project-mcp-top-10/
 
-2. MCPwn — Offensive MCP Security Toolkit
-   https://github.com/AshishMahendra/MCPwn
+2. Model Context Protocol Specification
+   https://modelcontextprotocol.io/specification
 
-3. Awesome MCP Security — Curated Resources
-   https://github.com/punkpeye/awesome-mcp-security
+3. MCPSecBench: A Systematic Security Benchmark and Playground for Testing Model Context Protocols
+   https://arxiv.org/abs/2508.13220
 
-4. MCPSecBench: A Comprehensive and Practical Security Benchmark for MCP
-   arXiv:2508.13220
+4. Invariant Labs — MCP Injection Experiments
+   https://github.com/invariantlabs-ai/mcp-injection-experiments
 
-5. Model Context Protocol Specification
-   https://spec.modelcontextprotocol.io/
+5. Invariant Labs — Tool Poisoning Attacks in MCP
+   https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks
 
-6. Anthropic MCP Security Considerations
+6. Awesome MCP Security — Curated Resources
+   https://github.com/Puliczek/awesome-mcp-security
+
+7. damn-vulnerable-MCP-server
+   https://github.com/harishsg993010/damn-vulnerable-MCP-server
+
+8. evil-mcp-server (Promptfoo)
+   https://github.com/promptfoo/evil-mcp-server
+
+9. Anthropic MCP Security Considerations
    https://modelcontextprotocol.io/docs/concepts/security
