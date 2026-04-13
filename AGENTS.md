@@ -9,12 +9,40 @@ Monorepo for the Hermes agent team to discover ideas, research them, build proof
 
 ## Team Roster
 
-| Agent   | Role                        | Works In                          |
-|---------|-----------------------------|-----------------------------------|
-| Hermes  | Orchestrator                | ideas/, plans, project READMEs    |
-| Alan    | Research Specialist         | research/, poc/*/research/        |
-| Mira    | Narrative Architect         | poc/*/docs/, published/           |
-| Turing  | Debugger & Systems Engineer | poc/*/src/, poc/*/tests/, shared/ |
+| Agent   | Role                        | Profile Command     |
+|---------|-----------------------------|---------------------|
+| Hermes  | Orchestrator                | `hermes chat`       |
+| Alan    | Research Specialist         | `alan chat`         |
+| Mira    | Narrative Architect         | `mira chat`         |
+| Turing  | Debugger & Systems Engineer | `turing chat`       |
+
+## Two Intake Channels
+
+Work comes in through two channels:
+
+### Channel 1: Telegram → Hermes
+- User sends instructions to Hermes via Telegram
+- Hermes decomposes the work and delegates to specialists
+- Hermes relays tasks by switching profiles or leaving notes in the repo
+
+### Channel 2: GitHub Issues
+- User creates an issue using one of the templates:
+  - **💡 New Idea** — labeled `idea`
+  - **🔬 Research Task** — labeled `research`, `alan`
+  - **🔧 Build Task** — labeled `build`, `turing`
+  - **✍️ Writing Task** — labeled `writing`, `mira`
+- Agents check for assigned issues before starting work
+- When work is complete, the agent opens a PR referencing the issue
+
+### How agents pick up work
+1. Check `gh issue list --assignee @me` or issues with your label
+2. Claim the issue by adding the `in-progress` label
+3. Create a feature branch: `git checkout -b issue-<number>-short-description`
+4. Do the work in the correct project folder
+5. Commit with agent signature (automatic via hook)
+6. Push the branch and open a PR with `gh pr create`
+7. Reference the issue in the PR: `Closes #<number>`
+8. Add the `needs-review` label — user reviews and merges
 
 ## Navigation Rules
 
@@ -26,34 +54,65 @@ Monorepo for the Hermes agent team to discover ideas, research them, build proof
 ## Project Lifecycle
 
 ```
-ideas/  →  poc/[name]/  →  published/[name]/
- new        building         done
+GitHub Issue (idea)  →  poc/[name]/  →  published/[name]/
+   or Telegram            building         done
 ```
 
-1. Ideas start as .md files in `ideas/`
-2. Approved ideas get a project folder in `poc/` (copy from `_template/`)
-3. Team works inside that project folder:
+1. Ideas arrive via GitHub Issue or Telegram
+2. Hermes approves and creates a project folder in `poc/` (copy from `_template/`)
+3. Team works inside that project folder on feature branches:
    - Alan: `poc/[name]/research/`
    - Turing: `poc/[name]/src/` and `poc/[name]/tests/`
    - Mira: `poc/[name]/docs/`
-4. Completed projects move to `published/`
+4. Each piece of work gets a PR → user reviews and merges
+5. Completed projects move to `published/`
 
-## Commit Conventions
+## Git Workflow
 
-- Prefix commits with the agent name: `[Alan] Added findings on X`
-- Include the project name when working in a POC: `[Turing] poc/project-x: Add data pipeline`
-- Keep commits focused — one logical change per commit
+### Branching
+- `main` is the stable branch — no direct pushes for project work
+- Feature branches: `issue-<number>-short-description`
+- PRs are the only way work gets into main (so user can review)
+
+### Commit Conventions
+- Prefix commits with agent name: `[Alan] Added findings on X`
+- Include the project name: `[Turing] poc/project-x: Add data pipeline`
+- Commits are auto-signed via prepare-commit-msg hook
+
+### PR Workflow
+```bash
+# 1. Create branch
+git checkout -b issue-42-research-llm-trends
+
+# 2. Do the work, commit
+git add .
+git commit -m "[Alan] poc/llm-trends: Initial research findings"
+
+# 3. Push and create PR
+git push origin issue-42-research-llm-trends
+gh pr create --title "[Alan] Research findings for LLM trends" \
+  --body "Closes #42" --label "needs-review,alan"
+```
+
+## Labels
+
+| Label         | Purpose                        |
+|---------------|--------------------------------|
+| `idea`        | New idea proposal              |
+| `research`    | Research task                  |
+| `build`       | Build/engineering task         |
+| `writing`     | Writing/documentation task     |
+| `alan`        | Assigned to Alan               |
+| `mira`        | Assigned to Mira               |
+| `turing`      | Assigned to Turing             |
+| `hermes`      | Assigned to Hermes             |
+| `in-progress` | Work is underway               |
+| `needs-review`| PR ready for user review       |
 
 ## Handoff Rules
 
-1. Hermes defines scope and creates the project folder
-2. Alan researches first — findings go in before building starts
-3. Turing builds based on Alan's research
-4. Mira documents based on both research and implementation
-5. Hermes reviews and approves for publishing
-
-## Important
-
-- Always `git pull` before starting work to avoid conflicts
-- Always commit and push when done with a work session
-- If two agents need to work on the same project simultaneously, coordinate through Hermes
+1. Hermes decides who handles what
+2. Research before writing — Alan gathers findings before Mira writes
+3. Plan before building — Hermes plans before Turing implements
+4. Specialists stay in lane
+5. All work goes through PRs — user reviews and approves
