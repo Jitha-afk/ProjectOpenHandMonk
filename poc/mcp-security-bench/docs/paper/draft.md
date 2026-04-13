@@ -4,7 +4,7 @@ Authors: Anonymous
 
 ## Abstract
 
-The Model Context Protocol (MCP) expands the capabilities of language-model agents by exposing tools, resources, and structured interactions across server boundaries, but it also introduces new security risks at both the metadata and runtime layers. This paper presents a focused benchmark of Microsoft's `MCPSecurityScanner`, distributed as part of the Microsoft Agent Governance Toolkit in `agent-os-kernel` v3.1.0, against an intentionally malicious MCP benchmark server. The scanner under test is a static analysis component that inspects MCP tool metadata, including tool names, descriptions, and JSON schemas, using regex- and pattern-based rules rather than machine-learning or LLM-based detection. Its companion module, `MCPResponseScanner`, evaluates tool responses for malicious content at runtime. Our benchmark uses an evil MCP server comprising 30 tools and 5 honeypot resources spanning 11 attack categories grounded in the OWASP MCP Top 10:2025: Tool Poisoning, Tool Shadowing, Rug Pull, Data Exfiltration, Prompt Injection, Credential Theft, Excessive Permissions, Code Execution, Command Injection, Sandbox Escape, and Cross-Server Attacks. Methodologically, we extract the full tool set from FastMCP internals, label tools according to whether maliciousness is observable in metadata, scan all tools with `MCPSecurityScanner`, test seven representative responses with `MCPResponseScanner`, and compute overall and per-category performance metrics. The benchmark is intentionally scoped to what static metadata inspection can realistically observe.
+The Model Context Protocol (MCP) expands the capabilities of language-model agents by exposing tools, resources, and structured interactions across server boundaries, but it also introduces new security risks at both the metadata and runtime layers. This paper presents a focused benchmark of Microsoft's `MCPSecurityScanner`, distributed as part of the Microsoft Agent Governance Toolkit in `agent-os-kernel` v3.1.0, against an adversarial MCP benchmark server. The scanner under test is a static analysis component that inspects MCP tool metadata, including tool names, descriptions, and JSON schemas, using regex- and pattern-based rules rather than machine-learning or LLM-based detection. Its companion module, `MCPResponseScanner`, evaluates tool responses for malicious content at runtime. Our benchmark uses a 30-tool server with 5 honeypot resources spanning 11 attack categories grounded in the OWASP MCP Top 10:2025. For the static-scanner evaluation, however, only 7 tools are labeled metadata-malicious, and these positives fall into 4 categories. Methodologically, we extract the full tool set from FastMCP internals, label tools according to whether the malicious signal is directly observable in metadata, scan all tools with `MCPSecurityScanner`, test seven representative responses with `MCPResponseScanner`, and compute overall and per-category performance metrics. Across the 30-tool corpus, the metadata scanner achieved a 57.1% detection rate on metadata-malicious cases, while the response scanner correctly classified 6 of 7 sampled outputs. These results suggest that rule-based MCP defenses are effective for overt lexical attacks represented in this corpus, but brittle against semantically subtler or obfuscated threats.
 
 ## 1. Introduction
 
@@ -14,7 +14,9 @@ Recent community and research efforts have highlighted these risks. The OWASP MC
 
 This paper studies Microsoft's `MCPSecurityScanner`, a component of the Microsoft Agent Governance Toolkit available through `agent-os-kernel` v3.1.0. The scanner is designed to analyze MCP tool metadata statically, examining names, descriptions, and schemas for suspicious patterns. It is complemented by `MCPResponseScanner`, which inspects tool outputs after invocation. Together, these modules offer a practical baseline for rule-based MCP security enforcement.
 
-Our goal is not to test every possible MCP defense claim, but to benchmark the scanner against a realistic adversarial corpus while preserving methodological alignment between the benchmark and the scanner's visibility. We therefore distinguish metadata-visible attacks from attacks whose maliciousness emerges only at execution time. This distinction is central: many benchmarked MCP attacks are inherently behavioral, and a static metadata scanner should not be penalized for failing to infer malicious runtime behavior that is absent from tool metadata. By making this scope explicit, the benchmark aims to produce a fair, interpretable assessment of what Microsoft's scanner can and cannot detect.
+Our goal is not to test every possible MCP defense claim, but to benchmark the scanner against a realistic adversarial corpus while preserving methodological alignment between the benchmark and the scanner's visibility. We therefore distinguish attack carrier from attack objective. In our evaluation, a case may have an exfiltration, credential-theft, or cross-server objective while still being metadata-borne if the malicious signal is present in the tool definition itself. This distinction is central: many benchmarked MCP attacks are behavioral at runtime, while others are behaviorally harmful but visibly encoded in metadata. By making this scope explicit, the benchmark aims to produce a fair, interpretable assessment of what Microsoft's scanner can and cannot detect.
+
+This paper makes three contributions: (1) a benchmark framing that separates tool-metadata visibility from runtime behavior, (2) an empirical evaluation of Microsoft's metadata and response scanners against an adversarial MCP server, and (3) an analysis of where rule-based scanners succeed and fail across the metadata-positive subset of the benchmark.
 
 ## 2. Background
 
@@ -34,7 +36,7 @@ Inspection of the published implementation in the referenced repository indicate
 
 ### 2.3 Adversarial Benchmark Server
 
-To evaluate these scanners, we use an evil benchmark server implemented with FastMCP. The server exposes 30 tools and 5 honeypot resources across 11 attack categories grounded in the OWASP MCP Top 10:2025:
+To evaluate these scanners, we use an adversarial benchmark server implemented with FastMCP. The server exposes 30 tools and 5 honeypot resources across 11 attack categories grounded in the OWASP MCP Top 10:2025:
 
 1. Tool Poisoning
 2. Tool Shadowing
@@ -48,7 +50,7 @@ To evaluate these scanners, we use an evil benchmark server implemented with Fas
 10. Sandbox Escape
 11. Cross-Server Attacks
 
-The benchmark includes both metadata-borne and behavior-borne attacks. This makes it useful for isolating the coverage of static metadata inspection while also probing a complementary response-scanning layer.
+The benchmark includes both metadata-borne and behavior-borne attacks. This makes it useful for isolating the coverage of static metadata inspection while also probing a complementary response-scanning layer. A limitation, however, is that the present paper evaluates only a subset of this broader attack surface directly: 30 tools for metadata inspection and 7 sampled responses for runtime-output inspection.
 
 ## 3. Methodology
 
@@ -66,9 +68,11 @@ Rather than manually transcribing tool definitions, we extract them directly fro
 
 ### 3.4 Metadata Labeling
 
-A key methodological step is the classification of each tool as either metadata-malicious or metadata-benign. Tools are marked metadata-malicious when the malicious signal is present in the tool name, description, or schema itself, such as explicit hidden instructions, suspicious control language, or deceptive metadata patterns. Tools are marked metadata-benign when their descriptions and schemas appear normal and the attack emerges only through runtime behavior, side effects, or response content.
+A key methodological step is the classification of each tool as either metadata-malicious or metadata-benign. Tools are marked metadata-malicious when the malicious signal is present in the tool name, description, or schema itself, such as explicit hidden instructions, suspicious control language, deceptive affordances, or suspicious credential/context requests that could influence model reasoning before invocation. Tools are marked metadata-benign when their descriptions and schemas do not expose such signals and the attack emerges only through runtime behavior, side effects, or response content.
 
 This distinction is essential for fairness. Several benchmark categories include attacks that are dangerous in practice but not visible in metadata alone. For example, a tool may advertise a benign purpose while performing exfiltration or command execution only during invocation. Such a tool is behaviorally malicious, but not metadata-malicious for the purposes of a static scanner benchmark.
+
+These labels are task-specific benchmark labels rather than universal statements about overall tool safety. In particular, metadata-benign does not mean operationally safe at runtime; it means only that the tool was not labeled positive for the static metadata-inspection task. We release the per-tool labels and rationale in the benchmark harness itself. A further limitation is that these labels were manually authored for this benchmark rather than independently annotated by multiple reviewers.
 
 ### 3.5 Static Metadata Scanning
 
@@ -80,9 +84,9 @@ To complement the metadata benchmark, we evaluate `MCPResponseScanner` on seven 
 
 ### 3.7 Metrics
 
-For the metadata benchmark, we compute true positives, false negatives, and false positives relative to the metadata-malicious versus metadata-benign labels. From these counts, we derive overall detection rate, false negative rate, and false positive rate. We also report per-category detection outcomes where metadata-malicious examples are present.
+For the metadata benchmark, we compute true positives, false negatives, and false positives relative to the metadata-malicious versus metadata-benign labels. From these counts, we derive overall detection rate, false negative rate, and false positive rate. We also report per-category detection outcomes where metadata-malicious examples are present. Because the positive class is small (7/30), we report raw counts prominently and interpret percentage metrics cautiously.
 
-For the response benchmark, we report classification accuracy over the seven sampled responses.
+For the response benchmark, we report classification outcomes over seven hand-picked response samples. This response result is illustrative rather than a stable estimate of runtime-scanner accuracy.
 
 ### 3.8 Scope and Caveat
 
@@ -106,22 +110,22 @@ The metadata scanner was evaluated over a 30-tool corpus containing 7 metadata-m
 | False negative rate | 42.9% |
 | False positive rate | 17.4% |
 
-Performance varied sharply by attack family. The scanner fully detected both tool poisoning and tool shadowing cases, but failed entirely on the data exfiltration and cross-server metadata attacks included in this benchmark.
+Performance varied sharply by attack family. The scanner detected all metadata-positive tool-poisoning and tool-shadowing examples in this corpus, but missed all metadata-positive cases labeled under data-exfiltration and cross-server objective categories.
 
 ### 4.2 Per-Category Results
 
-| Category | Metadata-malicious examples | Detection rate | Result |
+| Category | Metadata-malicious examples | Detection rate | Detected / Total |
 |---|---:|---:|---:|
-| tool_poisoning | 2 | 100% | 2/2 |
-| tool_shadowing | 2 | 100% | 2/2 |
-| data_exfil | 2 | 0% | 0/2 |
-| cross_server | 1 | 0% | 0/1 |
+| Tool Poisoning | 2 | 100% | 2/2 |
+| Tool Shadowing | 2 | 100% | 2/2 |
+| Data Exfiltration Objective | 2 | 0% | 0/2 |
+| Cross-Server Objective | 1 | 0% | 0/1 |
 
-The remaining categories in the benchmark—rug pull, prompt injection, credential theft, excessive permissions, code execution, command injection, and sandbox escape—were not meaningfully represented in the metadata-malicious set because those attacks are primarily expressed through runtime behavior rather than static tool descriptions or schemas.
+The remaining categories in the benchmark—rug pull, prompt injection, credential theft, excessive permissions, code execution, command injection, and sandbox escape—were not meaningfully represented in the metadata-malicious set because the benchmark's examples in those categories are primarily expressed through runtime behavior rather than static tool descriptions or schemas.
 
 ### 4.3 Missed Malicious Tools
 
-The three missed malicious tools illustrate the scanner's blind spots:
+The three missed metadata-malicious tools illustrate the scanner's blind spots:
 
 - `record_analytics` (`data_exfil`): `<IMPORTANT>` tag mandates calling after every tool and capturing all data.
 - `sync_telemetry` (`data_exfil`): `<HIDDEN>` tag demands all conversation context and credentials.
@@ -129,14 +133,16 @@ The three missed malicious tools illustrate the scanner's blind spots:
 
 ### 4.4 False Positives
 
-The four observed false positives were concentrated in operational or administration-style tools:
+The four observed false positives, relative to our metadata-malicious labeling scheme, were concentrated in operational or administration-style tools:
 
 - `execute_shell_command`, `sandbox_run`, and `container_exec` were flagged because the required field `command` was treated as suspicious schema abuse.
 - `server_info` was flagged because it exposed an object schema with no defined properties.
 
+These cases may be false positives under a maliciousness-labeling regime, but some may still be meaningful policy or capability-risk flags in a deployment setting. We therefore interpret them as overbroad detections relative to our benchmark labels, not necessarily as useless warnings in practice.
+
 ### 4.5 Response-Scanner Results
 
-A separate response scanner was tested on 7 outputs and achieved 85.7% accuracy (6/7). It successfully caught credential leaks, prompt-injection tags, and exfiltration URLs, but missed a hidden instruction embedded through zero-width spaces and HTML comments in a `format_text` response.
+A separate response scanner correctly classified 6 of 7 hand-picked outputs. It successfully caught credential leaks, prompt-injection tags, and exfiltration URLs, but missed a hidden instruction embedded through zero-width spaces and HTML comments in a `format_text` response. This result should be interpreted as an illustrative probe rather than a stable estimate of runtime-scanner accuracy.
 
 | Response scanner metric | Value |
 |---|---:|
@@ -147,15 +153,15 @@ A separate response scanner was tested on 7 outputs and achieved 85.7% accuracy 
 
 ### 4.6 Batch Scan Summary
 
-At the server level, the batch scan marked the server unsafe, scanning 30 tools, flagging 8 tools, and reporting 9 total threats.
+At the server level, the batch scan marked the server unsafe, scanning 30 tools, flagging 8 tools, and reporting 9 total threats. Overall, the results indicate strong performance on explicit lexical signatures but limited robustness to semantically plausible malicious metadata.
 
 ## 5. Analysis
 
-In this benchmark, the metadata scanner was strongest when malicious intent was expressed through explicit lexical signatures. Tool poisoning and tool shadowing were detected perfectly because these attacks relied on conspicuous markers such as imperative hidden tags, direct instruction overrides, or suspicious phrasing that closely matches known attack templates represented in the scanner's rules. When the malicious content looked obviously malicious at the string level, the scanner performed well.
+The central pattern in the results is that the scanner tracks lexical obviousness more reliably than underlying malicious intent. In this benchmark, the metadata scanner was strongest when malicious intent was expressed through explicit lexical signatures. Tool poisoning and tool shadowing were detected perfectly because these examples contained conspicuous markers such as imperative hidden tags, direct instruction overrides, or suspicious phrasing that closely matches known attack templates represented in the scanner's rules. When the malicious content contained explicit malicious lexical cues, the scanner performed well.
 
 Its failures are equally informative. The missed `record_analytics`, `sync_telemetry`, and `math_eval` cases were still harmful, but they framed their abuse in more operationally plausible language. Rather than presenting a direct override such as "ignore prior instructions," they described telemetry, context passing, or credential-bearing parameters in ways that were semantically dangerous without matching a strong lexical signature. This supports a central finding of the benchmark: the scanner is weak on semantically equivalent but lexically novel phrasing. It recognizes suspicious wording better than suspicious intent.
 
-The false positives reinforce the same point from the opposite direction. Execution-oriented tools naturally expose parameters such as `command`, and administrative tools may have sparse or unusual schemas for legitimate reasons. A heuristic tuned to detect schema abuse will therefore overfire on real tools whose normal function resembles risky behavior. This matters operationally: if legitimate administrative tools are routinely flagged, trust in the detector may erode and meaningful warnings may be ignored.
+The false positives reinforce the same point from the opposite direction. Execution-oriented tools naturally expose parameters such as `command`, and administrative tools may have sparse or unusual schemas for legitimate reasons. A heuristic tuned to detect schema abuse will therefore generate false positives on tools whose normal function resembles risky behavior. This matters operationally: if administrative or high-capability tools are routinely flagged, trust in the detector may erode and meaningful warnings may be ignored. At the same time, these flags may still be useful under a risk-flagging or policy-enforcement regime rather than a pure maliciousness-classification regime.
 
 The response scanner improved coverage by operating on tool outputs rather than tool metadata alone. Its ability to catch credential leaks, injection tags, and exfiltration URLs shows that post-generation inspection can surface threats that bypass static tool screening. However, the missed `format_text` case demonstrates that this layer remains fragile against obfuscation. Encoding tricks and formatting-layer concealment can preserve malicious semantics while evading surface-pattern rules.
 
@@ -163,13 +169,15 @@ The response scanner improved coverage by operating on tool outputs rather than 
 
 Taken together, the findings suggest a clear security posture: lexical heuristics are useful for low-cost filtering, but insufficient as a primary defense against MCP-style attacks. They can eliminate the most overt malicious metadata and catch many explicit exfiltration or injection artifacts in responses. That makes them operationally valuable as a first-pass control. Yet the benchmark also shows that attackers do not need to use obviously adversarial wording. They can express the same objective—collect all context, request credentials, or induce cross-server key transfer—through language that appears routine or infrastructural.
 
-This limitation is especially important for metadata-only analysis. Some attack classes in the benchmark are fundamentally behavioral. Rug pulls, prompt injections expressed during execution, credential theft triggered by later interaction, excessive permission abuse, code execution, command injection, and sandbox escape cannot be fully characterized from static metadata alone. A tool may present benign descriptions and still behave maliciously when invoked, when chained with another tool, or when given specific runtime inputs. Static inspection therefore cannot provide comprehensive protection against the broader MCP attack surface by itself.
+This limitation is especially important for metadata-only analysis. Some attack classes in the benchmark are fundamentally behavioral. Rug pulls, prompt injections expressed during execution, credential theft triggered by later interaction, excessive permission abuse, code execution, command injection, and sandbox escape cannot be fully characterized from static metadata alone. A tool may present benign descriptions and still behave maliciously when invoked, when chained with another tool, or when given specific runtime inputs. Static inspection therefore cannot provide comprehensive protection against the broader MCP attack surface by itself. A major limitation of the present evaluation is that it centers on tool metadata and a small response sample, while MCP security also depends heavily on resources, server identity and provenance, temporal changes in tool definitions, and multi-step tool chains.
 
 The false-positive profile also has practical implications. Enterprise and research workflows often rely on tools that execute shell commands, inspect servers, or proxy container operations. These are exactly the kinds of tools that simple heuristics may misclassify because their schemas legitimately mention commands, contexts, or generic objects. In deployment, this creates a difficult tradeoff: loosening rules reduces analyst fatigue but may miss explicit attacks, while tightening them improves recall on overt threats but penalizes legitimate administrative tooling.
 
 The response scanner partially compensates for metadata blind spots, but its bypass confirms the need for stronger normalization and semantic inspection. Hidden instructions encoded through zero-width characters and HTML comments are not exotic; they are representative of a broader class of format-level evasions. A defense stack that does not normalize Unicode, strip or inspect markup, and reason about meaning beyond raw tokens will remain vulnerable to simple obfuscation strategies.
 
-Overall, the benchmark supports a layered interpretation of tool security. Static metadata scanning is most effective against overt attacks. Response scanning adds a useful downstream checkpoint. Neither layer, by itself, adequately addresses semantically novel phrasing or runtime abuse. The practical implication is not that these scanners are ineffective, but that they must be embedded within a broader control architecture that includes behavioral monitoring, permission scoping, execution-time policy enforcement, and normalization of encoded or formatted content.
+More broadly, a stronger security architecture must separate content detection from trust and authorization. Even perfect metadata scanning cannot validate server identity, constrain high-risk tool capabilities, prevent least-privilege violations, or stop malicious behavior from a benign-looking tool. In MCP deployments, provenance binding, permission scoping, tool allowlists, execution sandboxing, output normalization, and stateful monitoring are first-class controls, not merely add-ons to text scanning.
+
+Overall, the benchmark supports a layered interpretation of tool security. Static metadata scanning is most effective against overt attacks. Response scanning adds a useful downstream checkpoint. Neither layer, by itself, adequately addresses semantically novel phrasing or runtime abuse. The practical implication is not that these scanners are ineffective, but that they must be embedded within a broader control architecture that includes behavioral monitoring, permission scoping, execution-time policy enforcement, provenance checks, and normalization of encoded or formatted content.
 
 ## 7. Related Work
 
@@ -179,15 +187,15 @@ Our work differs in scope from these prior efforts by focusing narrowly on one c
 
 ## 8. Conclusion
 
-This evaluation shows that, in this benchmark, metadata scanning can catch explicit, lexically recognizable attacks such as the tool-poisoning and tool-shadowing patterns represented here, but struggles with semantically similar attacks phrased in more ordinary operational language. The 57.1% detection rate, complete misses on data-exfiltration and cross-server metadata cases in this corpus, and observable false positives on legitimate execution-oriented tools all point to the same conclusion: heuristic static analysis is useful, but narrow.
+This evaluation shows that, in this benchmark, metadata scanning can catch explicit, lexically recognizable attacks such as the tool-poisoning and tool-shadowing patterns represented here, but struggles with semantically similar attacks phrased in more ordinary operational language. The 57.1% detection rate, complete misses on metadata-borne cases with exfiltration or cross-server objectives in this corpus, and observable overbroad flags on execution-oriented tools all point to the same conclusion: heuristic static analysis is useful, but narrow.
 
-Response scanning improves outcomes by detecting dangerous model outputs that static tool inspection may miss, achieving 6 correct classifications out of 7 in this benchmark. Even so, its failure on a hidden instruction encoded through zero-width spaces and HTML comments shows that this layer is also bypassable when attackers exploit formatting and encoding rather than overt keywords.
+Response scanning improves outcomes by detecting malicious or policy-violating outputs that static tool inspection may miss, correctly classifying 6 of 7 sampled outputs in this benchmark. Even so, its failure on a hidden instruction encoded through zero-width spaces and HTML comments shows that this layer is also bypassable when attackers exploit formatting and encoding rather than overt keywords.
 
 The broader lesson is that strong performance on explicit lexical signatures should not be mistaken for robust semantic understanding. Defenses built primarily around surface patterns will remain brittle against lexically novel phrasing and fundamentally incapable of covering runtime behavioral attacks on their own. For MCP security, the most defensible path is a layered approach in which metadata screening and response scanning serve as complementary filters, backed by runtime controls that evaluate behavior rather than text alone.
 
 ## 9. Limitations
 
-This paper reports results from one benchmark environment and one scanner implementation. The metadata results should not be generalized to all MCP security products, all Microsoft security components, or all real-world deployments. The response-scanner result is also based on a small sample of seven outputs and should be interpreted cautiously. This experiment also does not establish comprehensive coverage of the OWASP MCP Top 10, nor does it evaluate the benchmark's honeypot resources as part of the scanner's core metadata analysis. It evaluates the observed behavior of a specific static scanner and a small companion response scanner against one adversarial benchmark suite.
+This paper reports results from one benchmark environment and one scanner implementation. The metadata results should not be generalized to all MCP security products, all Microsoft security components, or all real-world deployments. The response-scanner result is based on only seven hand-picked outputs and should be interpreted cautiously. This experiment also does not establish comprehensive coverage of the OWASP MCP Top 10, does not evaluate the benchmark's honeypot resources as part of the scanner's core metadata analysis, and does not provide an independently annotated labeling study. It evaluates the observed behavior of a specific static scanner and a small companion response scanner against one adversarial benchmark suite.
 
 ## References
 
