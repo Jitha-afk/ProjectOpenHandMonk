@@ -118,7 +118,7 @@ class MCPBenchHarness:
     available tools/resources, and runs attack scenarios.
 
     Usage:
-        harness = MCPBenchHarness(server_url="http://localhost:8000")
+        harness = MCPBenchHarness(server_url="http://localhost:9000/sse")
         await harness.connect()
         tools = await harness.list_tools()
         results = await harness.run_all()
@@ -127,7 +127,7 @@ class MCPBenchHarness:
 
     def __init__(
         self,
-        server_url: str = "http://localhost:8000",
+        server_url: str = "http://localhost:9000/sse",
         llm_backend: Optional[str] = None,
         llm_config: Optional[dict[str, Any]] = None,
         scenarios_dir: Optional[Path] = None,

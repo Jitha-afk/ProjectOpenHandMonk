@@ -183,8 +183,8 @@ include them in both the scenario YAML metadata and the README attack table.
 ### Environment Variables
 | Variable         | Default              | Description                          |
 |-----------------|----------------------|--------------------------------------|
-| MCP_SERVER_URL  | http://localhost:8000| URL of the evil MCP server           |
-| MCP_SERVER_PORT | 8000                 | Port for the evil MCP server         |
+| MCP_SERVER_URL  | http://localhost:9000/sse| URL of the evil MCP SSE endpoint |
+| MCP_SERVER_PORT | 9000                 | Port for the evil MCP server         |
 | LLM_BACKEND     | openai               | LLM backend for evaluation           |
 | LLM_MODEL       | gpt-4o               | Model name for LLM backend           |
 | LLM_API_KEY     | (none)               | API key for the LLM backend          |
@@ -195,7 +195,7 @@ include them in both the scenario YAML metadata and the README attack table.
 ### Harness Configuration (Python)
 ```python
 harness = MCPBenchHarness(
-    server_url="http://localhost:8000",
+    server_url="http://localhost:9000/sse",
     llm_backend="openai",           # or "anthropic", "local"
     llm_config={
         "model": "gpt-4o",

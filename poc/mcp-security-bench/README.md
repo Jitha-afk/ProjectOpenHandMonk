@@ -28,9 +28,8 @@ pip install mcp pyyaml pytest pytest-asyncio
 
 ### 1. Start the Evil MCP Server
 ```bash
-cd src/evil_server
-python server.py
-# Server starts on http://localhost:8000
+PYTHONPATH=src python -m evil_server.server --transport sse --port 9000
+# SSE endpoint: http://localhost:9000/sse
 ```
 
 ### 2. Run the Benchmark
@@ -51,7 +50,7 @@ import asyncio
 from src.bench import MCPBenchHarness, BenchmarkEvaluator
 
 async def main():
-    harness = MCPBenchHarness(server_url="http://localhost:8000")
+    harness = MCPBenchHarness(server_url="http://localhost:9000/sse")
     await harness.connect()
 
     results = await harness.run_all()
@@ -102,7 +101,7 @@ Set via environment variables:
 
 | Variable         | Default              | Description                    |
 |-----------------|----------------------|--------------------------------|
-| MCP_SERVER_URL  | http://localhost:8000| Evil MCP server URL            |
+| MCP_SERVER_URL  | http://localhost:9000/sse| Evil MCP SSE endpoint      |
 | LLM_BACKEND     | openai               | LLM provider to evaluate       |
 | LLM_MODEL       | gpt-4o               | Model name                     |
 | LLM_API_KEY     | (none)               | API key for LLM provider       |

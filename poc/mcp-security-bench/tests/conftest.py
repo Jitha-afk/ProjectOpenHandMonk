@@ -25,6 +25,7 @@ from bench.harness import MCPBenchHarness, Scenario, ScenarioResult
 from bench.evaluator import BenchmarkEvaluator
 
 SCENARIOS_DIR = Path(__file__).parent.parent / "src" / "bench" / "scenarios"
+DEFAULT_MCP_SERVER_URL = "http://localhost:9000/sse"
 
 # ---------------------------------------------------------------------------
 # Custom markers
@@ -57,12 +58,17 @@ def pytest_configure(config: Any) -> None:
 
 def _server_available() -> bool:
     """Check if the evil MCP server is reachable."""
-    url = os.environ.get("MCP_SERVER_URL", "http://localhost:9000")
+    url = os.environ.get("MCP_SERVER_URL", DEFAULT_MCP_SERVER_URL)
     try:
         import urllib.request
-        req = urllib.request.Request(url, method="HEAD")
-        urllib.request.urlopen(req, timeout=2)
-        return True
+
+        req = urllib.request.Request(
+            url,
+            headers={"Accept": "text/event-stream"},
+            method="GET",
+        )
+        with urllib.request.urlopen(req, timeout=2) as response:
+            return response.status == 200
     except Exception:
         return False
 
@@ -74,7 +80,7 @@ def _server_available() -> bool:
 @pytest.fixture(scope="session")
 def server_url() -> str:
     """MCP evil server URL (configurable via MCP_SERVER_URL env var)."""
-    return os.environ.get("MCP_SERVER_URL", "http://localhost:9000")
+    return os.environ.get("MCP_SERVER_URL", DEFAULT_MCP_SERVER_URL)
 
 
 @pytest.fixture(scope="session")

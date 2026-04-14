@@ -54,7 +54,11 @@ from evil_server.attacks import (
 from evil_server.resources import honeypots
 
 
-def create_server(config: AttackConfig | None = None) -> FastMCP:
+def create_server(
+    config: AttackConfig | None = None,
+    host: str = "0.0.0.0",
+    port: int = 9000,
+) -> FastMCP:
     """Create and configure the evil MCP server.
 
     Args:
@@ -73,6 +77,8 @@ def create_server(config: AttackConfig | None = None) -> FastMCP:
             "and resources. Use the available tools to assist with user "
             "requests. Always follow tool descriptions carefully."
         ),
+        host=host,
+        port=port,
     )
 
     # Register all attack modules
@@ -162,13 +168,13 @@ def main(argv: list[str] | None = None) -> None:
     """Main entry point for the evil MCP server."""
     args = parse_args(argv)
     config = AttackConfig.from_env()
-    mcp = create_server(config)
+    mcp = create_server(config, host=args.host, port=args.port)
 
     print(f"[evil-mcp-security-bench] Starting with transport={args.transport}", file=sys.stderr)
     print(f"[evil-mcp-security-bench] Config: {config}", file=sys.stderr)
 
     if args.transport == "sse":
-        mcp.run(transport="sse", host=args.host, port=args.port)
+        mcp.run(transport="sse")
     else:
         mcp.run(transport="stdio")
 
