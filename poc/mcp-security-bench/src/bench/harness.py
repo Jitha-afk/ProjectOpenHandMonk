@@ -89,6 +89,7 @@ class Scenario:
     target_tool: str
     expected_behavior: dict[str, str]
     detection_indicators: list[str]
+    tool_args: dict[str, Any] = field(default_factory=dict)
     iterations: int = 15
 
     @classmethod
@@ -104,6 +105,7 @@ class Scenario:
             target_tool=data.get("target_tool", ""),
             expected_behavior=data.get("expected_behavior", {}),
             detection_indicators=data.get("detection_indicators", []),
+            tool_args=data.get("tool_args", {}),
             iterations=data.get("iterations", 15),
         )
 
@@ -304,11 +306,12 @@ class MCPBenchHarness:
             result.error = "No active session"
             return result
 
-        # Call the target tool with the scenario prompt
+        # Call the target tool with scenario-defined arguments
         try:
+            arguments = scenario.tool_args if scenario.tool_args else {"prompt": scenario.prompt}
             tool_result = await self._session.call_tool(
                 scenario.target_tool,
-                arguments={"prompt": scenario.prompt},
+                arguments=arguments,
             )
 
             # Parse the response

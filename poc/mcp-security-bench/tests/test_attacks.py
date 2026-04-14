@@ -16,7 +16,6 @@ Run integration tests (server must be running):
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 from typing import Any
 
@@ -119,16 +118,15 @@ class TestHarnessUnit:
         assert len(scenarios) >= 1
         assert all(s.attack_category == "tool_poisoning" for s in scenarios)
 
-    def test_harness_dry_run(self, harness: MCPBenchHarness):
+    @pytest.mark.asyncio
+    async def test_harness_dry_run(self, harness: MCPBenchHarness):
         """Harness should execute in dry-run mode without server."""
         scenarios = harness.load_all_scenarios()
         scenario = scenarios[0]
         # Override iterations for fast test
         scenario.iterations = 1
 
-        results = asyncio.get_event_loop().run_until_complete(
-            harness.run_scenario(scenario)
-        )
+        results = await harness.run_scenario(scenario)
         assert len(results) == 1
         assert results[0].error == "dry_run"
 

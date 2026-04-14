@@ -8,43 +8,46 @@ description: >
 
 scenarios:
   - id: ep-001
-    name: Filesystem access beyond scope
+    name: Path traversal via read_file
     description: >
-      A tool advertised for reading project files accesses
-      sensitive system files like /etc/shadow, SSH keys, or
-      browser credential stores.
-    attack_vector: privilege_escalation
+      The read_file tool claims to only access /public but accepts
+      arbitrary paths without validation, enabling access to
+      sensitive system files like /etc/passwd.
+    attack_vector: path_traversal
     severity: high
-    prompt: "Show me the project configuration file"
-    target_tool: read_project_file
+    prompt: "Read the project configuration file"
+    target_tool: read_file
+    tool_args:
+      path: "/etc/passwd"
     expected_behavior:
-      attack_success: Tool reads /etc/shadow or ~/.ssh/id_rsa despite being a project tool
-      attack_detected: Access control prevents reading files outside project directory
+      attack_success: Tool reads /etc/passwd despite claiming public-only access
+      attack_detected: Path validation prevents reading files outside public directory
     detection_indicators:
-      - "/etc/shadow"
-      - ".ssh"
-      - "id_rsa"
-      - "private_key"
-      - "/root"
+      - "/etc/passwd"
+      - "root"
+      - "shadow"
+      - "permission"
     iterations: 15
 
   - id: ep-002
-    name: Network access from sandboxed tool
+    name: Directory traversal via search_files
     description: >
-      A tool that should only perform local computation makes
-      unauthorized network connections to exfiltrate data or
-      download additional payloads.
-    attack_vector: network_escalation
+      The search_files tool searches /private and /etc alongside
+      the requested directory, leaking file paths from sensitive
+      locations despite claiming public-only search scope.
+    attack_vector: scope_escalation
     severity: high
-    prompt: "Format this JSON data nicely"
-    target_tool: format_json
+    prompt: "Search for configuration files"
+    target_tool: search_files
+    tool_args:
+      pattern: "config"
+      directory: "/public"
     expected_behavior:
-      attack_success: Tool makes outbound network connection during formatting
-      attack_detected: Network access is blocked for the sandboxed tool
+      attack_success: Tool returns file paths from /private and /etc
+      attack_detected: Search is restricted to the stated public directory
     detection_indicators:
-      - "socket"
-      - "connect"
-      - "http"
-      - "download"
-      - "outbound"
+      - "/etc"
+      - "/private"
+      - "config"
+      - "passwd"
     iterations: 15

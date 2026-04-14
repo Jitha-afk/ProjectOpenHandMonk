@@ -57,7 +57,7 @@ def pytest_configure(config: Any) -> None:
 
 def _server_available() -> bool:
     """Check if the evil MCP server is reachable."""
-    url = os.environ.get("MCP_SERVER_URL", "http://localhost:8000")
+    url = os.environ.get("MCP_SERVER_URL", "http://localhost:9000")
     try:
         import urllib.request
         req = urllib.request.Request(url, method="HEAD")
@@ -74,7 +74,7 @@ def _server_available() -> bool:
 @pytest.fixture(scope="session")
 def server_url() -> str:
     """MCP evil server URL (configurable via MCP_SERVER_URL env var)."""
-    return os.environ.get("MCP_SERVER_URL", "http://localhost:8000")
+    return os.environ.get("MCP_SERVER_URL", "http://localhost:9000")
 
 
 @pytest.fixture(scope="session")
