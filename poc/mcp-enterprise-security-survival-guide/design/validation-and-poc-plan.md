@@ -78,6 +78,18 @@ This setup allows testing of both single-tool and multi-hop failure modes.
 
 ## POC tracks
 
+The six tracks below are the full candidate space for this project, not the first implementation wave.
+
+Recommended first-wave implementation subset for this repo:
+1. Track 1: Policy enforcement gateway
+2. Track 2: Provenance and integrity envelope
+3. Track 6: Multi-server trust controls and cross-server taint tracking
+
+These three are prioritized because they align most directly with the issue's enterprise focus, are testable with replay-style fixtures, and create a credible path toward a later narrow formal model of enforcement and trust transitions. Tracks 3-5 should remain in scope as follow-on work unless the first wave proves too narrow or infeasible.
+
+Threshold note:
+All quantitative thresholds below are provisional kickoff targets for experiment design, not validated expectations. They should be tightened, relaxed, or replaced once the baseline corpus and benign-task set are defined empirically.
+
 ### Track 1: Policy enforcement gateway
 Threat addressed
 - Prompt injection or model error causes invocation of tools outside user intent, outside least privilege, or outside approved server boundaries.

@@ -22,7 +22,7 @@ Develop a practitioner/research hybrid project that turns the latest MCP specifi
 - **Hermes (Orchestration):** Keep the scope coherent, challenge unsupported claims, sequence workstreams, and prepare branch/PR updates.
 
 ## Findings
-Initial kickoff findings suggest the literature already covers MCP attack taxonomies, malicious server/tool behaviors, and early defensive ideas, but under-serves enterprise-deployable guidance for the latest spec surface — especially authorization, Streamable HTTP hardening, roots confinement, elicitation safety, sampling/tool trust chains, provenance, and private-registry control planes.
+Initial kickoff findings from the first literature intake suggest that current MCP security work already pays substantial attention to attack taxonomies, malicious server/tool behaviors, and early defensive ideas, but appears to provide less enterprise-deployable guidance for the latest spec surface — especially authorization, Streamable HTTP hardening, roots confinement, elicitation safety, sampling/tool trust chains, provenance, and private-registry control planes. This is a preliminary synthesis, not a final literature conclusion.
 
 ## Current Working Artifacts
 - `research/source-inventory-and-gap-analysis.md` — literature intake memo, gap analysis, and first-wave research questions
