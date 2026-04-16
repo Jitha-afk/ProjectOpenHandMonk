@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-labelledby="title desc">
+  <title id="title">Delegated authority flow in MCP systems</title>
+  <desc id="desc">A visual showing authority moving from user intent through host, client, MCP server, tool, and backend systems across six lifecycle stages.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f7f8fc; }
+      .title { font: 700 34px Inter, Segoe UI, Arial, sans-serif; fill: #111827; }
+      .subtitle { font: 500 18px Inter, Segoe UI, Arial, sans-serif; fill: #4b5563; }
+      .stage { fill: #e5edf9; stroke: #bcd0f5; stroke-width: 2; rx: 18; }
+      .stageText { font: 700 18px Inter, Segoe UI, Arial, sans-serif; fill: #23437d; }
+      .laneLabel { font: 700 16px Inter, Segoe UI, Arial, sans-serif; fill: #5b6475; text-transform: uppercase; letter-spacing: 1px; }
+      .card { fill: #ffffff; stroke: #d6dceb; stroke-width: 2; rx: 22; }
+      .cardAccent1 { fill: #dbeafe; }
+      .cardAccent2 { fill: #dcfce7; }
+      .cardAccent3 { fill: #ede9fe; }
+      .cardAccent4 { fill: #fef3c7; }
+      .cardAccent5 { fill: #fee2e2; }
+      .cardTitle { font: 700 22px Inter, Segoe UI, Arial, sans-serif; fill: #111827; }
+      .cardBody { font: 500 16px Inter, Segoe UI, Arial, sans-serif; fill: #4b5563; }
+      .arrow { stroke: #64748b; stroke-width: 4; fill: none; marker-end: url(#arrowhead); }
+      .loop { stroke: #94a3b8; stroke-width: 3; stroke-dasharray: 10 10; fill: none; marker-end: url(#arrowheadLite); }
+      .caption { font: 600 16px Inter, Segoe UI, Arial, sans-serif; fill: #475569; }
+      .foot { font: 500 15px Inter, Segoe UI, Arial, sans-serif; fill: #6b7280; }
+    </style>
+    <marker id="arrowhead" markerWidth="14" markerHeight="10" refX="11" refY="5" orient="auto">
+      <polygon points="0 0, 14 5, 0 10" fill="#64748b" />
+    </marker>
+    <marker id="arrowheadLite" markerWidth="14" markerHeight="10" refX="11" refY="5" orient="auto">
+      <polygon points="0 0, 14 5, 0 10" fill="#94a3b8" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1400" height="760" rx="28" />
+  <text class="title" x="72" y="74">MCP as a delegated-authority system</text>
+  <text class="subtitle" x="72" y="108">Authority moves through multiple components. Security controls must follow the movement, not only the model output.</text>
+
+  <rect class="stage" x="72" y="148" width="150" height="54" />
+  <rect class="stage" x="236" y="148" width="150" height="54" />
+  <rect class="stage" x="400" y="148" width="150" height="54" />
+  <rect class="stage" x="564" y="148" width="150" height="54" />
+  <rect class="stage" x="728" y="148" width="150" height="54" />
+  <rect class="stage" x="892" y="148" width="150" height="54" />
+  <text class="stageText" x="111" y="182">Discover</text>
+  <text class="stageText" x="279" y="182">Select</text>
+  <text class="stageText" x="436" y="182">Approve</text>
+  <text class="stageText" x="606" y="182">Invoke</text>
+  <text class="stageText" x="772" y="182">Return</text>
+  <text class="stageText" x="936" y="182">Retain</text>
+
+  <text class="laneLabel" x="72" y="266">Authority path</text>
+
+  <rect class="card cardAccent1" x="72" y="292" width="220" height="150" rx="24" />
+  <rect class="card cardAccent2" x="328" y="292" width="220" height="150" rx="24" />
+  <rect class="card cardAccent3" x="584" y="292" width="220" height="150" rx="24" />
+  <rect class="card cardAccent4" x="840" y="292" width="220" height="150" rx="24" />
+  <rect class="card cardAccent5" x="1096" y="292" width="220" height="150" rx="24" />
+
+  <text class="cardTitle" x="104" y="344">Host / user intent</text>
+  <text class="cardBody" x="104" y="378">Prompt, task, and human context</text>
+  <text class="cardBody" x="104" y="405">establish what the system is</text>
+  <text class="cardBody" x="104" y="432">trying to do.</text>
+
+  <text class="cardTitle" x="360" y="344">Client / agent</text>
+  <text class="cardBody" x="360" y="378">Discovers tools, reasons over</text>
+  <text class="cardBody" x="360" y="405">metadata, and constructs the</text>
+  <text class="cardBody" x="360" y="432">next action.</text>
+
+  <text class="cardTitle" x="616" y="344">MCP server</text>
+  <text class="cardBody" x="616" y="378">Mediates tool access, policy,</text>
+  <text class="cardBody" x="616" y="405">approval, and identity flow.</text>
+
+  <text class="cardTitle" x="872" y="344">Tool / runtime</text>
+  <text class="cardBody" x="872" y="378">Executes the requested action</text>
+  <text class="cardBody" x="872" y="405">using bounded capabilities and</text>
+  <text class="cardBody" x="872" y="432">runtime controls.</text>
+
+  <text class="cardTitle" x="1128" y="344">Backend systems</text>
+  <text class="cardBody" x="1128" y="378">Data stores, APIs, repos,</text>
+  <text class="cardBody" x="1128" y="405">messaging systems, and other</text>
+  <text class="cardBody" x="1128" y="432">high-consequence targets.</text>
+
+  <path class="arrow" d="M292 366 H328" />
+  <path class="arrow" d="M548 366 H584" />
+  <path class="arrow" d="M804 366 H840" />
+  <path class="arrow" d="M1060 366 H1096" />
+
+  <text class="laneLabel" x="72" y="520">Control implications</text>
+  <rect class="card" x="72" y="544" width="1244" height="112" rx="24" />
+  <text class="caption" x="104" y="586">Discovery and selection are trust decisions.</text>
+  <text class="caption" x="104" y="616">Approval and invocation are authority decisions.</text>
+  <text class="caption" x="104" y="646">Return and retain are context-integrity decisions.</text>
+
+  <path class="loop" d="M988 206 C1110 214, 1190 246, 1220 320 C1255 410, 1220 500, 1138 544" />
+  <text class="foot" x="1058" y="238">Output can re-enter future context</text>
+</svg>

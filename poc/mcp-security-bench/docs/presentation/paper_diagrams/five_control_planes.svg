@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">Five control planes for MCP security</title>
+  <desc id="desc">A paper diagram showing five control planes as layered operating surfaces around MCP systems.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 34px Inter, Segoe UI, Arial, sans-serif; fill: #111827; }
+      .subtitle { font: 500 18px Inter, Segoe UI, Arial, sans-serif; fill: #475569; }
+      .ring1 { fill: #e0f2fe; stroke: #7dd3fc; stroke-width: 2.5; }
+      .ring2 { fill: #dcfce7; stroke: #86efac; stroke-width: 2.5; }
+      .ring3 { fill: #ede9fe; stroke: #c4b5fd; stroke-width: 2.5; }
+      .ring4 { fill: #fef3c7; stroke: #fcd34d; stroke-width: 2.5; }
+      .ring5 { fill: #fee2e2; stroke: #fca5a5; stroke-width: 2.5; }
+      .center { fill: #0f172a; }
+      .ringTitle { font: 700 24px Inter, Segoe UI, Arial, sans-serif; fill: #0f172a; }
+      .ringBody { font: 500 16px Inter, Segoe UI, Arial, sans-serif; fill: #475569; }
+      .centerText { font: 700 28px Inter, Segoe UI, Arial, sans-serif; fill: #ffffff; }
+      .callout { fill: #ffffff; stroke: #d7dfef; stroke-width: 2; rx: 20; }
+      .callTitle { font: 700 20px Inter, Segoe UI, Arial, sans-serif; fill: #111827; }
+      .callBody { font: 500 15px Inter, Segoe UI, Arial, sans-serif; fill: #4b5563; }
+      .arrow { stroke: #94a3b8; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#94a3b8" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1400" height="860" rx="28"/>
+  <text class="title" x="72" y="76">Five control planes for MCP rollout and operations</text>
+  <text class="subtitle" x="72" y="110">The control model becomes easier to operationalize when safeguards are grouped by operating plane rather than by disconnected incidents.</text>
+
+  <ellipse class="ring5" cx="700" cy="455" rx="520" ry="250" />
+  <ellipse class="ring4" cx="700" cy="455" rx="425" ry="205" />
+  <ellipse class="ring3" cx="700" cy="455" rx="338" ry="162" />
+  <ellipse class="ring2" cx="700" cy="455" rx="255" ry="122" />
+  <ellipse class="ring1" cx="700" cy="455" rx="172" ry="82" />
+  <ellipse class="center" cx="700" cy="455" rx="92" ry="46" />
+
+  <text class="centerText" x="643" y="464">MCP system</text>
+
+  <text class="ringTitle" x="620" y="282">Architecture</text>
+  <text class="ringBody" x="535" y="308">Where MCP is exposed, networked,</text>
+  <text class="ringBody" x="566" y="330">and policy-wrapped.</text>
+
+  <text class="ringTitle" x="998" y="387">Tool trust</text>
+  <text class="ringBody" x="939" y="413">What becomes discoverable,</text>
+  <text class="ringBody" x="957" y="435">versioned, and re-certified.</text>
+
+  <text class="ringTitle" x="885" y="618">Delegated authority</text>
+  <text class="ringBody" x="856" y="644">How credentials, approval,</text>
+  <text class="ringBody" x="866" y="666">and least privilege move.</text>
+
+  <text class="ringTitle" x="365" y="618">Context integrity</text>
+  <text class="ringBody" x="318" y="644">How inputs, outputs, metadata,</text>
+  <text class="ringBody" x="334" y="666">and errors are validated.</text>
+
+  <text class="ringTitle" x="214" y="387">Containment + telemetry</text>
+  <text class="ringBody" x="232" y="413">How blast radius is reduced</text>
+  <text class="ringBody" x="240" y="435">and misuse becomes visible.</text>
+
+  <rect class="callout" x="1020" y="180" width="270" height="108" rx="20" />
+  <text class="callTitle" x="1048" y="218">Why this matters</text>
+  <text class="callBody" x="1048" y="248">A single incident often crosses multiple</text>
+  <text class="callBody" x="1048" y="270">planes; the grouping improves ownership.</text>
+  <path class="arrow" d="M1020 258 C930 270, 870 290, 822 322" />
+
+  <rect class="callout" x="112" y="182" width="286" height="108" rx="20" />
+  <text class="callTitle" x="140" y="220">Operational use</text>
+  <text class="callBody" x="140" y="250">Teams can map controls, owners, and tests</text>
+  <text class="callBody" x="140" y="272">to planes before building full threat tables.</text>
+  <path class="arrow" d="M398 248 C470 268, 528 292, 584 324" />
+
+  <text class="subtitle" x="72" y="810">The five-control-plane model is intentionally smaller than a full enterprise architecture diagram. Its purpose is operational clarity: what must be governed, by whom, and at which layer.</text>
+</svg>

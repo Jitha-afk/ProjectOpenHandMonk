@@ -1,0 +1,63 @@
+{
+  "_comment": "MCP client configuration examples for evil-mcp-security-bench. Copy the relevant section to your client's config.",
+
+  "vscode_github_copilot": {
+    "_comment": "Add to VS Code settings.json under 'mcp.servers'",
+    "mcp": {
+      "servers": {
+        "evil-mcp-security-bench": {
+          "type": "stdio",
+          "command": "python",
+          "args": ["-m", "evil_server.server"],
+          "env": {
+            "PYTHONPATH": "src"
+          }
+        }
+      }
+    }
+  },
+
+  "cursor": {
+    "_comment": "Save as .cursor/mcp.json in this project root",
+    "mcpServers": {
+      "evil-mcp-security-bench": {
+        "command": "python",
+        "args": ["-m", "evil_server.server"],
+        "env": {
+          "PYTHONPATH": "src"
+        }
+      }
+    }
+  },
+
+  "claude_desktop": {
+    "_comment": "Add to ~/Library/Application Support/Claude/claude_desktop_config.json (macOS) or equivalent",
+    "mcpServers": {
+      "evil-mcp-security-bench": {
+        "command": "python",
+        "args": ["-m", "evil_server.server"],
+        "env": {
+          "PYTHONPATH": "src"
+        }
+      }
+    }
+  },
+
+  "generic_stdio": {
+    "_comment": "Generic stdio transport config",
+    "command": "python",
+    "args": ["-m", "evil_server.server", "--transport", "stdio"],
+    "env": {
+      "PYTHONPATH": "src"
+    }
+  },
+
+  "generic_sse": {
+    "_comment": "Generic SSE transport config — start server first, then connect",
+    "start_command": "python -m evil_server.server --transport sse --host 0.0.0.0 --port 9000",
+    "connect_url": "http://localhost:9000/sse",
+    "env": {
+      "PYTHONPATH": "src"
+    }
+  }
+}

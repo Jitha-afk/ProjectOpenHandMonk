@@ -1,0 +1,29 @@
+flowchart TB
+  subgraph L[Lifecycle stages]
+    D[Discover] --> S[Select] --> A[Approve] --> I[Invoke] --> R[Return] --> T[Retain]
+  end
+
+  subgraph P[Delegated authority path]
+    H[Host / user intent] --> C[Client / agent] --> M[MCP server] --> X[Tool / runtime] --> B[Backend systems]
+  end
+
+  B -. Output can re-enter future context .-> C
+
+  TD[Trust decisions<br/>Discover + Select]
+  AD[Authority decisions<br/>Approve + Invoke]
+  CD[Context-integrity decisions<br/>Return + Retain]
+
+  D -.-> TD
+  S -.-> TD
+  A -.-> AD
+  I -.-> AD
+  R -.-> CD
+  T -.-> CD
+
+  classDef stage fill:#e8f0ff,stroke:#7aa2ff,color:#16325c;
+  classDef path fill:#eef2ff,stroke:#8b5cf6,color:#1f2937;
+  classDef concept fill:#f8fafc,stroke:#94a3b8,color:#334155;
+
+  class D,S,A,I,R,T stage;
+  class H,C,M,X,B path;
+  class TD,AD,CD concept;

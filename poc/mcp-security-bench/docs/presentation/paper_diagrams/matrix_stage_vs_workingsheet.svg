@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860" role="img" aria-labelledby="title desc">
+  <title id="title">Core matrix versus team worksheet</title>
+  <desc id="desc">A comparison between a concise core matrix and a richer team worksheet for operators.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 34px Inter, Segoe UI, Arial, sans-serif; fill: #111827; }
+      .subtitle { font: 500 18px Inter, Segoe UI, Arial, sans-serif; fill: #475569; }
+      .panel { fill: #ffffff; stroke: #d8dfec; stroke-width: 2; rx: 26; }
+      .panelTitle { font: 700 26px Inter, Segoe UI, Arial, sans-serif; fill: #111827; }
+      .panelSub { font: 500 16px Inter, Segoe UI, Arial, sans-serif; fill: #64748b; }
+      .chipA { fill: #dbeafe; stroke: #93c5fd; stroke-width: 2; rx: 18; }
+      .chipB { fill: #dcfce7; stroke: #86efac; stroke-width: 2; rx: 18; }
+      .chipC { fill: #ede9fe; stroke: #c4b5fd; stroke-width: 2; rx: 18; }
+      .chipD { fill: #fef3c7; stroke: #fcd34d; stroke-width: 2; rx: 18; }
+      .chipE { fill: #fee2e2; stroke: #fca5a5; stroke-width: 2; rx: 18; }
+      .chipText { font: 700 18px Inter, Segoe UI, Arial, sans-serif; fill: #1f2937; }
+      .small { font: 600 15px Inter, Segoe UI, Arial, sans-serif; fill: #475569; }
+      .tableHead { fill: #e2e8f0; stroke: #cbd5e1; stroke-width: 1.5; }
+      .tableCell { fill: #ffffff; stroke: #dbe2ee; stroke-width: 1.5; }
+      .thead { font: 700 15px Inter, Segoe UI, Arial, sans-serif; fill: #334155; }
+      .tbody { font: 500 14px Inter, Segoe UI, Arial, sans-serif; fill: #475569; }
+      .arrow { stroke: #94a3b8; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+      .note { font: 600 16px Inter, Segoe UI, Arial, sans-serif; fill: #475569; }
+    </style>
+    <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto">
+      <polygon points="0 0, 12 4, 0 8" fill="#94a3b8" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1400" height="820" rx="28" />
+  <text class="title" x="72" y="76">A usable threat-model matrix starts small</text>
+  <text class="subtitle" x="72" y="110">The core matrix should optimize for memorability and prioritization. The team worksheet can retain richer engineering detail.</text>
+
+  <rect class="panel" x="72" y="160" width="536" height="560" rx="28" />
+  <text class="panelTitle" x="104" y="210">Core matrix</text>
+  <text class="panelSub" x="104" y="238">Use on slides, in executive reviews, and in rollout conversations.</text>
+
+  <rect class="chipA" x="104" y="286" width="188" height="58" rx="18" />
+  <rect class="chipB" x="322" y="286" width="188" height="58" rx="18" />
+  <rect class="chipC" x="104" y="372" width="188" height="58" rx="18" />
+  <rect class="chipD" x="322" y="372" width="188" height="58" rx="18" />
+  <rect class="chipE" x="213" y="458" width="188" height="58" rx="18" />
+
+  <text class="chipText" x="171" y="322">Risk</text>
+  <text class="chipText" x="383" y="322">Stage</text>
+  <text class="chipText" x="131" y="408">First control</text>
+  <text class="chipText" x="383" y="408">Owner</text>
+  <text class="chipText" x="270" y="494">Priority</text>
+
+  <text class="small" x="104" y="568">Why it works:</text>
+  <text class="small" x="104" y="596">• one row = one realistic abuse story</text>
+  <text class="small" x="104" y="622">• easy to explain in one meeting</text>
+  <text class="small" x="104" y="648">• forces ownership and prioritization fast</text>
+
+  <rect class="panel" x="684" y="160" width="644" height="560" rx="28" />
+  <text class="panelTitle" x="716" y="210">Team worksheet</text>
+  <text class="panelSub" x="716" y="238">Use for engineering review, rollout planning, and operational follow-through.</text>
+
+  <rect class="tableHead" x="716" y="286" width="92" height="42" />
+  <rect class="tableHead" x="808" y="286" width="120" height="42" />
+  <rect class="tableHead" x="928" y="286" width="96" height="42" />
+  <rect class="tableHead" x="1024" y="286" width="104" height="42" />
+  <rect class="tableHead" x="1128" y="286" width="96" height="42" />
+  <rect class="tableHead" x="1224" y="286" width="72" height="42" />
+  <text class="thead" x="744" y="312">ID</text>
+  <text class="thead" x="836" y="312">Goal</text>
+  <text class="thead" x="952" y="312">Asset</text>
+  <text class="thead" x="1054" y="312">Signal</text>
+  <text class="thead" x="1156" y="312">Impact</text>
+  <text class="thead" x="1241" y="312">Likely.</text>
+
+  <rect class="tableCell" x="716" y="328" width="92" height="62" />
+  <rect class="tableCell" x="808" y="328" width="120" height="62" />
+  <rect class="tableCell" x="928" y="328" width="96" height="62" />
+  <rect class="tableCell" x="1024" y="328" width="104" height="62" />
+  <rect class="tableCell" x="1128" y="328" width="96" height="62" />
+  <rect class="tableCell" x="1224" y="328" width="72" height="62" />
+
+  <rect class="tableCell" x="716" y="390" width="92" height="62" />
+  <rect class="tableCell" x="808" y="390" width="120" height="62" />
+  <rect class="tableCell" x="928" y="390" width="96" height="62" />
+  <rect class="tableCell" x="1024" y="390" width="104" height="62" />
+  <rect class="tableCell" x="1128" y="390" width="96" height="62" />
+  <rect class="tableCell" x="1224" y="390" width="72" height="62" />
+
+  <rect class="tableCell" x="716" y="452" width="92" height="62" />
+  <rect class="tableCell" x="808" y="452" width="120" height="62" />
+  <rect class="tableCell" x="928" y="452" width="96" height="62" />
+  <rect class="tableCell" x="1024" y="452" width="104" height="62" />
+  <rect class="tableCell" x="1128" y="452" width="96" height="62" />
+  <rect class="tableCell" x="1224" y="452" width="72" height="62" />
+
+  <text class="tbody" x="742" y="354">M1</text>
+  <text class="tbody" x="834" y="354">steer tool use</text>
+  <text class="tbody" x="950" y="354">repo</text>
+  <text class="tbody" x="1048" y="354">odd private reads</text>
+  <text class="tbody" x="1156" y="354">high</text>
+  <text class="tbody" x="1240" y="354">med</text>
+
+  <text class="tbody" x="742" y="416">M2</text>
+  <text class="tbody" x="834" y="416">trigger write</text>
+  <text class="tbody" x="950" y="416">connector</text>
+  <text class="tbody" x="1048" y="416">unexpected writes</text>
+  <text class="tbody" x="1156" y="416">high</text>
+  <text class="tbody" x="1240" y="416">med</text>
+
+  <text class="tbody" x="742" y="478">M3</text>
+  <text class="tbody" x="834" y="478">leak secrets</text>
+  <text class="tbody" x="950" y="478">tokens</text>
+  <text class="tbody" x="1048" y="478">prompt traces</text>
+  <text class="tbody" x="1156" y="478">high</text>
+  <text class="tbody" x="1240" y="478">high</text>
+
+  <text class="small" x="716" y="568">Working sheets can keep richer details:</text>
+  <text class="small" x="716" y="596">• attacker goal and preconditions</text>
+  <text class="small" x="716" y="622">• asset, signal, impact, likelihood</text>
+  <text class="small" x="716" y="648">• recovery action and evidence links</text>
+
+  <path class="arrow" d="M608 438 H684" />
+  <text class="note" x="560" y="420">Expand only when</text>
+  <text class="note" x="572" y="442">teams need detail</text>
+</svg>

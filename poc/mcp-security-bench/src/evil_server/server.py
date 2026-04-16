@@ -161,6 +161,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=9000,
         help="Port for SSE server (default: 9000)",
     )
+    parser.add_argument(
+        "--callback-port",
+        type=int,
+        default=None,
+        help="Start HTTP callback server on this port for exfil verification",
+    )
     return parser.parse_args(argv)
 
 
@@ -169,6 +175,12 @@ def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     config = AttackConfig.from_env()
     mcp = create_server(config, host=args.host, port=args.port)
+
+    # Optionally start callback server for exfil verification
+    if args.callback_port:
+        from evil_server.callback_server import start_callback_server
+        start_callback_server(port=args.callback_port, background=True)
+        print(f"[evil-mcp-security-bench] Callback server on port {args.callback_port}", file=sys.stderr)
 
     print(f"[evil-mcp-security-bench] Starting with transport={args.transport}", file=sys.stderr)
     print(f"[evil-mcp-security-bench] Config: {config}", file=sys.stderr)
