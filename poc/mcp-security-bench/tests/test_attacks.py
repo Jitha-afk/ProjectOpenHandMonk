@@ -140,6 +140,11 @@ class TestHarnessUnit:
         resources = await harness.list_resources()
         assert resources == []
 
+    @pytest.mark.asyncio
+    async def test_disconnect_without_connection_is_safe(self, harness: MCPBenchHarness):
+        await harness.disconnect()
+        assert not harness.connected
+
 
 class TestEvaluatorUnit:
     """Unit tests for BenchmarkEvaluator."""

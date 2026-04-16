@@ -141,6 +141,8 @@ class MCPBenchHarness:
 
         self._client = None
         self._session = None
+        self._session_context = None
+        self._sse_context = None
         self._connected = False
         self._tools: list[dict[str, Any]] = []
         self._resources: list[dict[str, Any]] = []
