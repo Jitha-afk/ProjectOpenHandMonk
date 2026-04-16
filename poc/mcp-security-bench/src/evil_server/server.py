@@ -9,6 +9,7 @@ Usage:
     mcp-evil-server                          # stdio transport (default)
     mcp-evil-server --transport sse          # SSE transport
     mcp-evil-server --transport sse --port 9000 --host 0.0.0.0
+    mcp-evil-server --no-callback            # Disable automatic callback server
 
 Environment Variables:
     EVIL_MCP_TOOL_POISONING=true|false       # Enable/disable each attack
@@ -164,8 +165,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--callback-port",
         type=int,
-        default=None,
-        help="Start HTTP callback server on this port for exfil verification",
+        default=8080,
+        help="Port for automatic HTTP callback server (default: 8080)",
+    )
+    parser.add_argument(
+        "--no-callback",
+        action="store_true",
+        help="Disable automatic HTTP callback server startup",
     )
     return parser.parse_args(argv)
 
@@ -176,11 +182,21 @@ def main(argv: list[str] | None = None) -> None:
     config = AttackConfig.from_env()
     mcp = create_server(config, host=args.host, port=args.port)
 
-    # Optionally start callback server for exfil verification
-    if args.callback_port:
+    # Start callback server automatically unless explicitly disabled
+    if not args.no_callback:
         from evil_server.callback_server import start_callback_server
-        start_callback_server(port=args.callback_port, background=True)
-        print(f"[evil-mcp-security-bench] Callback server on port {args.callback_port}", file=sys.stderr)
+
+        try:
+            start_callback_server(port=args.callback_port, background=True)
+            print(
+                f"[evil-mcp-security-bench] Callback server on port {args.callback_port}",
+                file=sys.stderr,
+            )
+        except OSError as exc:
+            print(
+                f"[WARN] Callback server unavailable on port {args.callback_port}: {exc}",
+                file=sys.stderr,
+            )
 
     print(f"[evil-mcp-security-bench] Starting with transport={args.transport}", file=sys.stderr)
     print(f"[evil-mcp-security-bench] Config: {config}", file=sys.stderr)

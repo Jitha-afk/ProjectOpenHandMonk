@@ -48,13 +48,16 @@ pip install -e .
 PYTHONPATH=src python -m evil_server.server --transport sse --port 9000
 ```
 
-3. **Start with callback logger (optional):**
+This now also starts the callback logger automatically on port `8080` by default.
+
+3. **Start with callback logger on a custom port (optional):**
 
 The callback logger listens for exfiltrated data, confirming whether an attack
-succeeded.
+succeeded. By default it starts automatically on port `8080`. Use `--callback-port`
+only when you want a different port, or `--no-callback` to disable automatic startup.
 
 ```
-PYTHONPATH=src python -m evil_server.server --transport sse --port 9000 --callback-port 8080
+PYTHONPATH=src python -m evil_server.server --transport sse --port 9000 --callback-port 18080
 ```
 
 4. **Connect your MCP client** to `http://localhost:9000/sse`

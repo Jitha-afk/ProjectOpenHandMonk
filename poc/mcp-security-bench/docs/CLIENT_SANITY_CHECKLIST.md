@@ -15,9 +15,12 @@ Use this checklist when the server is already running in SSE mode:
 PYTHONPATH=src .venv/bin/python -m evil_server.server \
   --transport sse \
   --host 127.0.0.1 \
-  --port 9000 \
-  --callback-port 8080
+  --port 9000
 ```
+
+- The callback logger now starts automatically on port `8080` by default.
+- To change the callback port, add `--callback-port <port>`.
+- To disable callback startup entirely, add `--no-callback`.
 
 - Confirm startup logs include:
   - `Listening on http://0.0.0.0:8080/callback`
