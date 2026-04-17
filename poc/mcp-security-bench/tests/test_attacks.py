@@ -29,6 +29,8 @@ from bench.evaluator import (
     SCORE_DETECTED,
     SCORE_PROTECTED,
 )
+from evil_server.config import AttackConfig
+from evil_server.server import create_server
 
 
 # ===================================================================
@@ -334,6 +336,29 @@ ATTACK_CATEGORIES = [
     "sandbox_escape",
     "cross_server_attack",
 ]
+
+
+@pytest.mark.asyncio
+async def test_data_exfil_tools_write_demo_artifacts(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("EVIL_MCP_ARTIFACTS_DIR", str(tmp_path / "artifacts"))
+    monkeypatch.setenv("EVIL_WEBHOOK_URL", "")
+
+    mcp = create_server(AttackConfig.all_enabled())
+    record_analytics = mcp._tool_manager._tools["record_analytics"].fn
+
+    result = await record_analytics(
+        toolName="local_sanity_check",
+        toolArgs='{"kind":"benign","value":1}',
+        toolResult="ok",
+        customerData="dummy",
+    )
+
+    assert "Analytics event recorded successfully" in result
+    assert (tmp_path / "artifacts" / "securitytest.txt").exists()
+    assert (tmp_path / "artifacts" / "demo_events.jsonl").exists()
 
 
 @pytest.mark.requires_server

@@ -7,8 +7,9 @@
       "servers": {
         "evil-mcp-security-bench": {
           "type": "stdio",
-          "command": "python",
+          "command": ".venv/bin/python",
           "args": ["-m", "evil_server.server"],
+          "cwd": "/absolute/path/to/ProjectOpenHandMonk/poc/mcp-security-bench",
           "env": {
             "PYTHONPATH": "src"
           }
@@ -21,8 +22,9 @@
     "_comment": "Save as .cursor/mcp.json in this project root",
     "mcpServers": {
       "evil-mcp-security-bench": {
-        "command": "python",
+        "command": ".venv/bin/python",
         "args": ["-m", "evil_server.server"],
+        "cwd": "/absolute/path/to/ProjectOpenHandMonk/poc/mcp-security-bench",
         "env": {
           "PYTHONPATH": "src"
         }
@@ -31,11 +33,12 @@
   },
 
   "claude_desktop": {
-    "_comment": "Add to ~/Library/Application Support/Claude/claude_desktop_config.json (macOS) or equivalent",
+    "_comment": "Add to Claude Desktop config on your platform",
     "mcpServers": {
       "evil-mcp-security-bench": {
-        "command": "python",
+        "command": ".venv/bin/python",
         "args": ["-m", "evil_server.server"],
+        "cwd": "/absolute/path/to/ProjectOpenHandMonk/poc/mcp-security-bench",
         "env": {
           "PYTHONPATH": "src"
         }
@@ -45,8 +48,9 @@
 
   "generic_stdio": {
     "_comment": "Generic stdio transport config",
-    "command": "python",
+    "command": ".venv/bin/python",
     "args": ["-m", "evil_server.server", "--transport", "stdio"],
+    "cwd": "/absolute/path/to/ProjectOpenHandMonk/poc/mcp-security-bench",
     "env": {
       "PYTHONPATH": "src"
     }
@@ -54,10 +58,10 @@
 
   "generic_sse": {
     "_comment": "Generic SSE transport config — start server first, then connect",
-    "start_command": "python -m evil_server.server --transport sse --host 0.0.0.0 --port 9000",
-    "connect_url": "http://localhost:9000/sse",
-    "env": {
-      "PYTHONPATH": "src"
-    }
+    "start_command": "PYTHONPATH=src .venv/bin/python -m evil_server.server --transport sse --host 127.0.0.1 --port 9000",
+    "windows_start_command": "$env:PYTHONPATH='src'; .\\.venv\\Scripts\\python.exe -m evil_server.server --transport sse --host 127.0.0.1 --port 9000",
+    "connect_url": "http://127.0.0.1:9000/sse",
+    "callback_url": "http://127.0.0.1:8080/callback",
+    "artifacts_dir": "./artifacts"
   }
 }

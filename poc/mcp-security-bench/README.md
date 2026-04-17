@@ -1,47 +1,72 @@
 # mcp-security-bench
 
-> A benchmark suite for evaluating LLM and security tool resilience against MCP (Model Context Protocol) attacks.
+> A benchmark suite and live demo corpus for evaluating LLM and security tool resilience against MCP (Model Context Protocol) attacks.
 
 ## Status
 `building`
 
 ## Overview
 
-mcp-security-bench is a structured benchmark for testing how well LLMs, AI agents, and security products defend against attacks delivered through the Model Context Protocol. It includes:
+mcp-security-bench is a structured project for testing how well LLMs, AI agents, and security products defend against attacks delivered through the Model Context Protocol. It includes:
 
-- **Evil MCP Server** — A FastMCP server implementing 11 attack categories as MCP tools/resources
-- **Benchmark Harness** — Automated test runner that connects to the server and executes attack scenarios
-- **Evaluator** — Scoring engine that computes Attack Success Rate, Refusal Rate, and Protection Success Rate
-- **Scenario Library** — 25+ attack scenarios across 11 categories, defined in YAML
+- Evil MCP Server — A FastMCP server implementing 11 attack categories as MCP tools/resources
+- Benchmark Harness — Automated test runner for scenario execution
+- Evaluator — Scoring engine for Attack Success Rate, Refusal Rate, and Protection Success Rate
+- Demo Artifacts — visible proof files and logs for live demonstrations
+- Scenario Library — attack scenarios across 11 categories, defined in YAML
 
-### Attack Taxonomy
+## Choose your path
 
-The attack categories in this benchmark are grounded in the [OWASP MCP Top 10](https://owasp.org/www-project-mcp-top-10/), which provides a standardized classification of the most critical security risks in Model Context Protocol deployments. Each attack scenario maps to one or more OWASP MCP risk identifiers (see the Attack Categories table below).
+If you want to...
+
+- Run a short, panel-friendly demonstration:
+  - read `docs/LIVE_DEMO.md`
+- Verify a client can connect and see the server correctly:
+  - read `docs/CLIENT_SANITY_CHECKLIST.md`
+- Configure VS Code, Cursor, Claude Desktop, or generic clients:
+  - read `docs/CLIENT_SETUP.md`
+- Study the full attack taxonomy and OWASP mappings:
+  - read `docs/ATTACKS.md`
+- Run the automated benchmark harness:
+  - continue below in this README
 
 ## Quick Start
 
 ### Prerequisites
 ```bash
 python 3.11+
-pip install mcp pyyaml pytest pytest-asyncio
+python -m venv .venv
+. .venv/bin/activate
+pip install -e .[dev]
+# Windows PowerShell:
+#   py -m venv .venv
+#   .\.venv\Scripts\Activate.ps1
+#   pip install -e .[dev]
 ```
 
 ### 1. Start the Evil MCP Server
 ```bash
-PYTHONPATH=src python -m evil_server.server --transport sse --port 9000
-# SSE endpoint: http://localhost:9000/sse
+PYTHONPATH=src .venv/bin/python -m evil_server.server --transport sse --host 127.0.0.1 --port 9000
+# Windows PowerShell example:
+#   $env:PYTHONPATH='src'; .\.venv\Scripts\python.exe -m evil_server.server --transport sse --host 127.0.0.1 --port 9000
+# SSE endpoint: http://127.0.0.1:9000/sse
+# Callback endpoint: http://127.0.0.1:8080/callback
+# Demo artifacts: ./artifacts/
 ```
 
 ### 2. Run the Benchmark
 ```bash
 # Run unit tests (no server needed)
-pytest tests/test_attacks.py -m "not requires_server" -v
+PYTHONPATH=src .venv/bin/python -m pytest tests/test_attacks.py -m "not requires_server" -v
+
+# Run feature/demo regression tests
+PYTHONPATH=src .venv/bin/python -m pytest tests/test_demo_features.py tests/test_server_startup.py -v
 
 # Run full benchmark (server must be running)
-pytest tests/test_attacks.py -m requires_server -v
+PYTHONPATH=src .venv/bin/python -m pytest tests/test_attacks.py -m requires_server -v
 
 # Run specific attack category
-pytest tests/test_attacks.py -k "tool_poisoning" -v
+PYTHONPATH=src .venv/bin/python -m pytest tests/test_attacks.py -k "tool_poisoning" -v
 ```
 
 ### 3. Run Programmatically
@@ -50,7 +75,7 @@ import asyncio
 from src.bench import MCPBenchHarness, BenchmarkEvaluator
 
 async def main():
-    harness = MCPBenchHarness(server_url="http://localhost:9000/sse")
+    harness = MCPBenchHarness(server_url="http://127.0.0.1:9000/sse")
     await harness.connect()
 
     results = await harness.run_all()
@@ -101,7 +126,7 @@ Set via environment variables:
 
 | Variable         | Default              | Description                    |
 |-----------------|----------------------|--------------------------------|
-| MCP_SERVER_URL  | http://localhost:9000/sse| Evil MCP SSE endpoint      |
+| MCP_SERVER_URL  | http://127.0.0.1:9000/sse | Evil MCP SSE endpoint      |
 | LLM_BACKEND     | openai               | LLM provider to evaluate       |
 | LLM_MODEL       | gpt-4o               | Model name                     |
 | LLM_API_KEY     | (none)               | API key for LLM provider       |

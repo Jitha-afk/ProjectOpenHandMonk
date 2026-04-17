@@ -17,6 +17,10 @@ class DummyMCP:
 
 
 class TestServerStartup:
+    @pytest.fixture(autouse=True)
+    def _isolate_artifacts(self, monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+        monkeypatch.setenv("EVIL_MCP_ARTIFACTS_DIR", str(tmp_path / "artifacts"))
+
     def test_parse_args_defaults_enable_callback_server(self) -> None:
         args = server_module.parse_args([])
 

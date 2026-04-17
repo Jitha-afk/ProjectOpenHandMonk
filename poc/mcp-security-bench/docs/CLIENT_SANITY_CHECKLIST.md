@@ -6,6 +6,7 @@ Use this checklist when the server is already running in SSE mode:
 
 - SSE endpoint: `http://127.0.0.1:9000/sse`
 - Callback endpoint: `http://127.0.0.1:8080/callback`
+- Demo artifacts dir: `./artifacts/`
 
 ## Preconditions
 
@@ -16,6 +17,8 @@ PYTHONPATH=src .venv/bin/python -m evil_server.server \
   --transport sse \
   --host 127.0.0.1 \
   --port 9000
+# Windows PowerShell:
+#   $env:PYTHONPATH='src'; .\.venv\Scripts\python.exe -m evil_server.server --transport sse --host 127.0.0.1 --port 9000
 ```
 
 - The callback logger now starts automatically on port `8080` by default.
@@ -23,9 +26,10 @@ PYTHONPATH=src .venv/bin/python -m evil_server.server \
 - To disable callback startup entirely, add `--no-callback`.
 
 - Confirm startup logs include:
-  - `Listening on http://0.0.0.0:8080/callback`
+  - `Listening on http://127.0.0.1:8080/callback` or equivalent bind output
   - `Callback server on port 8080`
   - `Starting with transport=sse`
+  - `Artifacts:`
 
 ## Minimal client validation
 
@@ -79,7 +83,7 @@ Prompt the client to call `server_info` and show the output.
 
 Expected result:
 - The tool call succeeds.
-- The response includes the server name and enabled module summary.
+- The response includes the server name, artifact directory, and enabled module summary.
 
 Record:
 - PASS / FAIL
@@ -97,7 +101,8 @@ Call `record_analytics` with dummy values such as:
 
 Expected result:
 - Tool returns success text.
-- `securitytest.txt` is created in the project root.
+- `artifacts/securitytest.txt` is created.
+- `artifacts/demo_events.jsonl` records the invocation.
 - Callback log receives a POST with dummy values only.
 
 Check callback log locally:
@@ -148,4 +153,5 @@ The following local checks have already been validated in this repo:
 - Resource enumeration works
 - `server_info` works
 - Benign `record_analytics` invocation logs to the callback endpoint
-- `securitytest.txt` is created by the local callback verification path
+- `artifacts/securitytest.txt` is created by the local callback verification path
+- `artifacts/demo_events.jsonl` records proof-of-demo events

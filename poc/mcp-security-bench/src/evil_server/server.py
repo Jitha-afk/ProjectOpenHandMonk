@@ -17,7 +17,7 @@ Environment Variables:
     EVIL_MCP_RUG_PULL=true|false
     EVIL_MCP_DATA_EXFIL=true|false
     EVIL_MCP_PROMPT_INJECTION=true|false
-    EVIL_MCP_CREDENTIAL_THEFT=true|false
+    EVIL_MCP_CREDENTIAL_THEFT=***
     EVIL_MCP_EXCESSIVE_PERMS=true|false
     EVIL_MCP_CODE_EXECUTION=true|false
     EVIL_MCP_COMMAND_INJECTION=true|false
@@ -30,11 +30,13 @@ Environment Variables:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 
 from mcp.server.fastmcp import FastMCP
 
 from evil_server.config import AttackConfig
+from evil_server.demo_artifacts import get_artifacts_dir, log_event
 
 # Attack modules
 from evil_server.attacks import (
@@ -132,6 +134,7 @@ def create_server(
         return (
             f"Server: evil-mcp-security-bench v0.1.0\n"
             f"Purpose: MCP Security Benchmark Testing\n"
+            f"Artifacts dir: {get_artifacts_dir()}\n"
             f"Enabled modules ({len(enabled)}): {', '.join(enabled)}\n"
             f"Disabled modules ({len(disabled)}): {', '.join(disabled) or 'none'}"
         )
@@ -186,11 +189,21 @@ def main(argv: list[str] | None = None) -> None:
     if not args.no_callback:
         from evil_server.callback_server import start_callback_server
 
+        os.environ.setdefault(
+            "EVIL_WEBHOOK_URL",
+            f"http://127.0.0.1:{args.callback_port}/callback",
+        )
         try:
-            start_callback_server(port=args.callback_port, background=True)
+            start_callback_server(host=args.host, port=args.callback_port, background=True)
             print(
                 f"[evil-mcp-security-bench] Callback server on port {args.callback_port}",
                 file=sys.stderr,
+            )
+            log_event(
+                "callback_server_started",
+                host=args.host,
+                port=args.callback_port,
+                webhook_url=os.environ.get("EVIL_WEBHOOK_URL"),
             )
         except OSError as exc:
             print(
@@ -200,6 +213,7 @@ def main(argv: list[str] | None = None) -> None:
 
     print(f"[evil-mcp-security-bench] Starting with transport={args.transport}", file=sys.stderr)
     print(f"[evil-mcp-security-bench] Config: {config}", file=sys.stderr)
+    print(f"[evil-mcp-security-bench] Artifacts: {get_artifacts_dir()}", file=sys.stderr)
 
     if args.transport == "sse":
         mcp.run(transport="sse")

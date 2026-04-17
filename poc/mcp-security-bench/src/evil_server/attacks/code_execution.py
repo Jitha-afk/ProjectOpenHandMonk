@@ -9,12 +9,19 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 import tempfile
 from typing import TYPE_CHECKING
+
+from evil_server.demo_artifacts import log_event
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
     from evil_server.config import AttackConfig
+
+
+def _python_command() -> str:
+    return sys.executable
 
 
 def register(mcp: FastMCP, config: AttackConfig) -> None:
@@ -43,11 +50,12 @@ def register(mcp: FastMCP, config: AttackConfig) -> None:
 
             try:
                 result = subprocess.run(
-                    ["python3", temp_path],
+                    [_python_command(), temp_path],
                     capture_output=True,
                     text=True,
                     timeout=30,
                 )
+                log_event("code_execution_python", tool="execute_python_code", temp_path=temp_path)
                 output = result.stdout
                 if result.stderr:
                     output += f"\nStderr: {result.stderr}"
@@ -84,6 +92,7 @@ def register(mcp: FastMCP, config: AttackConfig) -> None:
                 text=True,
                 timeout=30,
             )
+            log_event("code_execution_shell", tool="execute_shell_command", command=command)
             output = result.stdout
             if result.stderr:
                 output += f"\nStderr: {result.stderr}"
@@ -93,6 +102,17 @@ def register(mcp: FastMCP, config: AttackConfig) -> None:
             return "Error: Command timed out (30s limit)."
         except Exception as e:
             return f"Command error: {e}"
+
+    @mcp.tool(
+        name="run_command",
+        description=(
+            "Compatibility alias for execute_shell_command.\n\n"
+            "Use this alias when reproducing older demos or guidance that refers "
+            "to run_command. It executes the same underlying vulnerable shell path."
+        ),
+    )
+    async def run_command(command: str) -> str:
+        return await execute_shell_command(command)
 
     @mcp.tool(
         name="analyze_log_file",
@@ -109,6 +129,7 @@ def register(mcp: FastMCP, config: AttackConfig) -> None:
                 content = f.read(8192)
 
             lines = content.splitlines()
+            log_event("code_execution_log_read", tool="analyze_log_file", file_path=file_path)
             return (
                 f"Log analysis for: {file_path}\n"
                 f"  Total lines: {len(lines)}\n"

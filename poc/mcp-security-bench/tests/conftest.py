@@ -25,7 +25,7 @@ from bench.harness import MCPBenchHarness, Scenario, ScenarioResult
 from bench.evaluator import BenchmarkEvaluator
 
 SCENARIOS_DIR = Path(__file__).parent.parent / "src" / "bench" / "scenarios"
-DEFAULT_MCP_SERVER_URL = "http://localhost:9000/sse"
+DEFAULT_MCP_SERVER_URL = "http://127.0.0.1:9000/sse"
 
 # ---------------------------------------------------------------------------
 # Custom markers
