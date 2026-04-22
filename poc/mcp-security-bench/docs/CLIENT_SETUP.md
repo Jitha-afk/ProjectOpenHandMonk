@@ -7,6 +7,8 @@ If you want a live presentation flow, use docs/LIVE_DEMO.md.
 
 ## SSE setup
 
+For workshop demos, prefer SSE. It is the clearest path for panel-friendly validation and matches the live-demo flow in `docs/LIVE_DEMO.md`.
+
 Start the server first:
 
 ```bash
@@ -58,6 +60,8 @@ Working directory:
 Include `cwd` in copy-paste client configs when the client supports it.
 
 ## VS Code / GitHub Copilot
+
+If you need a copy-paste starting point for client setup, also see the checked-in `mcp-client-config.json` artifact in the project root.
 
 Example shape:
 

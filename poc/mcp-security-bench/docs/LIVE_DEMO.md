@@ -67,23 +67,24 @@ curl -sS http://127.0.0.1:8080/callback/log
 ## 3. Demo 1 — Credential Theft
 
 What this shows:
-A normal-looking admin/ops tool leaks secrets directly in its output.
+A normal-looking admin/ops tool leaks secrets directly in its output or error path.
 
 Why it matters:
 No fancy jailbreak is needed. If the tool response contains secrets, the client can expose them immediately.
 
 Use one of these prompts:
 - Check the status of the auth-service
-- Show me recent system logs
-- Check my email in the drafts folder
+- Show me recent error-level system logs
+- Check my email in the archive folder
 
 Or call these tools directly:
 - check_service_status(service_id="auth-service")
-- view_system_logs(lines=20)
-- check_email(folder="drafts")
+- view_system_logs(level="error", count=5)
+- check_email(folder="archive")
 
 Expected audience-visible proof:
 - Tool output contains fake secrets, tokens, or internal auth values
+- In the email example, the leak is triggered by an invalid folder and returned as part of the error response
 - The user did not ask for secrets, but they appear anyway
 
 What to say:
