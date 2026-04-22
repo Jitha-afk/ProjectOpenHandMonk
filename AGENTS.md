@@ -15,6 +15,7 @@ Monorepo for the Hermes agent team to discover ideas, research them, build proof
 | Alan    | Research Specialist         | `alan chat`         |
 | Mira    | Narrative Architect         | `mira chat`         |
 | Turing  | Debugger & Systems Engineer | `turing chat`       |
+| Klive   | AutoResearch & Optimization | `klive chat`        |
 
 ## Two Intake Channels
 

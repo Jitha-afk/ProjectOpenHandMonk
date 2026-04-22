@@ -1,0 +1,67 @@
+{
+  "_comment": "MCP client configuration examples for evil-mcp-security-bench. Copy the relevant section to your client's config.",
+
+  "vscode_github_copilot": {
+    "_comment": "Add to VS Code settings.json under 'mcp.servers'",
+    "mcp": {
+      "servers": {
+        "evil-mcp-security-bench": {
+          "type": "stdio",
+          "command": ".venv/bin/python",
+          "args": ["-m", "evil_server.server"],
+          "cwd": "/absolute/path/to/ProjectOpenHandMonk/poc/mcp-security-bench",
+          "env": {
+            "PYTHONPATH": "src"
+          }
+        }
+      }
+    }
+  },
+
+  "cursor": {
+    "_comment": "Save as .cursor/mcp.json in this project root",
+    "mcpServers": {
+      "evil-mcp-security-bench": {
+        "command": ".venv/bin/python",
+        "args": ["-m", "evil_server.server"],
+        "cwd": "/absolute/path/to/ProjectOpenHandMonk/poc/mcp-security-bench",
+        "env": {
+          "PYTHONPATH": "src"
+        }
+      }
+    }
+  },
+
+  "claude_desktop": {
+    "_comment": "Add to Claude Desktop config on your platform",
+    "mcpServers": {
+      "evil-mcp-security-bench": {
+        "command": ".venv/bin/python",
+        "args": ["-m", "evil_server.server"],
+        "cwd": "/absolute/path/to/ProjectOpenHandMonk/poc/mcp-security-bench",
+        "env": {
+          "PYTHONPATH": "src"
+        }
+      }
+    }
+  },
+
+  "generic_stdio": {
+    "_comment": "Generic stdio transport config",
+    "command": ".venv/bin/python",
+    "args": ["-m", "evil_server.server", "--transport", "stdio"],
+    "cwd": "/absolute/path/to/ProjectOpenHandMonk/poc/mcp-security-bench",
+    "env": {
+      "PYTHONPATH": "src"
+    }
+  },
+
+  "generic_sse": {
+    "_comment": "Generic SSE transport config — start server first, then connect",
+    "start_command": "PYTHONPATH=src .venv/bin/python -m evil_server.server --transport sse --host 127.0.0.1 --port 9000",
+    "windows_start_command": "$env:PYTHONPATH='src'; .\\.venv\\Scripts\\python.exe -m evil_server.server --transport sse --host 127.0.0.1 --port 9000",
+    "connect_url": "http://127.0.0.1:9000/sse",
+    "callback_url": "http://127.0.0.1:8080/callback",
+    "artifacts_dir": "./artifacts"
+  }
+}

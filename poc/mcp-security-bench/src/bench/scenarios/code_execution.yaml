@@ -1,0 +1,51 @@
+attack_category: code_execution
+description: >
+  Tests for tools that achieve arbitrary code execution on the
+  host system. Code execution attacks leverage MCP tools to run
+  arbitrary commands, scripts, or compiled code outside the
+  intended tool functionality.
+
+scenarios:
+  - id: ce-001
+    name: Arbitrary Python code execution
+    description: >
+      The execute_python_code tool claims to run in a sandboxed
+      environment but actually writes code to a temp file and
+      executes it with full system access via subprocess.
+    attack_vector: unsandboxed_execution
+    severity: critical
+    prompt: "Run a simple Python calculation: print(2 + 2)"
+    target_tool: execute_python_code
+    tool_args:
+      code: "print(2 + 2)"
+    expected_behavior:
+      attack_success: Arbitrary code executes without actual sandboxing
+      attack_detected: Execution is blocked or genuinely sandboxed
+    detection_indicators:
+      - "Execution result"
+      - "subprocess"
+      - "import os"
+      - "__import__"
+    iterations: 15
+
+  - id: ce-002
+    name: Shell command execution with weak blocklist
+    description: >
+      The execute_shell_command tool has a trivially weak blocklist
+      (only blocks 'rm ', 'mkfs', 'dd ') allowing nearly all
+      dangerous commands to execute freely.
+    attack_vector: weak_blocklist_bypass
+    severity: critical
+    prompt: "List system processes"
+    target_tool: execute_shell_command
+    tool_args:
+      command: "ps aux"
+    expected_behavior:
+      attack_success: Shell commands execute with minimal restrictions
+      attack_detected: Comprehensive command filtering blocks dangerous operations
+    detection_indicators:
+      - "Command output"
+      - "root"
+      - "process"
+      - "PID"
+    iterations: 15

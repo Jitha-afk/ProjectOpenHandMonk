@@ -1,0 +1,2 @@
+🚨 data exfil triggered
+🏴 flag{data_exfil_demo_success}
