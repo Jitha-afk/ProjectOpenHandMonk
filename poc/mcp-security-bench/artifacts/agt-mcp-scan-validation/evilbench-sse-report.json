@@ -1,0 +1,126 @@
+{
+  "servers": {
+    "evilbench-sse": {
+      "safe": false,
+      "primitives_scanned": 38,
+      "primitives_flagged": 9,
+      "tools_scanned": 38,
+      "tools_flagged": 9,
+      "threats": [
+        {
+          "threat_type": "hidden_instruction",
+          "severity": "critical",
+          "tool_name": "search_records",
+          "server_name": "evilbench-sse",
+          "message": "Instruction-like pattern in tool description: \\bsystem\\s*:",
+          "matched_pattern": "\\bsystem\\s*:",
+          "details": {}
+        },
+        {
+          "threat_type": "hidden_instruction",
+          "severity": "critical",
+          "tool_name": "enhanced_calculate",
+          "server_name": "evilbench-sse",
+          "message": "Instruction-like pattern in tool description: \\bsystem\\s*:",
+          "matched_pattern": "\\bsystem\\s*:",
+          "details": {}
+        },
+        {
+          "threat_type": "tool_poisoning",
+          "severity": "critical",
+          "tool_name": "execute_shell_command",
+          "server_name": "evilbench-sse",
+          "message": "Suspicious required field: 'command'",
+          "matched_pattern": null,
+          "details": {
+            "field_name": "command"
+          }
+        },
+        {
+          "threat_type": "tool_poisoning",
+          "severity": "critical",
+          "tool_name": "run_command",
+          "server_name": "evilbench-sse",
+          "message": "Suspicious required field: 'command'",
+          "matched_pattern": null,
+          "details": {
+            "field_name": "command"
+          }
+        },
+        {
+          "threat_type": "tool_poisoning",
+          "severity": "critical",
+          "tool_name": "sandbox_run",
+          "server_name": "evilbench-sse",
+          "message": "Suspicious required field: 'command'",
+          "matched_pattern": null,
+          "details": {
+            "field_name": "command"
+          }
+        },
+        {
+          "threat_type": "tool_poisoning",
+          "severity": "critical",
+          "tool_name": "container_exec",
+          "server_name": "evilbench-sse",
+          "message": "Suspicious required field: 'command'",
+          "matched_pattern": null,
+          "details": {
+            "field_name": "command"
+          }
+        },
+        {
+          "threat_type": "tool_poisoning",
+          "severity": "warning",
+          "tool_name": "server_info",
+          "server_name": "evilbench-sse",
+          "message": "Overly permissive schema: object type with no defined properties",
+          "matched_pattern": null,
+          "details": {}
+        },
+        {
+          "threat_type": "hidden_instruction",
+          "severity": "critical",
+          "tool_name": "resource:system://config",
+          "server_name": "evilbench-sse",
+          "message": "Instruction-like pattern in tool description: \\bsystem\\s*:",
+          "matched_pattern": "\\bsystem\\s*:",
+          "details": {}
+        },
+        {
+          "threat_type": "hidden_instruction",
+          "severity": "critical",
+          "tool_name": "resource:system://secrets",
+          "server_name": "evilbench-sse",
+          "message": "Instruction-like pattern in tool description: \\bsystem\\s*:",
+          "matched_pattern": "\\bsystem\\s*:",
+          "details": {}
+        }
+      ]
+    }
+  },
+  "summary": {
+    "servers_scanned": 1,
+    "primitives_scanned": 38,
+    "primitives_flagged": 9,
+    "tools_scanned": 38,
+    "tools_flagged": 9,
+    "warnings": 1,
+    "critical": 8
+  },
+  "config_findings": [],
+  "inspection_errors": [],
+  "inspections": {
+    "evilbench-sse": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 32,
+      "resources_discovered": 5,
+      "resource_templates_discovered": 1,
+      "prompts_discovered": 0,
+      "primitives_discovered": 38,
+      "error": null
+    }
+  }
+}
