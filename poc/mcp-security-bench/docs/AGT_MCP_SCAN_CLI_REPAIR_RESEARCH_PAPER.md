@@ -25,6 +25,10 @@ Can a drifted MCP scan CLI/tutorial contract be repaired into a bounded, test-ba
 
 The answer supported by the source artifact is yes, within explicit limits. The repair does not make the scanner a runtime prevention layer. It does not validate every possible MCP attack. It does not prove that a server is benign. It aligns a specific CLI workflow with live metadata enumeration, static-only review mode, fingerprinting over normalized primitive metadata, and regression tests.
 
+![Figure 1. AGT mcp-scan repair lifecycle](paper_diagrams/agt_mcp_scan_repair_lifecycle.mermaid.svg)
+
+Figure 1 summarizes the paper's central narrative: the work starts from a drifted CLI/tutorial contract, repairs the packaged `mcp-scan` command, performs live MCP metadata inspection, normalizes advertised primitives into scanner-visible metadata, reuses AGT's existing scanner, and produces user-facing evidence backed by regression and sandbox validation.
+
 ## Background/Problem
 
 ### MCP metadata as a security surface
@@ -116,6 +120,10 @@ The source artifact reports that the repaired CLI performs metadata-only live in
 Interpretation:
 
 The key repair was not merely adding a command wrapper. It changed the scanner's evidence source from local launch/configuration metadata to advertised MCP primitive metadata, while still keeping the scan metadata-only. That distinction is important: the scanner enumerates metadata; it does not execute tools, read resources, or render prompts.
+
+![Figure 2. Metadata-only MCP inspection boundary](paper_diagrams/metadata_inspection_boundary.mermaid.svg)
+
+Figure 2 makes the operational boundary explicit. The default live scan connects to the configured MCP server and requests advertised primitive metadata, then normalizes and scans that metadata. Runtime behavior such as tool invocation, resource reads, prompt rendering, and side effects remains outside the default scan boundary.
 
 Evidence boundary:
 
@@ -310,6 +318,10 @@ It also reports that Klive re-ran the loop and recorded a PASS review in `.herme
 Interpretation:
 
 This evaluation supports a narrow claim: the repaired scanner detected the tested metadata-poisoning fixtures across tools and non-tool primitives. It does not support claims about full OWASP MCP Top 10 coverage, false-positive rate, runtime prevention, or all possible MCP attack patterns.
+
+![Figure 3. Evidence-to-claim boundary map](paper_diagrams/evidence_claim_boundary_map.mermaid.svg)
+
+Figure 3 separates evidence sources from the claims they support. The AGT case study, regression tests, synthetic Evil MCP loop, and ProjectOpenHandMonk sandbox checks support bounded claims about CLI repair, metadata enumeration, scanner/report output, and CI-relevant exit codes. They do not establish benchmark certification, runtime prevention, exhaustive OWASP MCP Top 10 coverage, or false-positive/false-negative rates.
 
 ## Limitations
 
