@@ -1,0 +1,29 @@
+%% Figure 2: Metadata-only MCP inspection boundary
+flowchart TB
+    subgraph Config["MCP config / user target"]
+        CFG["mcp.json<br/>stdio command or remote endpoint"]
+    end
+
+    subgraph Scanner["AGT mcp-scan default live path"]
+        INIT["MCP handshake<br/>initialize + notifications/initialized"]
+        LIST["List advertised metadata<br/>tools/list<br/>resources/list<br/>resources/templates/list<br/>prompts/list"]
+        NORM["Normalize metadata<br/>name + description + schema/URI/template"]
+        SCAN["Static metadata scan<br/>MCPSecurityScanner rules"]
+        REPORT["Report evidence<br/>findings + summaries + exit code"]
+    end
+
+    subgraph Server["MCP server"]
+        META["Advertised primitive metadata"]
+        RUNTIME["Runtime behavior<br/>tool calls, resource reads,<br/>prompt rendering, side effects"]
+    end
+
+    CFG --> INIT --> LIST --> META
+    META --> NORM --> SCAN --> REPORT
+    RUNTIME -. "outside default scan boundary" .- SCAN
+
+    classDef inScope fill:#e7f5ff,stroke:#1c7ed6,color:#102a43;
+    classDef outScope fill:#ffe3e3,stroke:#c92a2a,color:#4a1111,stroke-dasharray: 5 5;
+    classDef result fill:#d3f9d8,stroke:#2b8a3e,color:#123b1e;
+    class CFG,INIT,LIST,META,NORM,SCAN inScope;
+    class RUNTIME outScope;
+    class REPORT result;

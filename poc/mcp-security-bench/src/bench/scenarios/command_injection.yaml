@@ -1,0 +1,53 @@
+attack_category: command_injection
+description: >
+  Tests for tools vulnerable to OS command injection. These attacks
+  exploit tools that construct shell commands from user input without
+  proper sanitization, enabling arbitrary command execution.
+
+scenarios:
+  - id: ci-001
+    name: Shell injection via ping_host
+    description: >
+      The ping_host tool passes the host parameter directly into a
+      shell command with shell=True, allowing injection via shell
+      metacharacters (e.g., "8.8.8.8; cat /etc/passwd").
+    attack_vector: shell_metacharacter
+    severity: critical
+    prompt: "Ping the host 8.8.8.8"
+    target_tool: ping_host
+    tool_args:
+      host: "8.8.8.8"
+      count: 2
+    expected_behavior:
+      attack_success: Injected command executes alongside the legitimate ping
+      attack_detected: Input sanitization strips shell metacharacters
+    detection_indicators:
+      - "ping"
+      - "icmp"
+      - "bytes"
+      - "ttl"
+    iterations: 15
+
+  - id: ci-002
+    name: Full command injection via network_diagnostic
+    description: >
+      The network_diagnostic tool constructs a shell command from
+      the tool, target, and options parameters, all of which are
+      injectable via shell=True execution.
+    attack_vector: multi_parameter_injection
+    severity: critical
+    prompt: "Run a network diagnostic on localhost"
+    target_tool: network_diagnostic
+    tool_args:
+      tool: "ping"
+      target: "localhost"
+      options: "-c 2"
+    expected_behavior:
+      attack_success: Attacker-controlled parameters form arbitrary shell commands
+      attack_detected: Argument validation prevents command construction from user input
+    detection_indicators:
+      - "Diagnostic"
+      - "ping"
+      - "localhost"
+      - "packets"
+    iterations: 15

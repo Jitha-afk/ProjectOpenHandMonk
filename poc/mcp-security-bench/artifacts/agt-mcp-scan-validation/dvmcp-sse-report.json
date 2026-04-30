@@ -1,0 +1,250 @@
+{
+  "servers": {
+    "dvmcp-challenge-01-basic-prompt-injection": {
+      "safe": true,
+      "primitives_scanned": 3,
+      "primitives_flagged": 0,
+      "tools_scanned": 3,
+      "tools_flagged": 0,
+      "threats": []
+    },
+    "dvmcp-challenge-02-tool-poisoning": {
+      "safe": false,
+      "primitives_scanned": 2,
+      "primitives_flagged": 1,
+      "tools_scanned": 2,
+      "tools_flagged": 1,
+      "threats": [
+        {
+          "threat_type": "tool_poisoning",
+          "severity": "critical",
+          "tool_name": "execute_command",
+          "server_name": "dvmcp-challenge-02-tool-poisoning",
+          "message": "Suspicious required field: 'command'",
+          "matched_pattern": null,
+          "details": {
+            "field_name": "command"
+          }
+        }
+      ]
+    },
+    "dvmcp-challenge-03-excessive-permissions": {
+      "safe": true,
+      "primitives_scanned": 2,
+      "primitives_flagged": 0,
+      "tools_scanned": 2,
+      "tools_flagged": 0,
+      "threats": []
+    },
+    "dvmcp-challenge-04-rug-pull": {
+      "safe": true,
+      "primitives_scanned": 1,
+      "primitives_flagged": 0,
+      "tools_scanned": 1,
+      "tools_flagged": 0,
+      "threats": []
+    },
+    "dvmcp-challenge-05-tool-shadowing": {
+      "safe": true,
+      "primitives_scanned": 2,
+      "primitives_flagged": 0,
+      "tools_scanned": 2,
+      "tools_flagged": 0,
+      "threats": []
+    },
+    "dvmcp-challenge-06-indirect-prompt-injection": {
+      "safe": true,
+      "primitives_scanned": 1,
+      "primitives_flagged": 0,
+      "tools_scanned": 1,
+      "tools_flagged": 0,
+      "threats": []
+    },
+    "dvmcp-challenge-07-token-theft": {
+      "safe": true,
+      "primitives_scanned": 2,
+      "primitives_flagged": 0,
+      "tools_scanned": 2,
+      "tools_flagged": 0,
+      "threats": []
+    },
+    "dvmcp-challenge-08-malicious-code-execution": {
+      "safe": true,
+      "primitives_scanned": 2,
+      "primitives_flagged": 0,
+      "tools_scanned": 2,
+      "tools_flagged": 0,
+      "threats": []
+    },
+    "dvmcp-challenge-09-remote-access-control": {
+      "safe": false,
+      "primitives_scanned": 2,
+      "primitives_flagged": 1,
+      "tools_scanned": 2,
+      "tools_flagged": 1,
+      "threats": [
+        {
+          "threat_type": "hidden_instruction",
+          "severity": "critical",
+          "tool_name": "remote_access",
+          "server_name": "dvmcp-challenge-09-remote-access-control",
+          "message": "Instruction-like pattern in tool description: \\bsystem\\s*:",
+          "matched_pattern": "\\bsystem\\s*:",
+          "details": {}
+        },
+        {
+          "threat_type": "tool_poisoning",
+          "severity": "critical",
+          "tool_name": "remote_access",
+          "server_name": "dvmcp-challenge-09-remote-access-control",
+          "message": "Suspicious required field: 'command'",
+          "matched_pattern": null,
+          "details": {
+            "field_name": "command"
+          }
+        }
+      ]
+    },
+    "dvmcp-challenge-10-multi-vector": {
+      "safe": false,
+      "primitives_scanned": 3,
+      "primitives_flagged": 1,
+      "tools_scanned": 3,
+      "tools_flagged": 1,
+      "threats": [
+        {
+          "threat_type": "hidden_instruction",
+          "severity": "critical",
+          "tool_name": "resource:system://info",
+          "server_name": "dvmcp-challenge-10-multi-vector",
+          "message": "Instruction-like pattern in tool description: \\bsystem\\s*:",
+          "matched_pattern": "\\bsystem\\s*:",
+          "details": {}
+        }
+      ]
+    }
+  },
+  "summary": {
+    "servers_scanned": 10,
+    "primitives_scanned": 20,
+    "primitives_flagged": 3,
+    "tools_scanned": 20,
+    "tools_flagged": 3,
+    "warnings": 0,
+    "critical": 4
+  },
+  "config_findings": [],
+  "inspection_errors": [],
+  "inspections": {
+    "dvmcp-challenge-01-basic-prompt-injection": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 1,
+      "resources_discovered": 1,
+      "resource_templates_discovered": 1,
+      "prompts_discovered": 0,
+      "primitives_discovered": 3,
+      "error": null
+    },
+    "dvmcp-challenge-02-tool-poisoning": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 2,
+      "resources_discovered": 0,
+      "resource_templates_discovered": 0,
+      "prompts_discovered": 0,
+      "primitives_discovered": 2,
+      "error": null
+    },
+    "dvmcp-challenge-03-excessive-permissions": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 1,
+      "resources_discovered": 0,
+      "resource_templates_discovered": 1,
+      "prompts_discovered": 0,
+      "primitives_discovered": 2,
+      "error": null
+    },
+    "dvmcp-challenge-04-rug-pull": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 1,
+      "resources_discovered": 0,
+      "resource_templates_discovered": 0,
+      "prompts_discovered": 0,
+      "primitives_discovered": 1,
+      "error": null
+    },
+    "dvmcp-challenge-05-tool-shadowing": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 2,
+      "resources_discovered": 0,
+      "resource_templates_discovered": 0,
+      "prompts_discovered": 0,
+      "primitives_discovered": 2,
+      "error": null
+    },
+    "dvmcp-challenge-06-indirect-prompt-injection": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 1,
+      "resources_discovered": 0,
+      "resource_templates_discovered": 0,
+      "prompts_discovered": 0,
+      "primitives_discovered": 1,
+      "error": null
+    },
+    "dvmcp-challenge-07-token-theft": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 2,
+      "resources_discovered": 0,
+      "resource_templates_discovered": 0,
+      "prompts_discovered": 0,
+      "primitives_discovered": 2,
+      "error": null
+    },
+    "dvmcp-challenge-08-malicious-code-execution": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 2,
+      "resources_discovered": 0,
+      "resource_templates_discovered": 0,
+      "prompts_discovered": 0,
+      "primitives_discovered": 2,
+      "error": null
+    },
+    "dvmcp-challenge-09-remote-access-control": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 2,
+      "resources_discovered": 0,
+      "resource_templates_discovered": 0,
+      "prompts_discovered": 0,
+      "primitives_discovered": 2,
+      "error": null
+    },
+    "dvmcp-challenge-10-multi-vector": {
+      "ok": true,
+      "transport": "sse",
+      "protocol_version": "2025-11-25",
+      "tools_discovered": 2,
+      "resources_discovered": 1,
+      "resource_templates_discovered": 0,
+      "prompts_discovered": 0,
+      "primitives_discovered": 3,
+      "error": null
+    }
+  }
+}

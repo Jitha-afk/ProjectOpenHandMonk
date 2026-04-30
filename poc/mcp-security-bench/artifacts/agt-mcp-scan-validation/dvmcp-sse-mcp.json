@@ -1,0 +1,44 @@
+{
+  "servers": {
+    "dvmcp-challenge-01-basic-prompt-injection": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9001/sse"
+    },
+    "dvmcp-challenge-02-tool-poisoning": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9002/sse"
+    },
+    "dvmcp-challenge-03-excessive-permissions": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9003/sse"
+    },
+    "dvmcp-challenge-04-rug-pull": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9004/sse"
+    },
+    "dvmcp-challenge-05-tool-shadowing": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9005/sse"
+    },
+    "dvmcp-challenge-06-indirect-prompt-injection": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9006/sse"
+    },
+    "dvmcp-challenge-07-token-theft": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9007/sse"
+    },
+    "dvmcp-challenge-08-malicious-code-execution": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9008/sse"
+    },
+    "dvmcp-challenge-09-remote-access-control": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9009/sse"
+    },
+    "dvmcp-challenge-10-multi-vector": {
+      "type": "sse",
+      "url": "http://127.0.0.1:9010/sse"
+    }
+  }
+}

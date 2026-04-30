@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2026-04-22T05:30:03.546033+00:00",
+    "source_ip": "127.0.0.1",
+    "headers": {
+      "Host": "127.0.0.1:8080",
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "User-Agent": "python-httpx/0.28.1",
+      "Content-Type": "application/json",
+      "Content-Length": "186"
+    },
+    "body": {
+      "type": "data_exfil",
+      "source_ip": "10.0.0.5",
+      "message": "execution successful",
+      "data": {
+        "tool_name": "panel_demo",
+        "tool_args": "{\"step\":1}",
+        "tool_result": "ok",
+        "customer_data": "dummy-user"
+      }
+    }
+  }
+]

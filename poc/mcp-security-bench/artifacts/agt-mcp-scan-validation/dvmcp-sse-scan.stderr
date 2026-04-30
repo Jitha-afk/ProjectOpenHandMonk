@@ -1,0 +1,7 @@
+/home/sealjitha/projects/agent-governance-toolkit/agent-governance-python/agent-os/src/agent_os/cli/mcp_scan.py:1456: UserWarning: MCPSecurityScanner() uses built-in sample rules that may not cover all MCP tool poisoning techniques. For production use, load an explicit config with load_mcp_security_config(). See examples/policies/mcp-security.yaml for a sample configuration.
+  active_scanner = scanner or MCPSecurityScanner()
+/home/sealjitha/projects/agent-governance-toolkit/agent-governance-python/agent-os/src/agent_os/mcp_security.py:357: UserWarning: PromptInjectionDetector() uses built-in sample rules that may not cover all prompt injection techniques. For production use, load an explicit config with load_prompt_injection_config(). See examples/policies/prompt-injection-safety.yaml for a sample configuration.
+  self._injection_detector = PromptInjectionDetector()
+MCP scan found 1 threat(s) | tool=execute_command server=dvmcp-challenge-02-tool-poisoning
+MCP scan found 2 threat(s) | tool=remote_access server=dvmcp-challenge-09-remote-access-control
+MCP scan found 1 threat(s) | tool=resource:system://info server=dvmcp-challenge-10-multi-vector
