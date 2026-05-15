@@ -6,19 +6,25 @@ must not be used to run offensive payloads.
 """
 
 from .generator import generate_scenario, generate_suite
-from .metrics import compare_by_mode, summarize
-from .scenario import ActionKind, Mode, Scenario, ToolAction
+from .metrics import compare_by_mode, summarize, summarize_by_attack_type, summarize_by_scenario_family, summarize_by_source_family
+from .scenario import ActionKind, AttackType, Mode, Scenario, ScenarioMetadata, SourceFamily, ToolAction
 from .simulator import HostSimulator, run_suite
 
 __all__ = [
     "ActionKind",
+    "AttackType",
     "HostSimulator",
     "Mode",
     "Scenario",
+    "ScenarioMetadata",
+    "SourceFamily",
     "ToolAction",
     "compare_by_mode",
     "generate_scenario",
     "generate_suite",
     "run_suite",
     "summarize",
+    "summarize_by_attack_type",
+    "summarize_by_scenario_family",
+    "summarize_by_source_family",
 ]

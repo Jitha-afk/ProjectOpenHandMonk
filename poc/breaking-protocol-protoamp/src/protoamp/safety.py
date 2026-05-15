@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from .scenario import ActionKind, Scenario, ToolAction
+import re
+
+from .scenario import ActionKind, Scenario, ScenarioMetadata, ToolAction
 
 
 class SafetyError(ValueError):
@@ -22,6 +24,9 @@ ALLOWED_ACTIONS = frozenset(
 )
 
 ALLOWED_CAPABILITIES = ALLOWED_ACTIONS
+
+SAFE_LABEL_RE = re.compile(r"^[A-Za-z0-9_.:, -]+$")
+DIGEST_RE = re.compile(r"^(synthetic:[a-z0-9_.-]+|sha256:[0-9a-f]{64})$")
 
 RISKY_TOKENS = tuple(
     token.lower()
@@ -79,6 +84,27 @@ def assert_safe_text(text: str) -> None:
         raise SafetyError("command-like metacharacter cluster rejected")
 
 
+def validate_metadata(metadata: ScenarioMetadata) -> None:
+    for value in [
+        metadata.scenario_family,
+        metadata.attack_type.value,
+        metadata.source_family.value,
+        metadata.source_adapter,
+        metadata.abuse_axis,
+        metadata.trust_failure,
+    ]:
+        assert_safe_text(str(value))
+        if not SAFE_LABEL_RE.match(str(value)):
+            raise SafetyError(f"unsafe metadata label: {value}")
+    if metadata.source_record_count < 0:
+        raise SafetyError("source_record_count must be non-negative")
+    if not DIGEST_RE.match(metadata.source_digest):
+        raise SafetyError("unsafe source digest")
+    for key, value in metadata.notes.items():
+        assert_safe_text(str(key))
+        assert_safe_text(str(value))
+
+
 def validate_action(action: ToolAction) -> None:
     if action.name not in ALLOWED_ACTIONS:
         raise SafetyError(f"action not allowlisted: {action.name}")
@@ -111,6 +137,4 @@ def validate_scenario(scenario: Scenario) -> None:
     for expected in scenario.expected_unauthorized:
         if expected not in action_names:
             raise SafetyError(f"expected unauthorized action missing: {expected}")
-    for key, value in scenario.metadata.items():
-        assert_safe_text(str(key))
-        assert_safe_text(str(value))
+    validate_metadata(scenario.typed_metadata)

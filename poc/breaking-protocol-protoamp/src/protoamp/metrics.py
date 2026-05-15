@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Mapping, Sequence
 
-from .scenario import ActionKind, Mode
+from .scenario import ActionKind, AttackType, Mode, Scenario, SourceFamily
 from .simulator import ScenarioResult
 
 
@@ -83,3 +83,39 @@ def reduction(protected: MetricsSummary, unprotected: MetricsSummary) -> float:
     return (
         unprotected.attack_success_rate - protected.attack_success_rate
     ) / unprotected.attack_success_rate
+
+
+def _group_by_metadata(
+    results: Sequence[ScenarioResult],
+    scenarios: Sequence[Scenario],
+    field: str,
+) -> dict[str, MetricsSummary]:
+    scenarios_by_id = {scenario.id: scenario for scenario in scenarios}
+    grouped: dict[str, list[ScenarioResult]] = {}
+    for result in results:
+        scenario = scenarios_by_id.get(result.scenario_id)
+        if scenario is None:
+            raise ValueError(f"result has no matching scenario: {result.scenario_id}")
+        metadata = scenario.typed_metadata
+        value = getattr(metadata, field)
+        key = value.value if isinstance(value, (AttackType, SourceFamily, Mode)) else str(value)
+        grouped.setdefault(key, []).append(result)
+    return {key: summarize(group_results) for key, group_results in grouped.items()}
+
+
+def summarize_by_attack_type(
+    results: Sequence[ScenarioResult], scenarios: Sequence[Scenario]
+) -> dict[str, MetricsSummary]:
+    return _group_by_metadata(results, scenarios, "attack_type")
+
+
+def summarize_by_source_family(
+    results: Sequence[ScenarioResult], scenarios: Sequence[Scenario]
+) -> dict[str, MetricsSummary]:
+    return _group_by_metadata(results, scenarios, "source_family")
+
+
+def summarize_by_scenario_family(
+    results: Sequence[ScenarioResult], scenarios: Sequence[Scenario]
+) -> dict[str, MetricsSummary]:
+    return _group_by_metadata(results, scenarios, "scenario_family")
