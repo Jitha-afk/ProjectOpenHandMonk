@@ -1,0 +1,25 @@
+{
+  "branch": "poc/canaryweave-asr",
+  "completed": [
+    "Renamed project/package/docs to CanaryWeave and removed stale branding terms",
+    "Created Hermes-native GSD-style plan at design/hermes_gsd_autonomous_plan.md",
+    "Implemented 50-loop deterministic local research runner",
+    "Added sampling-focused scenario families and tests",
+    "Generated artifacts/research/loop_results.json",
+    "Created docs/canaryweave_findings.md and artifacts/research/summary_table.md",
+    "Added safe model dry-run model-set support"
+  ],
+  "next_steps": [
+    "Run final smokes and scans",
+    "Clean caches and transient artifacts",
+    "Commit and push branch"
+  ],
+  "phase": "autonomous overnight execution",
+  "project": "CanaryWeave",
+  "updated": "2026-05-15",
+  "validation": {
+    "pytest": "43 passed",
+    "secret_scan": "pending final gate",
+    "stale_name_scan": "pending final gate"
+  }
+}
