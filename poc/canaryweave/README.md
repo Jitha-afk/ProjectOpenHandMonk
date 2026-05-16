@@ -38,8 +38,9 @@ The POC implements:
 - AgentDojo and InjecAgent were inspected only for structural metadata: paths, counts, schema/category labels, hashes, task/tool surfaces, and benchmark shape. Raw upstream adversarial payload text is not copied into scenarios, docs, tests, or logs.
 - New ASR-style scenario families primarily model sampling abuse: majority-vote candidate echo, temperature boundary drift, best-of-n overreach, self-consistency label drift, and verifier-gap decoy acceptance. Secondary families cover capability-attestation absence and implicit trust propagation.
 - 50-loop local finding: sampling abuse dominates the scenario mix (1,181 / 1,200 scenario instances). In the deterministic simulator, the intentionally permissive `mcp` mode has a simulated unauthorized-action execution rate of 1.0, while local `attest` has 0.0.
+- Conference demo finding: four JSON-RPC-shaped `sampling/createMessage` scenarios demonstrate role/provenance confusion with a precise success predicate: an unauthorized inert action executes from server-originated sampling content. The vulnerable host ASR is 4/4 and the hardened host ASR is 0/4.
 
-These are toy-harness validation results, not claims about real MCP hosts, live model behavior, or the source paper's reported ASR values.
+These are controlled harness/demo results, not claims about all real MCP hosts, live model behavior, or the source paper's reported ASR values.
 
 ## Quickstart
 
@@ -62,6 +63,7 @@ Safe model-ASR plan generation, with no provider API calls:
 
 ```bash
 PYTHONPATH=src python3 scripts/model_asr_dry_run.py --model-set smoke_core --seed 1337 --count 4 --output artifacts/runs/model_dry_run.json
+PYTHONPATH=src python3 scripts/sampling_demo.py --output artifacts/research/sampling_demo.json
 PYTHONPATH=src python3 scripts/autonomous_research_loops.py --loops 50 --output artifacts/research/loop_results.json
 ```
 
