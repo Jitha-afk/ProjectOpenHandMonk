@@ -76,9 +76,9 @@ def _source_summary_for_condition(condition: str, loop_index: int):
         return load_source_summary(SourceFamily.INJECAGENT_STRUCTURAL)
     if condition == SourceFamily.SYNTHETIC_SAFE.value:
         return synthetic_source_summary()
-    # Mixed condition alternates safe structural summaries while retaining a
-    # local fallback for absent source checkouts. The adapters expose structural
-    # counts and digests only; raw source records are never embedded in results.
+    # Mixed condition rotates safe structural summaries while retaining a local
+    # fallback for absent source checkouts. The adapters expose structural counts
+    # and digests only; raw source records are never embedded in results.
     cycle = (
         synthetic_source_summary(),
         load_source_summary(SourceFamily.AGENTDOJO_STRUCTURAL),
@@ -160,6 +160,7 @@ def _build_loop(loop_index: int, base_seed: int, scenarios_per_loop: int) -> dic
         "attack_mix": _attack_mix(scenarios),
         "source_family_condition": condition,
         "source_summary": {
+            "requested_source_family_condition": condition,
             "source_family": source_summary.source_family.value,
             "adapter_name": source_summary.adapter_name,
             "digest": source_summary.digest,
@@ -193,11 +194,18 @@ def _aggregate(loops: Sequence[dict[str, object]]) -> dict[str, object]:
     attack_mix_counter: Counter[str] = Counter()
     source_condition_counter: Counter[str] = Counter()
 
+    by_attack_type_mode: dict[str, dict[str, list[MetricsSummary]]] = {}
+
     for loop in loops:
         metrics_by_mode = loop["metrics_by_mode"]
+        grouped_by_attack = loop["grouped_metrics"]["by_attack_type"]  # type: ignore[index]
         for mode in MODES:
             metrics = metrics_by_mode[mode.value]  # type: ignore[index]
             summaries_by_mode[mode.value].append(MetricsSummary(**metrics))  # type: ignore[arg-type]
+            for attack_type, attack_metrics in grouped_by_attack[mode.value].items():  # type: ignore[index]
+                by_attack_type_mode.setdefault(str(attack_type), {}).setdefault(mode.value, []).append(
+                    MetricsSummary(**attack_metrics)  # type: ignore[arg-type]
+                )
         comparisons = loop["comparisons"]  # type: ignore[assignment]
         amplification_values.append(float(comparisons["amplification"]))  # type: ignore[index]
         reduction_values.append(float(comparisons["attest_reduction"]))  # type: ignore[index]
@@ -230,6 +238,13 @@ def _aggregate(loops: Sequence[dict[str, object]]) -> dict[str, object]:
             mode: _mean_metric_dict(summaries)
             for mode, summaries in summaries_by_mode.items()
         },
+        "by_attack_type": {
+            attack_type: {
+                mode: _mean_metric_dict(summaries)
+                for mode, summaries in sorted(mode_summaries.items())
+            }
+            for attack_type, mode_summaries in sorted(by_attack_type_mode.items())
+        },
         "comparisons": {
             "amplification": round(float(statistics.mean(amplification_values)), 6) if amplification_values else 0.0,
             "attest_reduction": round(float(statistics.mean(reduction_values)), 6) if reduction_values else 0.0,
@@ -239,19 +254,24 @@ def _aggregate(loops: Sequence[dict[str, object]]) -> dict[str, object]:
 
 
 def _finding(aggregate: Mapping[str, object]) -> dict[str, object]:
-    comparisons = aggregate["comparisons"]  # type: ignore[index]
-    by_mode = aggregate["by_mode"]  # type: ignore[index]
-    mcp_asr = float(by_mode[Mode.MCP.value]["attack_success_rate"])  # type: ignore[index]
-    attest_asr = float(by_mode[Mode.ATTEST.value]["attack_success_rate"])  # type: ignore[index]
-    baseline_asr = float(by_mode[Mode.BASELINE.value]["attack_success_rate"])  # type: ignore[index]
-    amplification_value = float(comparisons["amplification"])  # type: ignore[index]
-    reduction_value = float(comparisons["attest_reduction"])  # type: ignore[index]
+    by_attack_type = aggregate["by_attack_type"]  # type: ignore[index]
+    sampling = by_attack_type[AttackType.SAMPLING_ABUSE.value]  # type: ignore[index]
+    baseline = sampling[Mode.BASELINE.value]  # type: ignore[index]
+    mcp = sampling[Mode.MCP.value]  # type: ignore[index]
+    attest = sampling[Mode.ATTEST.value]  # type: ignore[index]
+    baseline_asr = float(baseline["attack_success_rate"])
+    mcp_asr = float(mcp["attack_success_rate"])
+    attest_asr = float(attest["attack_success_rate"])
+    amplification_value = mcp_asr - baseline_asr
+    reduction_value = 0.0 if mcp_asr == 0 else (mcp_asr - attest_asr) / mcp_asr
     return {
         "topic": AttackType.SAMPLING_ABUSE.value,
+        "metric_name": "simulated_unauthorized_action_execution_rate",
         "summary": (
-            "Across deterministic local simulator loops, sampling abuse families show higher "
-            f"unprotected MCP attack success than the baseline by {amplification_value:.3f}, "
-            f"while attestation reduces unprotected success by {reduction_value:.3f}."
+            "Across deterministic local simulator loops, sampling abuse scenarios show a "
+            f"higher simulated unauthorized-action execution rate in the intentionally permissive "
+            f"MCP-shaped mode than in baseline by {amplification_value:.3f}; the local "
+            f"policy-plus-attestation mode reduces that simulator rate by {reduction_value:.3f}."
         ),
         "evidence": {
             "baseline_attack_success_rate": round(baseline_asr, 6),
@@ -260,7 +280,7 @@ def _finding(aggregate: Mapping[str, object]) -> dict[str, object]:
             "amplification": round(amplification_value, 6),
             "attest_reduction": round(reduction_value, 6),
         },
-        "scope": "safe local simulator evidence using synthetic canaries and inert symbolic actions",
+        "scope": "deterministic simulator invariant using synthetic canaries and inert symbolic actions",
         "raw_payloads_included": False,
     }
 

@@ -1,6 +1,6 @@
 # CanaryWeave Autonomous Handoff
 
-Status: final verification in progress.
+Status: verification completed and branch pushed before peer-review fixes; current review-fix patch is being validated separately.
 
 Completed work:
 
@@ -11,6 +11,7 @@ Completed work:
 - Research outputs generated under `artifacts/research/`.
 - Findings documented in `docs/canaryweave_findings.md`.
 - Safe model dry-run scaffold supports `--model-set smoke_core|smoke_frontier`.
+- Peer-review fixes add event action-kind traces, artifact-schema tests, model-registry sync tests, and claim-boundary documentation.
 
 Safety boundary:
 
@@ -18,15 +19,15 @@ Safety boundary:
 - No network sinks.
 - No raw adversarial payloads.
 - No real secrets.
-- Synthetic canaries are redacted in shared artifacts.
+- Synthetic canaries are redacted or omitted in shared artifacts.
 
-Final gates still required before shipping:
+Final gates for this review-fix patch:
 
 1. Full pytest.
 2. CLI smoke.
-3. model dry-run smoke.
-4. 50-loop runner smoke.
-5. stale-name scan.
-6. secret/url scan.
-7. clean caches.
-8. commit and push.
+3. Model dry-run smoke.
+4. 50-loop runner artifact regeneration.
+5. Stale-name scan.
+6. Secret/url scan.
+7. Independent review.
+8. Clean caches, commit, and push.

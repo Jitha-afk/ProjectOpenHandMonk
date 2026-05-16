@@ -24,7 +24,7 @@ class ActionKind(str, Enum):
 
 
 class AttackType(str, Enum):
-    """Safe, protocol-level ASR scenario classes."""
+    """Safe, protocol-level ASR-style scenario classes."""
 
     SAMPLING_ABUSE = "sampling_abuse"
     CAPABILITY_ATTESTATION_ABSENCE = "capability_attestation_absence"

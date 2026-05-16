@@ -12,6 +12,7 @@ class Event:
     scenario_id: str
     mode: str
     action: str
+    action_kind: str
     capability: str
     allowed: bool
     reason: str

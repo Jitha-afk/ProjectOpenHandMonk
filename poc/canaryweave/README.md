@@ -6,7 +6,7 @@
 `validated` / `research finding drafted`
 
 ## Objective
-Build a safe, deterministic proof-of-concept that reproduces the experimental shape of the source paper without using the authors' unavailable benchmark code, raw exploit payloads, real secrets, or outbound exfiltration.
+Build a safe, deterministic proof-of-concept that reconstructs the experimental shape of the source paper without using the authors' unavailable benchmark code, raw exploit payloads, real secrets, or outbound exfiltration.
 
 The POC implements:
 - synthetic MCP-protocol-confusion scenarios;
@@ -22,7 +22,7 @@ The POC implements:
 ## Key Questions
 - Can we build a safe CanaryWeave-like harness from the paper's public methodology?
 - What exact claims in "the source paper" are reproducible from the text alone, and what requires missing artifacts?
-- How should ASR-like metrics be computed without harmful payloads or real exfiltration?
+- How should simulated unauthorized-action execution metrics be computed without harmful payloads or real exfiltration?
 - Does a message-level attestation/policy shim block synthetic protocol-confusion actions in this controlled harness?
 
 ## Team Notes
@@ -34,12 +34,12 @@ The POC implements:
 ## Findings
 - The source paper describes a protocol-safety methodology but does not provide a public code URL or full payload/scenario corpus in the local copy.
 - A faithful 847-scenario numeric reproduction is therefore not supported from the source text alone.
-- This POC safely reproduces the measurement shape: matched baseline/MCP/attested conditions, symbolic capabilities, JSON-RPC traces, benign canaries, and deterministic ASR-style metrics.
+- This POC safely reconstructs the measurement shape: matched baseline/MCP/attested conditions, symbolic capabilities, JSON-RPC traces, benign canaries, and deterministic ASR-style metrics.
 - AgentDojo and InjecAgent were inspected only for structural metadata: paths, counts, schema/category labels, hashes, task/tool surfaces, and benchmark shape. Raw upstream adversarial payload text is not copied into scenarios, docs, tests, or logs.
-- New ASR scenario families primarily model sampling abuse: majority-vote candidate echo, temperature boundary drift, best-of-n overreach, self-consistency label drift, and verifier-gap decoy acceptance. Secondary families cover capability-attestation absence and implicit trust propagation.
-- 50-loop local finding: sampling abuse dominates the scenario mix (1,181 / 1,200 scenario instances), unprotected `mcp` ASR is 1.0, and local `attest` ASR is 0.0 under deterministic simulator semantics.
+- New ASR-style scenario families primarily model sampling abuse: majority-vote candidate echo, temperature boundary drift, best-of-n overreach, self-consistency label drift, and verifier-gap decoy acceptance. Secondary families cover capability-attestation absence and implicit trust propagation.
+- 50-loop local finding: sampling abuse dominates the scenario mix (1,181 / 1,200 scenario instances). In the deterministic simulator, the intentionally permissive `mcp` mode has a simulated unauthorized-action execution rate of 1.0, while local `attest` has 0.0.
 
-These are toy-harness results, not claims about real MCP hosts or the original paper's reported ASR values.
+These are toy-harness validation results, not claims about real MCP hosts, live model behavior, or the source paper's reported ASR values.
 
 ## Quickstart
 

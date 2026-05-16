@@ -2,7 +2,11 @@
 
 Source artifact: `artifacts/research/loop_results.json`.
 
-This table is generated from the deterministic local simulator output. It is public-safe: no raw adversarial payloads, no external services, no provider calls, and no real sensitive data are represented.
+This table is generated from deterministic local simulator output. It is public-safe: no raw adversarial payloads, no external services, no provider calls, and no real sensitive data are represented.
+
+## Claim boundary
+
+The values below are ASR-style proxy metrics for simulated unauthorized-action execution. They validate harness mechanics and do not estimate real-world exploitation probability, live-model behavior, or the source paper's reported benchmark numbers.
 
 ## Run metadata
 
@@ -18,7 +22,7 @@ This table is generated from the deterministic local simulator output. It is pub
 
 ## Mean mode metrics across 50 loops
 
-| Mode | Mean ASR | Mean block rate | Mean canary-touch rate | Mean unauthorized executed / attempts |
+| Mode | Mean proxy rate | Mean block rate | Mean canary-touch rate | Mean unauthorized executed / attempts |
 |---|---:|---:|---:|---:|
 | baseline | 0.000 | 1.000 | 0.000 | 0.0 / 24.0 |
 | mcp | 1.000 | 0.000 | 1.000 | 24.0 / 24.0 |
@@ -26,15 +30,15 @@ This table is generated from the deterministic local simulator output. It is pub
 
 ## Attack type and mode aggregate across all loops
 
-| Attack type | Mode | Scenarios | Unauthorized executed / attempts | ASR | Block rate | Reduction vs mcp |
+| Attack type | Mode | Scenarios | Unauthorized executed / attempts | Proxy rate | Block rate | Attest reduction vs mcp |
 |---|---|---:|---:|---:|---:|---:|
-| Sampling abuse | baseline | 1181 | 0 / 1181 | 0.000 | 1.000 | 1.000 |
+| Sampling abuse | baseline | 1181 | 0 / 1181 | 0.000 | 1.000 | — |
 | Sampling abuse | mcp | 1181 | 1181 / 1181 | 1.000 | 0.000 | 0.000 |
 | Sampling abuse | attest | 1181 | 0 / 1181 | 0.000 | 1.000 | 1.000 |
-| Capability-attestation absence | baseline | 10 | 0 / 10 | 0.000 | 1.000 | 1.000 |
+| Capability-attestation absence | baseline | 10 | 0 / 10 | 0.000 | 1.000 | — |
 | Capability-attestation absence | mcp | 10 | 10 / 10 | 1.000 | 0.000 | 0.000 |
 | Capability-attestation absence | attest | 10 | 0 / 10 | 0.000 | 1.000 | 1.000 |
-| Implicit trust propagation | baseline | 9 | 0 / 9 | 0.000 | 1.000 | 1.000 |
+| Implicit trust propagation | baseline | 9 | 0 / 9 | 0.000 | 1.000 | — |
 | Implicit trust propagation | mcp | 9 | 9 / 9 | 1.000 | 0.000 | 0.000 |
 | Implicit trust propagation | attest | 9 | 0 / 9 | 0.000 | 1.000 | 1.000 |
 
@@ -55,9 +59,11 @@ This table is generated from the deterministic local simulator output. It is pub
 | mixed_structural_and_synthetic | 13 |
 | synthetic_safe | 12 |
 
+If AgentDojo/InjecAgent source roots are absent, adapters emit explicit missing-source synthetic summaries rather than embedding raw upstream content.
+
 ## Top sampling-family observations
 
-| Scenario family | Observed scenarios in representative aggregate view | mcp ASR | attest ASR | Attest reduction |
+| Scenario family | Observed scenarios in representative aggregate view | mcp proxy rate | attest proxy rate | Attest reduction |
 |---|---:|---:|---:|---:|
 | sampling_self_consistency_label_drift | 2 | 1.000 | 0.000 | 1.000 |
 | sampling_candidate_replay_gap | 4 | 1.000 | 0.000 | 1.000 |
