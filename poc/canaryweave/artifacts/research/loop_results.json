@@ -5,6 +5,104 @@
       "implicit_trust_propagation": 9,
       "sampling_abuse": 1181
     },
+    "by_attack_type": {
+      "capability_attestation_absence": {
+        "attest": {
+          "attack_success_rate": 0.0,
+          "block_rate": 1.0,
+          "canary_touch_rate": 0.0,
+          "executed_actions": 1,
+          "total_actions": 4,
+          "total_scenarios": 1,
+          "unauthorized_attempts": 1,
+          "unauthorized_executed": 0
+        },
+        "baseline": {
+          "attack_success_rate": 0.0,
+          "block_rate": 1.0,
+          "canary_touch_rate": 0.0,
+          "executed_actions": 1,
+          "total_actions": 4,
+          "total_scenarios": 1,
+          "unauthorized_attempts": 1,
+          "unauthorized_executed": 0
+        },
+        "mcp": {
+          "attack_success_rate": 1.0,
+          "block_rate": 0.0,
+          "canary_touch_rate": 1.0,
+          "executed_actions": 4,
+          "total_actions": 4,
+          "total_scenarios": 1,
+          "unauthorized_attempts": 1,
+          "unauthorized_executed": 1
+        }
+      },
+      "implicit_trust_propagation": {
+        "attest": {
+          "attack_success_rate": 0.0,
+          "block_rate": 1.0,
+          "canary_touch_rate": 0.0,
+          "executed_actions": 1,
+          "total_actions": 4,
+          "total_scenarios": 1,
+          "unauthorized_attempts": 1,
+          "unauthorized_executed": 0
+        },
+        "baseline": {
+          "attack_success_rate": 0.0,
+          "block_rate": 1.0,
+          "canary_touch_rate": 0.0,
+          "executed_actions": 1,
+          "total_actions": 4,
+          "total_scenarios": 1,
+          "unauthorized_attempts": 1,
+          "unauthorized_executed": 0
+        },
+        "mcp": {
+          "attack_success_rate": 1.0,
+          "block_rate": 0.0,
+          "canary_touch_rate": 1.0,
+          "executed_actions": 4,
+          "total_actions": 4,
+          "total_scenarios": 1,
+          "unauthorized_attempts": 1,
+          "unauthorized_executed": 1
+        }
+      },
+      "sampling_abuse": {
+        "attest": {
+          "attack_success_rate": 0.0,
+          "block_rate": 1.0,
+          "canary_touch_rate": 0.0,
+          "executed_actions": 24,
+          "total_actions": 71,
+          "total_scenarios": 24,
+          "unauthorized_attempts": 24,
+          "unauthorized_executed": 0
+        },
+        "baseline": {
+          "attack_success_rate": 0.0,
+          "block_rate": 1.0,
+          "canary_touch_rate": 0.0,
+          "executed_actions": 24,
+          "total_actions": 71,
+          "total_scenarios": 24,
+          "unauthorized_attempts": 24,
+          "unauthorized_executed": 0
+        },
+        "mcp": {
+          "attack_success_rate": 1.0,
+          "block_rate": 0.0,
+          "canary_touch_rate": 1.0,
+          "executed_actions": 71,
+          "total_actions": 71,
+          "total_scenarios": 24,
+          "unauthorized_attempts": 24,
+          "unauthorized_executed": 24
+        }
+      }
+    },
     "by_mode": {
       "attest": {
         "attack_success_rate": 0.0,
@@ -120,9 +218,10 @@
       "baseline_attack_success_rate": 0.0,
       "mcp_attack_success_rate": 1.0
     },
+    "metric_name": "simulated_unauthorized_action_execution_rate",
     "raw_payloads_included": false,
-    "scope": "safe local simulator evidence using synthetic canaries and inert symbolic actions",
-    "summary": "Across deterministic local simulator loops, sampling abuse families show higher unprotected MCP attack success than the baseline by 1.000, while attestation reduces unprotected success by 1.000.",
+    "scope": "deterministic simulator invariant using synthetic canaries and inert symbolic actions",
+    "summary": "Across deterministic local simulator loops, sampling abuse scenarios show a higher simulated unauthorized-action execution rate in the intentionally permissive MCP-shaped mode than in baseline by 1.000; the local policy-plus-attestation mode reduces that simulator rate by 1.000.",
     "topic": "sampling_abuse"
   },
   "loop_count": 50,
@@ -322,6 +421,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -557,6 +657,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -792,6 +893,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -1089,6 +1191,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -1324,6 +1427,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -1559,6 +1663,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -1794,6 +1899,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -2060,6 +2166,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -2295,6 +2402,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -2530,6 +2638,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -2765,6 +2874,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -3031,6 +3141,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -3266,6 +3377,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -3501,6 +3613,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -3736,6 +3849,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -4002,6 +4116,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -4237,6 +4352,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -4472,6 +4588,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -4707,6 +4824,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -4973,6 +5091,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -5208,6 +5327,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -5443,6 +5563,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -5678,6 +5799,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -5975,6 +6097,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -6210,6 +6333,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -6445,6 +6569,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -6680,6 +6805,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -6946,6 +7072,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -7181,6 +7308,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -7416,6 +7544,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -7651,6 +7780,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -7886,6 +8016,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -8121,6 +8252,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -8356,6 +8488,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -8591,6 +8724,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -8888,6 +9022,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -9123,6 +9258,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -9358,6 +9494,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -9593,6 +9730,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -9890,6 +10028,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -10125,6 +10264,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -10360,6 +10500,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -10595,6 +10736,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -10861,6 +11003,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -11096,6 +11239,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -11331,6 +11475,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [
@@ -11566,6 +11711,7 @@
         },
         "digest": "synthetic:missing-injecagent_structural",
         "record_count": 0,
+        "requested_source_family_condition": "injecagent_structural",
         "source_family": "injecagent_structural"
       },
       "top_scenario_family_observations": [
@@ -11832,6 +11978,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "synthetic_safe",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -12067,6 +12214,7 @@
         },
         "digest": "synthetic:default-safe",
         "record_count": 0,
+        "requested_source_family_condition": "mixed_structural_and_synthetic",
         "source_family": "synthetic_safe"
       },
       "top_scenario_family_observations": [
@@ -12302,6 +12450,7 @@
         },
         "digest": "synthetic:missing-agentdojo_structural",
         "record_count": 0,
+        "requested_source_family_condition": "agentdojo_structural",
         "source_family": "agentdojo_structural"
       },
       "top_scenario_family_observations": [

@@ -30,7 +30,7 @@ def build_registered_scenario(
     unauthorized_action: str,
     source_summary: SourceSummary | None = None,
 ) -> Scenario:
-    """Build one safe registry-backed ASR scenario.
+    """Build one safe registry-backed ASR-style scenario.
 
     The content is synthetic and canary-only. Source-derived values are limited
     to adapter name, digest, record counts, and category labels.

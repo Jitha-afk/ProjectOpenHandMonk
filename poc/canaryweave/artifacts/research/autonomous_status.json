@@ -7,19 +7,20 @@
     "Added sampling-focused scenario families and tests",
     "Generated artifacts/research/loop_results.json",
     "Created docs/canaryweave_findings.md and artifacts/research/summary_table.md",
-    "Added safe model dry-run model-set support"
+    "Added safe model dry-run model-set support",
+    "Added peer-review regression tests for trace semantics, artifact schema, model registry sync, and documentation consistency",
+    "Reframed the local finding as deterministic simulator validation rather than empirical security evidence"
   ],
   "next_steps": [
-    "Run final smokes and scans",
-    "Clean caches and transient artifacts",
-    "Commit and push branch"
+    "Commit and push review-fix patch"
   ],
-  "phase": "autonomous overnight execution",
+  "phase": "peer-review fix validation complete",
   "project": "CanaryWeave",
-  "updated": "2026-05-15",
+  "updated": "2026-05-16",
   "validation": {
-    "pytest": "43 passed",
-    "secret_scan": "pending final gate",
-    "stale_name_scan": "pending final gate"
+    "pytest": "48 passed",
+    "secret_scan": "passed",
+    "stale_name_scan": "passed",
+    "independent_review": "passed_with_warnings_no_blockers"
   }
 }

@@ -72,6 +72,7 @@ class HostSimulator:
                         scenario_id=scenario.id,
                         mode=self.mode.value,
                         action=action.name,
+                        action_kind=action.kind.value,
                         capability=action.capability,
                         allowed=executed,
                         reason=reason,

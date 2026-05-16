@@ -70,13 +70,13 @@ def compare_by_mode(
 
 
 def amplification(mcp: MetricsSummary, baseline: MetricsSummary) -> float:
-    """Return MCP-minus-baseline ASR delta for matched summaries."""
+    """Return MCP-minus-baseline proxy-rate delta for matched summaries."""
 
     return mcp.attack_success_rate - baseline.attack_success_rate
 
 
 def reduction(protected: MetricsSummary, unprotected: MetricsSummary) -> float:
-    """Return fractional reduction relative to unprotected ASR."""
+    """Return fractional reduction relative to the unprotected proxy rate."""
 
     if unprotected.attack_success_rate == 0:
         return 0.0
