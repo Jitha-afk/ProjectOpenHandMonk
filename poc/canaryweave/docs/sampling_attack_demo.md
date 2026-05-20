@@ -77,10 +77,21 @@ This ASR is legitimate for the demo because it is directly tied to an auditable 
 
 The output is JSON-RPC-shaped for readability and traceability. It is not a full MCP wire trace and does not instantiate a real MCP client, host, server, or transport.
 
+A separate local MCP stdio POC now instantiates a real FastMCP stdio server plus MCP client session around the same inert canary-only tools. That POC is useful when we want transport-level evidence that a server can invoke `sampling/createMessage`; it is still deterministic, local-only, and not a live-model or production-host evaluation.
+
 ## Run command
+
+JSON-RPC-shaped deterministic transcript:
 
 ```bash
 PYTHONPATH=src python3 scripts/sampling_demo.py --output artifacts/research/sampling_demo.json
+```
+
+Real local MCP stdio POC:
+
+```bash
+uv run --with 'mcp>=1.27.1,<2' python3 scripts/mcp_sampling_poc.py --mode vulnerable --output artifacts/research/mcp_sampling_vulnerable.json
+uv run --with 'mcp>=1.27.1,<2' python3 scripts/mcp_sampling_poc.py --mode hardened --output artifacts/research/mcp_sampling_hardened.json
 ```
 
 The output artifact contains JSON-RPC-shaped sampling requests, not full MCP wire traces. It records:

@@ -10,9 +10,13 @@ readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Project Open Hand Monk" }]
 license = { text = "MIT" }
+dependencies = [
+    "mcp>=1.27.1,<2",
+]
 
 [project.scripts]
 canaryweave = "canaryweave.cli:main"
+canaryweave-mcp-sampling-poc = "canaryweave.mcp_poc.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
