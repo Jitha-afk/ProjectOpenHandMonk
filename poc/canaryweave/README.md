@@ -42,6 +42,8 @@ The POC implements:
 
 These are controlled harness/demo results, not claims about all real MCP hosts, live model behavior, or the source paper's reported ASR values.
 
+The sampling demo is a deterministic policy demonstration, not a live-model stochastic evaluation or full MCP wire trace. Scenario labels such as best-of-n, self-consistency, and verifier gap are illustrative subcases encoded as safe local scenario text/metadata.
+
 ## Quickstart
 
 From this directory:
@@ -99,3 +101,4 @@ canaryweave/
 | 2026-05-15 | Hermes | Implemented harness, tests, CLI, and smoke traces. |
 | 2026-05-15 | Alan/Klive/Turing | Mapped AgentDojo/InjecAgent structures, model-ASR protocol, and sampling-abuse scenario plan without raw payloads. |
 | 2026-05-15 | Hermes | Added typed ASR registry, safe source adapters, sampling-weighted generation, grouped metrics, and model dry-run scaffold. |
+| 2026-05-15 | Hermes | Added conference-safe deterministic sampling demo and claim-alignment guardrails. |

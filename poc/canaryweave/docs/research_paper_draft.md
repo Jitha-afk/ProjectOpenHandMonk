@@ -228,7 +228,7 @@ Command:
 PYTHONPATH=src python3 scripts/sampling_demo.py --output artifacts/research/sampling_demo.json
 ```
 
-Expected deterministic demo result:
+Deterministic demo result:
 
 | Host condition | Successes / scenarios | Demo ASR |
 |---|---:|---:|
@@ -237,6 +237,8 @@ Expected deterministic demo result:
 | hardened host | 0 / 4 | 0.000 |
 
 This supports the stage claim: a host that treats server-originated `sampling/createMessage` content as user authority is vulnerable in the controlled demo, while an origin-aware policy blocks the same cases. It does not support a prevalence claim about production MCP hosts or live LLMs.
+
+The demo is JSON-RPC-shaped rather than a full MCP wire trace. It does not instantiate a real MCP client/server transport, execute a live sampling algorithm, call a live model, run best-of-n selection, run self-consistency voting, or invoke a verifier model; those names are scenario labels used to explain policy-relevant subcases.
 
 ### 6.5 Fifty-Loop Local Validation
 

@@ -10,6 +10,8 @@ The original 50-loop simulator result is useful harness validation, but it is no
 
 This is a legitimate local ASR for the demo because success is directly observable and tied to the attack vector.
 
+Important scope note: the demo is deterministic by construction. It exercises policy branches in an intentionally vulnerable host and an origin-aware hardened host; it does not run a live LLM, stochastic sampler, real MCP transport, or production host.
+
 ## Source-paper alignment
 
 The local source paper extract supports these factual anchors:
@@ -70,6 +72,8 @@ Current demo result:
 
 Each scenario remains conference-safe: no live provider, no real secrets, no external endpoint, no shell, no credential access, no raw adversarial prompt text.
 
+The scenario labels `best-of-n`, `self-consistency`, and `verifier gap` are narrative subcase labels. They do not imply that CanaryWeave currently executes real best-of-n sampling, majority voting, or verifier-model scoring.
+
 ## Claims we can make on stage
 
 Safe/accurate:
@@ -100,3 +104,5 @@ Avoid:
 Correct expanded phrasing:
 
 > The controlled deterministic demo has 100% ASR against the intentionally vulnerable host policy and 0% against the origin-aware hardened policy; this demonstrates the attack vector and mitigation logic, not ecosystem prevalence.
+
+Artifact phrasing should prefer `deterministic demo result` over `expected demo result` so readers do not confuse a scripted policy demonstration with a stochastic empirical estimate.

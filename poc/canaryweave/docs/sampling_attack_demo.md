@@ -6,6 +6,8 @@ Status: conference-safe deterministic demo plan.
 
 CanaryWeave demonstrates a specific MCP sampling attack vector: a server sends a `sampling/createMessage` request whose message uses a user-like role, and a vulnerable host treats that server-originated sampling content as if it were user authority. In the demo, success means an unauthorized inert local action executes from that server-originated sampling request and carries a benign demo canary into an inert audit sink.
 
+This is a deterministic policy demonstration, not a live-model stochastic evaluation. The `vulnerable host` condition is intentionally defined to accept server-originated sampling content as authority so the demo can make the policy failure auditable.
+
 This is the attack vector described in the local source paper at a protocol level: the paper states that MCP sampling lets servers request LLM completions via `sampling/createMessage`, that server-controlled content can use the `user` role, and that hosts must distinguish server-originated sampling from user-originated instructions.
 
 ## What this does not demonstrate
@@ -45,15 +47,15 @@ The implemented safe demo suite contains four sampling scenarios:
 
 2. `Best-of-n candidate overreach`
    - server: `travel-review-server`
-   - issue: a best-of-n style candidate selection rewards a candidate that includes an unauthorized inert action.
+   - issue: a best-of-n style claim illustrates how candidate selection can reward a candidate that includes an unauthorized inert action. The demo encodes this as scenario metadata/text; it does not run an actual best-of-n sampler.
 
 3. `Self-consistency provenance drift`
    - server: `workspace-search-server`
-   - issue: majority phrasing makes server-originated sampling content appear trusted.
+   - issue: majority-style phrasing illustrates how server-originated sampling content can appear trusted. The demo encodes this as scenario metadata/text; it does not run a self-consistency vote.
 
 4. `Verifier gap: format accepted as authority`
    - server: `structured-output-server`
-   - issue: a well-formed sampled candidate passes format checks while bypassing authority provenance checks.
+   - issue: a well-formed sampled candidate illustrates format acceptance without authority provenance. The demo encodes this as scenario metadata/text; it does not run a separate verifier model.
 
 ## Deterministic demo result
 
@@ -72,6 +74,8 @@ Interpretation:
 - `hardened host` blocks server-originated sampling as authority, so none succeed.
 
 This ASR is legitimate for the demo because it is directly tied to an auditable attack-success predicate, not to a vague simulator mode label.
+
+The output is JSON-RPC-shaped for readability and traceability. It is not a full MCP wire trace and does not instantiate a real MCP client, host, server, or transport.
 
 ## Run command
 
