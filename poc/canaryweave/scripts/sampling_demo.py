@@ -22,7 +22,13 @@ def build_payload() -> dict[str, object]:
     result = evaluate_sampling_demo_suite(suite)
     return {
         "schema_version": "canaryweave.sampling_demo.safe.v1",
-        "claim": "MCP sampling role/provenance confusion can be demonstrated safely when a host treats server-originated sampling content as user authority.",
+        "claim": "Controlled deterministic MCP sampling role/provenance demo: an intentionally vulnerable host accepts server-originated sampling content as user authority; this is not ecosystem prevalence and not live-model evidence.",
+        "scope": {
+            "demo_type": "deterministic policy demonstration",
+            "vulnerable_policy": "intentionally vulnerable host accepts server sampling as authority",
+            "hardened_policy": "origin-aware host blocks server sampling as authority",
+            "evidence_boundary": "not ecosystem prevalence; not live-model behavior; not a full MCP wire trace",
+        },
         "attack_success_condition": "unauthorized_inert_action_executed_from_server_sampling",
         "safety_boundary": "benign_canary_only_no_external_side_effects",
         "total_scenarios": result.total_scenarios,
