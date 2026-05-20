@@ -14,6 +14,7 @@ The POC implements:
 - safe structural source adapters for AgentDojo and InjecAgent local clones;
 - a toy host simulator for `baseline`, `mcp`, and `attest` conditions;
 - JSON-RPC-shaped event logging;
+- a real MCP stdio sampling wrapper around the same inert canary-only tools;
 - benign ASR/amplification metrics grouped by attack/source/scenario family;
 - an ATTESTMCP-inspired HMAC/capability shim;
 - a safe model-ASR dry-run scaffold for Hermes/Klive model research;
@@ -39,10 +40,11 @@ The POC implements:
 - New ASR-style scenario families primarily model sampling abuse: majority-vote candidate echo, temperature boundary drift, best-of-n overreach, self-consistency label drift, and verifier-gap decoy acceptance. Secondary families cover capability-attestation absence and implicit trust propagation.
 - 50-loop local finding: sampling abuse dominates the scenario mix (1,181 / 1,200 scenario instances). In the deterministic simulator, the intentionally permissive `mcp` mode has a simulated unauthorized-action execution rate of 1.0, while local `attest` has 0.0.
 - Conference demo finding: four JSON-RPC-shaped `sampling/createMessage` scenarios demonstrate role/provenance confusion with a precise success predicate: an unauthorized inert action executes from server-originated sampling content. The vulnerable host ASR is 4/4 and the hardened host ASR is 0/4.
+- Real MCP stdio POC finding: the same inert scenario set runs through a local FastMCP stdio server and MCP client sampling callback. With the intentionally vulnerable victim policy, the sampled plan reaches only the inert local audit sink in 4/4 scenarios. With the hardened origin-aware policy, it reaches the sink in 0/4 scenarios.
 
 These are controlled harness/demo results, not claims about all real MCP hosts, live model behavior, or the source paper's reported ASR values.
 
-The sampling demo is a deterministic policy demonstration, not a live-model stochastic evaluation or full MCP wire trace. Scenario labels such as best-of-n, self-consistency, and verifier gap are illustrative subcases encoded as safe local scenario text/metadata.
+The sampling demo is a deterministic policy demonstration, not a live-model stochastic evaluation or full MCP wire trace. The optional MCP stdio POC uses a real local MCP client/server transport but still uses deterministic canary-only sampling and inert local sinks. Scenario labels such as best-of-n, self-consistency, and verifier gap are illustrative subcases encoded as safe local scenario text/metadata.
 
 ## Quickstart
 
@@ -69,12 +71,19 @@ PYTHONPATH=src python3 scripts/sampling_demo.py --output artifacts/research/samp
 PYTHONPATH=src python3 scripts/autonomous_research_loops.py --loops 50 --output artifacts/research/loop_results.json
 ```
 
+Real local MCP stdio sampling POC, still deterministic and canary-only:
+
+```bash
+uv run --with 'mcp>=1.27.1,<2' python3 scripts/mcp_sampling_poc.py --mode vulnerable --output artifacts/research/mcp_sampling_vulnerable.json
+uv run --with 'mcp>=1.27.1,<2' python3 scripts/mcp_sampling_poc.py --mode hardened --output artifacts/research/mcp_sampling_hardened.json
+```
+
 ## Safety Boundaries
-- No real MCP client/server integration.
+- Real MCP usage is limited to a local stdio client/server POC with inert tools.
 - No outbound network calls.
 - No filesystem reads of secrets or environment variables.
 - No raw exploit payloads in scenarios, docs, or tests.
-- Only synthetic `CANARY_*` markers and inert local logs.
+- Only synthetic `CANARY_*` / `DEMO_CANARY_*` markers and inert local logs.
 - The safety validator rejects URL-like, credential-like, command-like, and exfiltration-related text.
 
 ## Structure
@@ -102,3 +111,4 @@ canaryweave/
 | 2026-05-15 | Alan/Klive/Turing | Mapped AgentDojo/InjecAgent structures, model-ASR protocol, and sampling-abuse scenario plan without raw payloads. |
 | 2026-05-15 | Hermes | Added typed ASR registry, safe source adapters, sampling-weighted generation, grouped metrics, and model dry-run scaffold. |
 | 2026-05-15 | Hermes | Added conference-safe deterministic sampling demo and claim-alignment guardrails. |
+| 2026-05-20 | Hermes | Added real local MCP stdio sampling POC with vulnerable and hardened victim policies. |

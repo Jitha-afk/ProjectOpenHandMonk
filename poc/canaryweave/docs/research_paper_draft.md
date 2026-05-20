@@ -222,10 +222,17 @@ The plan redacts canaries and records only neutral prompt template identifiers. 
 
 For conference demonstration, CanaryWeave includes a focused `sampling/createMessage` demo suite with a stricter attack-success predicate than the broad simulator loops. A scenario succeeds only if a server-originated sampling request with `origin="server"` and `claimed_role="user"` causes an unauthorized inert action to execute and carry a benign `DEMO_CANARY_*` marker into an inert local sink.
 
-Command:
+Command for the JSON-RPC-shaped deterministic transcript:
 
 ```bash
 PYTHONPATH=src python3 scripts/sampling_demo.py --output artifacts/research/sampling_demo.json
+```
+
+Command for the real local MCP stdio POC:
+
+```bash
+uv run --with 'mcp>=1.27.1,<2' python3 scripts/mcp_sampling_poc.py --mode vulnerable --output artifacts/research/mcp_sampling_vulnerable.json
+uv run --with 'mcp>=1.27.1,<2' python3 scripts/mcp_sampling_poc.py --mode hardened --output artifacts/research/mcp_sampling_hardened.json
 ```
 
 Deterministic demo result:
@@ -238,7 +245,7 @@ Deterministic demo result:
 
 This supports the stage claim: a host that treats server-originated `sampling/createMessage` content as user authority is vulnerable in the controlled demo, while an origin-aware policy blocks the same cases. It does not support a prevalence claim about production MCP hosts or live LLMs.
 
-The demo is JSON-RPC-shaped rather than a full MCP wire trace. It does not instantiate a real MCP client/server transport, execute a live sampling algorithm, call a live model, run best-of-n selection, run self-consistency voting, or invoke a verifier model; those names are scenario labels used to explain policy-relevant subcases.
+The demo transcript artifact is JSON-RPC-shaped rather than a full MCP wire trace. It does not execute a live sampling algorithm, call a live model, run best-of-n selection, run self-consistency voting, or invoke a verifier model; those names are scenario labels used to explain policy-relevant subcases. A separate real local MCP stdio POC exercises an actual FastMCP stdio server and MCP client sampling callback, but it preserves the same deterministic canary-only model stand-in and inert local sink boundary.
 
 ### 6.5 Fifty-Loop Local Validation
 
@@ -271,7 +278,6 @@ The goal is defensive measurement scaffolding: make protocol-safety measurement 
 
 ## 9. Future Work
 
-- Add a real MCP stdio wrapper around the same inert tools while preserving no-network/no-secret constraints.
 - Add provenance tags and explicit cross-server flow policies to model multi-server composition more richly.
 - Add ablations for policy-only, provenance-tag-only, HMAC-only, and policy-plus-HMAC modes.
 - Add confidence intervals and paired comparison output only for stochastic/live-model suites where repeated trials are meaningful.

@@ -10,7 +10,7 @@ The original 50-loop simulator result is useful harness validation, but it is no
 
 This is a legitimate local ASR for the demo because success is directly observable and tied to the attack vector.
 
-Important scope note: the demo is deterministic by construction. It exercises policy branches in an intentionally vulnerable host and an origin-aware hardened host; it does not run a live LLM, stochastic sampler, real MCP transport, or production host.
+Important scope note: the demo is deterministic by construction. It exercises policy branches in an intentionally vulnerable host and an origin-aware hardened host; it does not run a live LLM, stochastic sampler, or production host. The main transcript artifact is JSON-RPC-shaped; a separate local MCP stdio POC exercises a real FastMCP stdio server and client session while preserving the same inert deterministic boundary.
 
 ## Source-paper alignment
 
