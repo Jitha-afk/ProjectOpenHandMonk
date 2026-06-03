@@ -58,3 +58,50 @@ def test_cli_eval_can_fail_on_missing_optional_dataset(tmp_path):
 
     assert code == 2
     assert not output.exists()
+
+
+def test_cli_eval_iterations_override_works_when_invoked_as_script(tmp_path, monkeypatch):
+    output = tmp_path / "configured-eval.json"
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "canaryweave-fides",
+            "eval",
+            "--config",
+            "data/evals/fides_test_double_gate.yaml",
+            "--iterations",
+            "2",
+            "--output",
+            str(output),
+        ],
+    )
+
+    code = main()
+
+    assert code == 0
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["iterations"] == 2
+    assert report["total_iterations"] == report["total_cases"] * 2
+
+
+def test_cli_eval_iterations_equals_form_overrides_config(tmp_path, monkeypatch):
+    output = tmp_path / "configured-eval.json"
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "canaryweave-fides",
+            "eval",
+            "--config",
+            "data/evals/fides_test_double_gate.yaml",
+            "--iterations=2",
+            "--output",
+            str(output),
+        ],
+    )
+
+    code = main()
+
+    assert code == 0
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert report["iterations"] == 2
+    assert report["total_iterations"] == report["total_cases"] * 2

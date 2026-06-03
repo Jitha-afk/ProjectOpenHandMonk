@@ -20,6 +20,11 @@ def _load_asb_case(tmp_path, *, text: str, label: str = "attack", category: str 
         "surface": surface,
         "payload": text,
     }
+    return _load_record(tmp_path, record)
+
+
+def _load_record(tmp_path, record):
+    path = tmp_path / "records.jsonl"
     path.write_text(json.dumps(record) + "\n", encoding="utf-8")
     result = ASBAdapter(AdapterConfig(root=tmp_path, split="dev")).load()
     assert result.status is AdapterStatus.LOADED
@@ -87,6 +92,52 @@ def test_asb_adapter_does_not_attach_credential_rule_to_exfiltration_only_shape(
     assert case.ground_truth is not None
     assert case.ground_truth.expected_rule_ids == ()
     assert "required_fields" not in case.ground_truth.labels
+
+
+def test_asb_native_schema_fields_are_safely_mapped_without_raw_payload_export(tmp_path):
+    case = _load_record(
+        tmp_path,
+        {
+            "Attacker Tool": "opaque local tool name",
+            "Attacker Instruction": "policy instruction hierarchy override structure",
+            "Description": "structural metadata only",
+            "Attack goal": "structural goal label",
+            "Attack Type": "Stealthy Attack",
+            "Corresponding Agent": "system_admin_agent",
+            "Aggressive": "False",
+        },
+    )
+
+    assert case.case_kind.value == "attack"
+    assert case.attack_category == "mcp_prompt_boundary/instruction_hierarchy_violation"
+    assert case.ground_truth is not None
+    assert case.ground_truth.labels["dataset_label_present"] is True
+    assert case.ground_truth.expected_rule_ids == ("cwfr-0003",)
+    assert case.safe_features["asb_attack_type"] == "stealthy_attack"
+    assert case.safe_features["asb_aggressive"] is False
+    assert case.safe_features["asb_corresponding_agent_hash"].startswith("hmac-sha256:")
+    assert "attacker_instruction" in case.safe_features["payload_field_paths"]
+    public_blob = json.dumps(case.to_dict(), sort_keys=True)
+    assert "opaque local tool name" not in public_blob
+    assert "system_admin_agent" not in public_blob
+
+
+def test_asb_native_benign_schema_is_classified_as_benign_without_expected_rule(tmp_path):
+    case = _load_record(
+        tmp_path,
+        {
+            "Tool Name": "opaque local normal tool",
+            "Description": "ordinary structural task metadata",
+            "Expected Achievements": "safe completion criteria",
+            "Corresponding Agent": "system_admin_agent",
+        },
+    )
+
+    assert case.case_kind.value == "benign"
+    assert case.expected_behavior.value == "allow"
+    assert case.ground_truth is not None
+    assert case.ground_truth.expected_rule_ids == ()
+    assert case.safe_features["asb_record_family"] == "normal_tool"
 
 
 def test_public_report_includes_expected_rule_evidence_without_case_rows():
@@ -177,6 +228,70 @@ def test_public_report_filters_non_public_expected_rule_ids():
 
     assert evidence["unique_expected_rule_ids"] == ["cwfr-0106"]
     assert "native-private-rule" not in str(evidence)
+
+
+def test_public_report_includes_false_positive_diagnostics_without_case_rows():
+    raw = {
+        "schema_version": "canaryweave_fides.gate_eval.v1",
+        "iterations": 1,
+        "total_cases": 3,
+        "total_iterations": 3,
+        "provider_calls": 0,
+        "case_results": [
+            {
+                "case_id": "benign.blocked",
+                "dataset_id": "asb",
+                "case_kind": "benign",
+                "attack_category": "mcp_execution/command_or_code_execution_request",
+                "surface": "api_message",
+                "iteration": 0,
+                "ground_truth": {"expected_rule_ids": [], "labels": {}},
+                "safe_features": {"command_execution_shape": True},
+                "policy_context": {},
+                "decisions": [
+                    {"stack": "yara_rules", "decision": "block", "rule_ids": ["cwfr-0106", "cwfr-0003"]},
+                    {"stack": "rules_plus_fides", "decision": "block", "rule_ids": ["cwfr-0106"]},
+                ],
+            },
+            {
+                "case_id": "benign.allowed",
+                "dataset_id": "asb",
+                "case_kind": "benign",
+                "attack_category": "dataset_native",
+                "surface": "api_message",
+                "iteration": 0,
+                "ground_truth": {"expected_rule_ids": [], "labels": {}},
+                "safe_features": {},
+                "policy_context": {},
+                "decisions": [{"stack": "yara_rules", "decision": "allow", "rule_ids": []}],
+            },
+            {
+                "case_id": "attack.blocked",
+                "dataset_id": "asb",
+                "case_kind": "attack",
+                "attack_category": "mcp_execution/command_or_code_execution_request",
+                "surface": "api_message",
+                "iteration": 0,
+                "ground_truth": {"expected_rule_ids": ["cwfr-0106"], "labels": {}},
+                "safe_features": {"command_execution_shape": True},
+                "policy_context": {},
+                "decisions": [{"stack": "yara_rules", "decision": "block", "rule_ids": ["cwfr-0106"]}],
+            },
+        ],
+    }
+
+    diagnostics = build_public_report(raw)["false_positive_diagnostics"]
+
+    assert diagnostics["available"] is True
+    assert diagnostics["total_false_positive_decisions"] == 2
+    assert diagnostics["by_stack"]["yara_rules"]["false_positive_decisions"] == 1
+    assert diagnostics["by_stack"]["rules_plus_fides"]["false_positive_decisions"] == 1
+    assert diagnostics["by_rule"]["cwfr-0106"]["false_positive_decisions"] == 2
+    assert diagnostics["by_rule"]["cwfr-0003"]["false_positive_decisions"] == 1
+    assert diagnostics["by_dataset"]["asb"]["false_positive_decisions"] == 2
+    assert diagnostics["by_category"]["mcp_execution/command_or_code_execution_request"]["false_positive_decisions"] == 2
+    assert diagnostics["case_level_rows_included"] is False
+    assert "benign.blocked" not in str(diagnostics)
 
 
 def test_public_report_includes_safe_fact_completeness_without_case_rows():

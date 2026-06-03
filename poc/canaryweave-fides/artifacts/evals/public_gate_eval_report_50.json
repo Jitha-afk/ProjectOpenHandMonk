@@ -213,6 +213,60 @@
     "unique_hit_rule_ids": [],
     "unique_missed_rule_ids": []
   },
+  "false_positive_diagnostics": {
+    "available": true,
+    "by_category": {
+      "benign_control": {
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
+        "total_benign_decisions": 200
+      }
+    },
+    "by_dataset": {
+      "synthetic": {
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
+        "total_benign_decisions": 200
+      }
+    },
+    "by_dataset_and_category": {
+      "synthetic": {
+        "benign_control": {
+          "false_positive_decisions": 0,
+          "false_positive_rate": 0.0,
+          "total_benign_decisions": 200
+        }
+      }
+    },
+    "by_rule": {},
+    "by_stack": {
+      "no_guard": {
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
+        "total_benign_decisions": 50
+      },
+      "regex_baseline": {
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
+        "total_benign_decisions": 50
+      },
+      "rules_plus_fides": {
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
+        "total_benign_decisions": 50
+      },
+      "yara_rules": {
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
+        "total_benign_decisions": 50
+      }
+    },
+    "case_level_rows_included": false,
+    "false_positive_rate": 0.0,
+    "reason": null,
+    "total_benign_decisions": 200,
+    "total_false_positive_decisions": 0
+  },
   "groups": {
     "by_category": {
       "benign_control": {
