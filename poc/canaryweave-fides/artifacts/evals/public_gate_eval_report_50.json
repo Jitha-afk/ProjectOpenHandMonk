@@ -349,38 +349,38 @@
     "rule_count": 4,
     "rule_coverage_by_category": {
       "hidden_unicode": {
-        "coverage_ratio": 0.25,
+        "coverage_ratio": 0.1818,
         "covered_rule_count": 2,
         "covered_rule_ids": [
           "cwfr-0003",
           "cwfr-0004"
         ],
         "hit_count": 100,
-        "total_rule_count": 8
+        "total_rule_count": 11
       },
       "origin_authority_confusion": {
-        "coverage_ratio": 0.25,
+        "coverage_ratio": 0.1818,
         "covered_rule_count": 2,
         "covered_rule_ids": [
           "cwfr-0001",
           "cwfr-0003"
         ],
         "hit_count": 100,
-        "total_rule_count": 8
+        "total_rule_count": 11
       },
       "unauthorized_data_flow": {
-        "coverage_ratio": 0.125,
+        "coverage_ratio": 0.0909,
         "covered_rule_count": 1,
         "covered_rule_ids": [
           "cwfr-0002"
         ],
         "hit_count": 50,
-        "total_rule_count": 8
+        "total_rule_count": 11
       }
     },
     "rule_coverage_by_dataset": {
       "synthetic": {
-        "coverage_ratio": 0.5,
+        "coverage_ratio": 0.3636,
         "covered_rule_count": 4,
         "covered_rule_ids": [
           "cwfr-0001",
@@ -389,71 +389,71 @@
           "cwfr-0004"
         ],
         "hit_count": 250,
-        "total_rule_count": 8
+        "total_rule_count": 11
       }
     },
     "rule_coverage_by_dataset_and_category": {
       "synthetic": {
         "hidden_unicode": {
-          "coverage_ratio": 0.25,
+          "coverage_ratio": 0.1818,
           "covered_rule_count": 2,
           "covered_rule_ids": [
             "cwfr-0003",
             "cwfr-0004"
           ],
           "hit_count": 100,
-          "total_rule_count": 8
+          "total_rule_count": 11
         },
         "origin_authority_confusion": {
-          "coverage_ratio": 0.25,
+          "coverage_ratio": 0.1818,
           "covered_rule_count": 2,
           "covered_rule_ids": [
             "cwfr-0001",
             "cwfr-0003"
           ],
           "hit_count": 100,
-          "total_rule_count": 8
+          "total_rule_count": 11
         },
         "unauthorized_data_flow": {
-          "coverage_ratio": 0.125,
+          "coverage_ratio": 0.0909,
           "covered_rule_count": 1,
           "covered_rule_ids": [
             "cwfr-0002"
           ],
           "hit_count": 50,
-          "total_rule_count": 8
+          "total_rule_count": 11
         }
       }
     },
     "rule_coverage_by_surface": {
       "mcp_resource": {
-        "coverage_ratio": 0.25,
+        "coverage_ratio": 0.1818,
         "covered_rule_count": 2,
         "covered_rule_ids": [
           "cwfr-0003",
           "cwfr-0004"
         ],
         "hit_count": 100,
-        "total_rule_count": 8
+        "total_rule_count": 11
       },
       "mcp_tool": {
-        "coverage_ratio": 0.25,
+        "coverage_ratio": 0.1818,
         "covered_rule_count": 2,
         "covered_rule_ids": [
           "cwfr-0001",
           "cwfr-0003"
         ],
         "hit_count": 100,
-        "total_rule_count": 8
+        "total_rule_count": 11
       },
       "tool_result": {
-        "coverage_ratio": 0.125,
+        "coverage_ratio": 0.0909,
         "covered_rule_count": 1,
         "covered_rule_ids": [
           "cwfr-0002"
         ],
         "hit_count": 50,
-        "total_rule_count": 8
+        "total_rule_count": 11
       }
     },
     "rule_engine_codename": "WARDEN",
@@ -461,10 +461,13 @@
       "cwfr-0104",
       "cwfr-0105",
       "cwfr-0106",
-      "cwfr-0107"
+      "cwfr-0107",
+      "cwfr-0108",
+      "cwfr-0109",
+      "cwfr-0110"
     ],
-    "rules_with_no_coverage_count": 4,
-    "total_rule_count": 8,
+    "rules_with_no_coverage_count": 7,
+    "total_rule_count": 11,
     "unique_rule_ids": [
       "cwfr-0001",
       "cwfr-0002",
@@ -498,6 +501,10 @@
         "credential_or_secret_shape_ratio": 0.0,
         "dataset_native_fallback_count": 0,
         "dataset_native_fallback_ratio": 0.0,
+        "deception_shape_count": 0,
+        "deception_shape_ratio": 0.0,
+        "destructive_action_shape_count": 0,
+        "destructive_action_shape_ratio": 0.0,
         "exfiltration_shape_count": 0,
         "exfiltration_shape_ratio": 0.0,
         "instruction_shape_count": 0,
@@ -512,10 +519,14 @@
         "obfuscated_ratio": 0.0,
         "path_boundary_shape_count": 0,
         "path_boundary_shape_ratio": 0.0,
+        "protected_context_extraction_shape_count": 0,
+        "protected_context_extraction_shape_ratio": 0.0,
         "requested_capability_present_count": 50,
         "requested_capability_present_ratio": 1.0,
         "requested_sink_present_count": 50,
         "requested_sink_present_ratio": 1.0,
+        "social_engineering_shape_count": 0,
+        "social_engineering_shape_ratio": 0.0,
         "tool_plan_shape_count": 0,
         "tool_plan_shape_ratio": 0.0,
         "total_cases": 50
@@ -529,6 +540,10 @@
         "credential_or_secret_shape_ratio": 0.0,
         "dataset_native_fallback_count": 0,
         "dataset_native_fallback_ratio": 0.0,
+        "deception_shape_count": 0,
+        "deception_shape_ratio": 0.0,
+        "destructive_action_shape_count": 0,
+        "destructive_action_shape_ratio": 0.0,
         "exfiltration_shape_count": 0,
         "exfiltration_shape_ratio": 0.0,
         "instruction_shape_count": 50,
@@ -543,10 +558,14 @@
         "obfuscated_ratio": 1.0,
         "path_boundary_shape_count": 0,
         "path_boundary_shape_ratio": 0.0,
+        "protected_context_extraction_shape_count": 0,
+        "protected_context_extraction_shape_ratio": 0.0,
         "requested_capability_present_count": 0,
         "requested_capability_present_ratio": 0.0,
         "requested_sink_present_count": 0,
         "requested_sink_present_ratio": 0.0,
+        "social_engineering_shape_count": 0,
+        "social_engineering_shape_ratio": 0.0,
         "tool_plan_shape_count": 0,
         "tool_plan_shape_ratio": 0.0,
         "total_cases": 50
@@ -560,6 +579,10 @@
         "credential_or_secret_shape_ratio": 0.0,
         "dataset_native_fallback_count": 0,
         "dataset_native_fallback_ratio": 0.0,
+        "deception_shape_count": 0,
+        "deception_shape_ratio": 0.0,
+        "destructive_action_shape_count": 0,
+        "destructive_action_shape_ratio": 0.0,
         "exfiltration_shape_count": 0,
         "exfiltration_shape_ratio": 0.0,
         "instruction_shape_count": 50,
@@ -574,10 +597,14 @@
         "obfuscated_ratio": 0.0,
         "path_boundary_shape_count": 0,
         "path_boundary_shape_ratio": 0.0,
+        "protected_context_extraction_shape_count": 0,
+        "protected_context_extraction_shape_ratio": 0.0,
         "requested_capability_present_count": 50,
         "requested_capability_present_ratio": 1.0,
         "requested_sink_present_count": 50,
         "requested_sink_present_ratio": 1.0,
+        "social_engineering_shape_count": 0,
+        "social_engineering_shape_ratio": 0.0,
         "tool_plan_shape_count": 50,
         "tool_plan_shape_ratio": 1.0,
         "total_cases": 50
@@ -591,6 +618,10 @@
         "credential_or_secret_shape_ratio": 0.0,
         "dataset_native_fallback_count": 0,
         "dataset_native_fallback_ratio": 0.0,
+        "deception_shape_count": 0,
+        "deception_shape_ratio": 0.0,
+        "destructive_action_shape_count": 0,
+        "destructive_action_shape_ratio": 0.0,
         "exfiltration_shape_count": 0,
         "exfiltration_shape_ratio": 0.0,
         "instruction_shape_count": 0,
@@ -605,10 +636,14 @@
         "obfuscated_ratio": 0.0,
         "path_boundary_shape_count": 0,
         "path_boundary_shape_ratio": 0.0,
+        "protected_context_extraction_shape_count": 0,
+        "protected_context_extraction_shape_ratio": 0.0,
         "requested_capability_present_count": 50,
         "requested_capability_present_ratio": 1.0,
         "requested_sink_present_count": 50,
         "requested_sink_present_ratio": 1.0,
+        "social_engineering_shape_count": 0,
+        "social_engineering_shape_ratio": 0.0,
         "tool_plan_shape_count": 0,
         "tool_plan_shape_ratio": 0.0,
         "total_cases": 50
@@ -622,6 +657,10 @@
         "credential_or_secret_shape_ratio": 0.0,
         "dataset_native_fallback_count": 0,
         "dataset_native_fallback_ratio": 0.0,
+        "deception_shape_count": 0,
+        "deception_shape_ratio": 0.0,
+        "destructive_action_shape_count": 0,
+        "destructive_action_shape_ratio": 0.0,
         "exfiltration_shape_count": 0,
         "exfiltration_shape_ratio": 0.0,
         "instruction_shape_count": 0,
@@ -636,10 +675,14 @@
         "obfuscated_ratio": 0.0,
         "path_boundary_shape_count": 0,
         "path_boundary_shape_ratio": 0.0,
+        "protected_context_extraction_shape_count": 0,
+        "protected_context_extraction_shape_ratio": 0.0,
         "requested_capability_present_count": 0,
         "requested_capability_present_ratio": 0.0,
         "requested_sink_present_count": 50,
         "requested_sink_present_ratio": 1.0,
+        "social_engineering_shape_count": 0,
+        "social_engineering_shape_ratio": 0.0,
         "tool_plan_shape_count": 0,
         "tool_plan_shape_ratio": 0.0,
         "total_cases": 50
@@ -655,6 +698,10 @@
         "credential_or_secret_shape_ratio": 0.0,
         "dataset_native_fallback_count": 0,
         "dataset_native_fallback_ratio": 0.0,
+        "deception_shape_count": 0,
+        "deception_shape_ratio": 0.0,
+        "destructive_action_shape_count": 0,
+        "destructive_action_shape_ratio": 0.0,
         "exfiltration_shape_count": 0,
         "exfiltration_shape_ratio": 0.0,
         "instruction_shape_count": 100,
@@ -669,10 +716,14 @@
         "obfuscated_ratio": 0.2,
         "path_boundary_shape_count": 0,
         "path_boundary_shape_ratio": 0.0,
+        "protected_context_extraction_shape_count": 0,
+        "protected_context_extraction_shape_ratio": 0.0,
         "requested_capability_present_count": 150,
         "requested_capability_present_ratio": 0.6,
         "requested_sink_present_count": 200,
         "requested_sink_present_ratio": 0.8,
+        "social_engineering_shape_count": 0,
+        "social_engineering_shape_ratio": 0.0,
         "tool_plan_shape_count": 50,
         "tool_plan_shape_ratio": 0.2,
         "total_cases": 250
@@ -689,6 +740,10 @@
           "credential_or_secret_shape_ratio": 0.0,
           "dataset_native_fallback_count": 0,
           "dataset_native_fallback_ratio": 0.0,
+          "deception_shape_count": 0,
+          "deception_shape_ratio": 0.0,
+          "destructive_action_shape_count": 0,
+          "destructive_action_shape_ratio": 0.0,
           "exfiltration_shape_count": 0,
           "exfiltration_shape_ratio": 0.0,
           "instruction_shape_count": 0,
@@ -703,10 +758,14 @@
           "obfuscated_ratio": 0.0,
           "path_boundary_shape_count": 0,
           "path_boundary_shape_ratio": 0.0,
+          "protected_context_extraction_shape_count": 0,
+          "protected_context_extraction_shape_ratio": 0.0,
           "requested_capability_present_count": 50,
           "requested_capability_present_ratio": 1.0,
           "requested_sink_present_count": 50,
           "requested_sink_present_ratio": 1.0,
+          "social_engineering_shape_count": 0,
+          "social_engineering_shape_ratio": 0.0,
           "tool_plan_shape_count": 0,
           "tool_plan_shape_ratio": 0.0,
           "total_cases": 50
@@ -720,6 +779,10 @@
           "credential_or_secret_shape_ratio": 0.0,
           "dataset_native_fallback_count": 0,
           "dataset_native_fallback_ratio": 0.0,
+          "deception_shape_count": 0,
+          "deception_shape_ratio": 0.0,
+          "destructive_action_shape_count": 0,
+          "destructive_action_shape_ratio": 0.0,
           "exfiltration_shape_count": 0,
           "exfiltration_shape_ratio": 0.0,
           "instruction_shape_count": 50,
@@ -734,10 +797,14 @@
           "obfuscated_ratio": 1.0,
           "path_boundary_shape_count": 0,
           "path_boundary_shape_ratio": 0.0,
+          "protected_context_extraction_shape_count": 0,
+          "protected_context_extraction_shape_ratio": 0.0,
           "requested_capability_present_count": 0,
           "requested_capability_present_ratio": 0.0,
           "requested_sink_present_count": 0,
           "requested_sink_present_ratio": 0.0,
+          "social_engineering_shape_count": 0,
+          "social_engineering_shape_ratio": 0.0,
           "tool_plan_shape_count": 0,
           "tool_plan_shape_ratio": 0.0,
           "total_cases": 50
@@ -751,6 +818,10 @@
           "credential_or_secret_shape_ratio": 0.0,
           "dataset_native_fallback_count": 0,
           "dataset_native_fallback_ratio": 0.0,
+          "deception_shape_count": 0,
+          "deception_shape_ratio": 0.0,
+          "destructive_action_shape_count": 0,
+          "destructive_action_shape_ratio": 0.0,
           "exfiltration_shape_count": 0,
           "exfiltration_shape_ratio": 0.0,
           "instruction_shape_count": 50,
@@ -765,10 +836,14 @@
           "obfuscated_ratio": 0.0,
           "path_boundary_shape_count": 0,
           "path_boundary_shape_ratio": 0.0,
+          "protected_context_extraction_shape_count": 0,
+          "protected_context_extraction_shape_ratio": 0.0,
           "requested_capability_present_count": 50,
           "requested_capability_present_ratio": 1.0,
           "requested_sink_present_count": 50,
           "requested_sink_present_ratio": 1.0,
+          "social_engineering_shape_count": 0,
+          "social_engineering_shape_ratio": 0.0,
           "tool_plan_shape_count": 50,
           "tool_plan_shape_ratio": 1.0,
           "total_cases": 50
@@ -782,6 +857,10 @@
           "credential_or_secret_shape_ratio": 0.0,
           "dataset_native_fallback_count": 0,
           "dataset_native_fallback_ratio": 0.0,
+          "deception_shape_count": 0,
+          "deception_shape_ratio": 0.0,
+          "destructive_action_shape_count": 0,
+          "destructive_action_shape_ratio": 0.0,
           "exfiltration_shape_count": 0,
           "exfiltration_shape_ratio": 0.0,
           "instruction_shape_count": 0,
@@ -796,10 +875,14 @@
           "obfuscated_ratio": 0.0,
           "path_boundary_shape_count": 0,
           "path_boundary_shape_ratio": 0.0,
+          "protected_context_extraction_shape_count": 0,
+          "protected_context_extraction_shape_ratio": 0.0,
           "requested_capability_present_count": 50,
           "requested_capability_present_ratio": 1.0,
           "requested_sink_present_count": 50,
           "requested_sink_present_ratio": 1.0,
+          "social_engineering_shape_count": 0,
+          "social_engineering_shape_ratio": 0.0,
           "tool_plan_shape_count": 0,
           "tool_plan_shape_ratio": 0.0,
           "total_cases": 50
@@ -813,6 +896,10 @@
           "credential_or_secret_shape_ratio": 0.0,
           "dataset_native_fallback_count": 0,
           "dataset_native_fallback_ratio": 0.0,
+          "deception_shape_count": 0,
+          "deception_shape_ratio": 0.0,
+          "destructive_action_shape_count": 0,
+          "destructive_action_shape_ratio": 0.0,
           "exfiltration_shape_count": 0,
           "exfiltration_shape_ratio": 0.0,
           "instruction_shape_count": 0,
@@ -827,10 +914,14 @@
           "obfuscated_ratio": 0.0,
           "path_boundary_shape_count": 0,
           "path_boundary_shape_ratio": 0.0,
+          "protected_context_extraction_shape_count": 0,
+          "protected_context_extraction_shape_ratio": 0.0,
           "requested_capability_present_count": 0,
           "requested_capability_present_ratio": 0.0,
           "requested_sink_present_count": 50,
           "requested_sink_present_ratio": 1.0,
+          "social_engineering_shape_count": 0,
+          "social_engineering_shape_ratio": 0.0,
           "tool_plan_shape_count": 0,
           "tool_plan_shape_ratio": 0.0,
           "total_cases": 50
@@ -844,6 +935,10 @@
     "credential_or_secret_shape_ratio": 0.0,
     "dataset_native_fallback_count": 0,
     "dataset_native_fallback_ratio": 0.0,
+    "deception_shape_count": 0,
+    "deception_shape_ratio": 0.0,
+    "destructive_action_shape_count": 0,
+    "destructive_action_shape_ratio": 0.0,
     "exfiltration_shape_count": 0,
     "exfiltration_shape_ratio": 0.0,
     "instruction_shape_count": 100,
@@ -858,10 +953,14 @@
     "obfuscated_ratio": 0.2,
     "path_boundary_shape_count": 0,
     "path_boundary_shape_ratio": 0.0,
+    "protected_context_extraction_shape_count": 0,
+    "protected_context_extraction_shape_ratio": 0.0,
     "requested_capability_present_count": 150,
     "requested_capability_present_ratio": 0.6,
     "requested_sink_present_count": 200,
     "requested_sink_present_ratio": 0.8,
+    "social_engineering_shape_count": 0,
+    "social_engineering_shape_ratio": 0.0,
     "tool_plan_shape_count": 50,
     "tool_plan_shape_ratio": 0.2,
     "total_cases": 250

@@ -6,15 +6,15 @@ Scope: `poc/canaryweave-fides`
 
 Terminology:
 
-- **WARDEN**: deterministic `.cwfr.yaml` rule engine.
+- **WARDEN**: deterministic `.war` rule engine.
 - **FIDES**: opt-in LLM-as-judge layer for WARDEN misses.
 
 ## Current state after reviewer-callout fixes
 
 The latest implementation fixes the highest-priority peer review blockers at the harness layer:
 
-- Public eval now executes declared `.cwfr.yaml` rules through `RuleEngine` instead of only hard-coded WARDEN heuristics.
-- WARDEN public reports now include `.cwfr` rule IDs such as `cwfr-0001`.
+- Public eval now executes declared `.war` rules through `RuleEngine` instead of only hard-coded WARDEN heuristics.
+- WARDEN public reports now include `cwfr-*` rule IDs such as `cwfr-0001`.
 - Dataset adapter configuration is loaded from eval/dataset YAML specs.
 - Optional ASB / AgentDefenseBench datasets explicitly skip when local paths are missing.
 - ASB adapter public IDs and content hashes use HMAC-style public identifiers instead of raw SHA-256 exports.
@@ -57,7 +57,7 @@ Current stack metrics:
 
 Interpretation:
 
-- WARDEN now runs real `.cwfr` rules, but current rules only cover the synthetic fixture families.
+- WARDEN now runs real `*.war` rules, but current rules only cover the synthetic fixture families.
 - ASB contributes 43,900 attack iterations and has essentially zero current WARDEN coverage.
 - FIDES is disabled, so `rules_plus_fides` equals WARDEN.
 - This is useful gap evidence, not thesis evidence yet.
@@ -92,7 +92,7 @@ Move from “scaffold with controlled ASB gap evidence” to “thesis-supportin
 
 The next phase is complete when we have:
 
-1. WARDEN `.cwfr` rules executing over richer ASB/AgentDefenseBench redacted facts.
+1. WARDEN `*.war` rules executing over richer ASB/AgentDefenseBench redacted facts.
 2. A shared attack taxonomy and explicit attack-to-rule mapping schema.
 3. Benign near-miss controls for each important category.
 4. Public-safe reports showing regex vs WARDEN vs WARDEN+FIDES on the same cases.
@@ -213,7 +213,7 @@ Each rule must include:
 
 Primary files:
 
-- `rules/**/**/*.cwfr.yaml`
+- `rules/**/*.war`
 - `tests/test_rule_schema.py`
 - `tests/test_rule_engine.py`
 - `tests/test_warden_rule_style.py`
@@ -351,7 +351,7 @@ Commit message:
 Until the next phase is complete, say:
 
 - Current ASB results are coverage-gap diagnostics.
-- WARDEN executes real `.cwfr` rules, but the starter rule families are still synthetic/MCP-sampling oriented.
+- WARDEN executes real `*.war` rules, but the starter rule families are still synthetic/MCP-sampling oriented.
 - FIDES is explicit but disabled by default; provider-backed judge results require a later opt-in run.
 - AgentDefenseBench is supported as an optional adapter but local path is not currently configured.
 - No raw ASB or private dataset payloads are committed or exposed.

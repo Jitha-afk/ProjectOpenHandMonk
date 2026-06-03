@@ -15,7 +15,7 @@ A good WARDEN rule is:
 
 ## Current executable format
 
-The current executable rules live in `rules/` as `.cwfr.yaml` files. They include metadata, signals, a boolean condition, recommended action, fixtures, and safety notes.
+The current executable rules live in `rules/` as `.war` files. They include metadata, signals, a boolean condition, recommended action, fixtures, and safety notes.
 
 The Milestone 1 `data/yara/` files are manifests for the future Vigil-style harness. They point at the current rules and define how the rule sets participate in the evaluation ladder.
 
