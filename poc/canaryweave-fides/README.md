@@ -1,0 +1,75 @@
+# CanaryWeave FIDES
+
+Controlled research POC for comparing a traditional regex/signature guard, a renamed NOVA-style structured rule layer, and an optional FIDES/IFC layer around quarantined `query_llm` calls.
+
+## Thesis
+
+The research claim is intentionally narrow:
+
+Within controlled MCP security benchmarks, a human-reviewable structured rule layer can improve over ordinary regex pattern matching because it evaluates policy-relevant context, not only text substrings. Adding FIDES/IFC can then reduce remaining policy-relevant ASR by tracking whether low-integrity or restricted data caused consequential actions or crossed permitted sinks.
+
+This mirrors the OPA/Rego philosophy: decouple policy decision-making from enforcement, feed the policy engine structured data, and let defenders author declarative, reviewable policies. Here, the structured input is a NormalizedTrace, the policy artifacts are `.cwfr.yaml` rules, and enforcement happens inside a quarantined `query_llm` gate.
+
+## What this POC demonstrates
+
+- Baseline regex guard: fast but shallow pattern matching over visible text.
+- Structured rule guard: YAML rules with metadata, named signals, boolean conditions, categories, and synthetic fixtures.
+- FIDES/IFC layer: optional information-flow checks for trusted-action and permitted-flow policies.
+- `query_llm`: deterministic preflight, quarantined model stub, postflight, optional FIDES/IFC, and structured result.
+- Smoke metrics: `no_guard`, `regex_guard`, `structured_rule_guard`, and `rules_plus_fides_ifc` compared on the same synthetic cases.
+
+## Why structured rules over regex
+
+Regex answers: does this string contain a known pattern?
+
+The structured rule layer answers: did a server-originated sampling result propose a tool-plan-shaped action that was not granted by the host policy? Did a canary appear outside an allowed sink? Did an untrusted field contain instruction-shaped structure? Did hidden text structure appear in an MCP-visible field?
+
+That lets defenders write higher-quality detections against origin, surface, capability, sink, labels, and event shape rather than only matching words.
+
+## NormalizedTrace
+
+A NormalizedTrace is the neutral audit record all guard stacks consume. It records event order, MCP surface, origin, role, action/tool/sink labels, capability labels, canary movement, integrity/confidentiality labels, and safe structural text features.
+
+Public/default NormalizedTrace exports do not contain raw adversarial payload text. They keep redactions, feature flags, lengths, hashes, categories, and opaque IDs so regex, rules, and FIDES can be compared apples-to-apples while raw payloads remain in controlled custody.
+
+## FIDES/IFC framing
+
+FIDES is treated as Flow Integrity Deterministic Enforcement System from the IFC line of work, not merely a generic LLM judge. In this POC it checks two policy shapes:
+
+- Trusted action: consequential actions must not be caused by low-integrity or untrusted-origin data.
+- Permitted flow: restricted data may only flow to permitted sinks/readers.
+
+The quarantined LLM path is represented by `query_llm` and a deterministic model stub. Real providers are not called by default.
+
+## Safety boundaries
+
+- No raw exploit payloads in docs, tests, rules, reports, PR text, or chat.
+- No outbound network sinks or real credentials.
+- Public fixtures are synthetic and structural.
+- Controlled future real-dataset evaluation should use manifests, hashes/HMAC IDs, and redacted NormalizedTrace exports.
+- Provider calls are disabled in this MVP.
+
+## Quickstart
+
+From this directory:
+
+```bash
+uv run --with pytest --with PyYAML pytest -q
+PYTHONPATH=src python3 -m canaryweave_fides.cli --fixture-set smoke --output artifacts/smoke_report.json
+python3 scripts/check_markdown_fences.py
+```
+
+The smoke report is written to `artifacts/smoke_report.json`.
+
+## Structure
+
+```text
+canaryweave-fides/
+├── rules/                 # .cwfr.yaml structured rules
+├── src/canaryweave_fides/ # rule engine, FIDES/IFC, query_llm, metrics
+├── tests/                 # pytest suite
+├── research/              # source-grounded research notes
+├── design/                # design docs
+├── scripts/               # local verification helpers
+└── artifacts/             # generated smoke reports
+```

@@ -1,0 +1,26 @@
+id: cwfr-0001
+name: ServerSamplingOriginBoundary
+version: 0.1.0
+category: mcp_agentic_misuse/origin_authority_confusion
+severity: high
+scope: event_window
+description: Detects server-originated sampled content being treated as host-authoritative tool policy.
+signals:
+  - name: source_is_server_sampling
+    type: event_field_equals
+    field: origin
+    value: server_sampling
+  - name: output_is_tool_plan_shape
+    type: schema_shape
+    shape: tool_plan_like_json
+  - name: capability_not_granted
+    type: capability_policy
+    relation: not_in_allowed_capabilities
+condition: source_is_server_sampling and output_is_tool_plan_shape and capability_not_granted
+recommended_action: block_and_audit
+fixtures:
+  positive:
+    - server_sampling_origin_mismatch
+  negative:
+    - host_authorized_tool_plan
+safety_notes: Synthetic structural fixtures only; no raw payload text or live sinks.
