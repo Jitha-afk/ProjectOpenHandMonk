@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import csv
+import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 from .adapters import AdapterConfig, DatasetAdapter, SyntheticAdapter
@@ -64,10 +67,127 @@ def _summarize_decisions(decisions: Iterable[GateDecision]) -> dict[str, object]
     }
 
 
+_PRIVATE_REVIEW_COLUMNS = (
+    "case_id",
+    "dataset_id",
+    "split",
+    "iteration",
+    "stack",
+    "case_kind",
+    "expected_behavior",
+    "attack_category",
+    "surface",
+    "decision",
+    "blocked_by",
+    "rule_ids",
+    "reason_codes",
+    "fides_verdict",
+    "llm_label",
+    "provider_calls",
+    "raw_ref",
+    "raw_input",
+    "raw_output",
+    "expected_rule_ids",
+    "required_fields",
+)
+
+
+def _join_public_list(value: object) -> str:
+    if value in (None, ""):
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, Iterable):
+        return ";".join(str(item) for item in value)
+    return str(value)
+
+
+def _private_review_rows(case: AttackCase, iteration: int, decisions: Sequence[GateDecision]) -> list[dict[str, object]]:
+    ground_truth = case.ground_truth if isinstance(case.ground_truth, GroundTruth) else None
+    labels = dict(ground_truth.labels) if ground_truth is not None else {}
+    required_fields = labels.get("required_fields") or ()
+    expected_rule_ids = ground_truth.expected_rule_ids if ground_truth is not None else ()
+    raw_input = str(case.private_data.get("raw_input") or "")
+    rows: list[dict[str, object]] = []
+    for decision in decisions:
+        raw_output = {
+            "decision": decision.decision.value,
+            "blocked_by": decision.blocked_by.value,
+            "rule_ids": list(decision.rule_ids),
+            "reason_codes": list(decision.reason_codes),
+            "fides_verdict": decision.fides_verdict.value,
+            "provider_calls": decision.provider_calls,
+        }
+        rows.append(
+            {
+                "case_id": case.case_id,
+                "dataset_id": case.dataset_id,
+                "split": case.split,
+                "iteration": iteration,
+                "stack": decision.stack.value,
+                "case_kind": case.case_kind.value,
+                "expected_behavior": case.expected_behavior.value,
+                "attack_category": case.attack_category,
+                "surface": case.surface,
+                "decision": decision.decision.value,
+                "blocked_by": decision.blocked_by.value,
+                "rule_ids": _join_public_list(decision.rule_ids),
+                "reason_codes": _join_public_list(decision.reason_codes),
+                "fides_verdict": decision.fides_verdict.value,
+                "llm_label": decision.fides_verdict.value,
+                "provider_calls": decision.provider_calls,
+                "raw_ref": case.raw_ref or "",
+                "raw_input": raw_input,
+                "raw_output": json.dumps(raw_output, sort_keys=True),
+                "expected_rule_ids": _join_public_list(expected_rule_ids),
+                "required_fields": _join_public_list(required_fields),
+            }
+        )
+    return rows
+
+
+_PUBLIC_REVIEW_FORBIDDEN_ROOTS = {"artifacts", "conf", "data", "design", "docs", "research", "rules", "scripts", "src", "tests"}
+
+
+def _neutralize_csv_cell(value: object) -> object:
+    if not isinstance(value, str):
+        return value
+    if value.startswith(("=", "+", "-", "@", "\t", "\r", "\n")):
+        return "'" + value
+    return value
+
+
+def _validate_private_review_csv_path(path: Path) -> None:
+    if not path.is_absolute() and path.parts and path.parts[0] in _PUBLIC_REVIEW_FORBIDDEN_ROOTS:
+        raise ValueError("private reviewer CSV must be written to a controlled, non-public path")
+    repo_root = Path(__file__).resolve().parents[2]
+    try:
+        resolved = path.resolve()
+    except OSError:
+        resolved = path.absolute()
+    for public_root in _PUBLIC_REVIEW_FORBIDDEN_ROOTS:
+        try:
+            resolved.relative_to(repo_root / public_root)
+        except ValueError:
+            continue
+        raise ValueError("private reviewer CSV must be written to a controlled, non-public path")
+
+
+def _write_private_review_csv(path: Path, rows: Sequence[Mapping[str, object]]) -> None:
+    _validate_private_review_csv_path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=_PRIVATE_REVIEW_COLUMNS, extrasaction="ignore")
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({key: _neutralize_csv_cell(value) for key, value in row.items()})
+
+
 def run_evaluation(
     config: EvaluationRunConfig | None = None,
     fides_judge: FidesJudge | None = None,
     rule_engine: RuleEngine | None = None,
+    private_review_csv: Path | str | None = None,
 ) -> dict[str, object]:
     config = config or EvaluationRunConfig()
     stacks = tuple(StackName.coerce(stack) for stack in config.stacks)
@@ -88,6 +208,7 @@ def run_evaluation(
 
     stack_counts = _empty_stack_counts(stacks)
     per_case_results: list[dict[str, object]] = []
+    private_review_rows: list[dict[str, object]] = []
     provider_calls = 0
 
     for case in cases:
@@ -98,6 +219,8 @@ def run_evaluation(
             provider_calls += int(summary["provider_calls"])
             for decision in decisions:
                 stack_counts[decision.stack.value][decision.decision.value] += 1
+            if private_review_csv is not None:
+                private_review_rows.extend(_private_review_rows(iteration_case, iteration, decisions))
             per_case_results.append(
                 {
                     "case_id": iteration_case.case_id,
@@ -119,7 +242,10 @@ def run_evaluation(
             )
 
     total_iterations = len(cases) * config.iterations
-    return {
+    if private_review_csv is not None:
+        _write_private_review_csv(Path(private_review_csv), private_review_rows)
+
+    report = {
         "schema_version": "canaryweave_fides.gate_eval.v1",
         "iterations": config.iterations,
         "total_cases": len(cases),
@@ -139,3 +265,7 @@ def run_evaluation(
         "provider_calls": provider_calls,
         "safety_boundary": "public-safe report: payload text and private custody fields are excluded",
     }
+    if private_review_csv is not None:
+        report["private_review_csv"] = str(private_review_csv)
+        report["private_review_csv_rows"] = len(private_review_rows)
+    return report

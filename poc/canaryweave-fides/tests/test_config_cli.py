@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import json
 
 from canaryweave_fides.cli import main
@@ -105,3 +106,28 @@ def test_cli_eval_iterations_equals_form_overrides_config(tmp_path, monkeypatch)
     report = json.loads(output.read_text(encoding="utf-8"))
     assert report["iterations"] == 2
     assert report["total_iterations"] == report["total_cases"] * 2
+
+
+def test_cli_eval_writes_private_review_csv(tmp_path):
+    output = tmp_path / "configured-eval.json"
+    review_csv = tmp_path / "controlled-private-review" / "review.csv"
+
+    code = main([
+        "eval",
+        "--config",
+        "data/evals/fides_test_double_gate.yaml",
+        "--iterations",
+        "1",
+        "--output",
+        str(output),
+        "--private-review-csv",
+        str(review_csv),
+    ])
+
+    assert code == 0
+    report = json.loads(output.read_text(encoding="utf-8"))
+    assert "private_review_csv" not in report
+    assert review_csv.exists()
+    rows = list(csv.DictReader(review_csv.open(newline="", encoding="utf-8")))
+    assert len(rows) == report["total_iterations"] * len(report["security_metrics"])
+    assert {"raw_input", "raw_output", "llm_label", "decision", "stack"} <= set(rows[0])

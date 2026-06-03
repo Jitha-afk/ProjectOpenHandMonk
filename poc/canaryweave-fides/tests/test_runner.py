@@ -1,4 +1,7 @@
-from canaryweave_fides.adapters import AdapterConfig, SyntheticAdapter
+import csv
+import json
+
+from canaryweave_fides.adapters import ASBAdapter, AdapterConfig, SyntheticAdapter
 from canaryweave_fides.runner import EvaluationRunConfig, run_evaluation
 
 
@@ -36,3 +39,68 @@ def test_runner_output_is_public_safe():
 
     assert "raw_ref" not in text
     assert "private_data" not in text
+
+
+def test_runner_writes_private_reviewer_csv_with_raw_io_and_labels(tmp_path):
+    dataset = tmp_path / "dataset"
+    dataset.mkdir()
+    record = {
+        "Attacker Tool": "opaque local tool name",
+        "Attacker Instruction": "policy instruction hierarchy override structure",
+        "Description": "structural metadata only",
+        "Attack goal": "structural goal label",
+        "Attack Type": "Stealthy Attack",
+        "Corresponding Agent": "system_admin_agent",
+        "Aggressive": "False",
+    }
+    (dataset / "records.jsonl").write_text(json.dumps(record) + "\n", encoding="utf-8")
+    output = tmp_path / "private-review" / "review.csv"
+
+    report = run_evaluation(
+        EvaluationRunConfig(adapters=(ASBAdapter(AdapterConfig(root=dataset)),), iterations=1),
+        private_review_csv=output,
+    )
+
+    assert report["private_review_csv"] == str(output)
+    rows = list(csv.DictReader(output.open(newline="", encoding="utf-8")))
+    assert len(rows) == 4
+    row = next(item for item in rows if item["stack"] == "yara_rules")
+    assert row["case_id"]
+    assert row["dataset_id"] == "asb"
+    assert row["case_kind"] == "attack"
+    assert row["expected_behavior"] == "block"
+    assert row["llm_label"] == "not_called"
+    assert row["decision"] in {"allow", "block", "quarantine"}
+    assert row["raw_input"] == "opaque local tool name\npolicy instruction hierarchy override structure\nstructural metadata only\nstructural goal label"
+    assert "decision" in row["raw_output"]
+    assert row["raw_ref"].startswith("asb:file_hmac=")
+    assert row["expected_rule_ids"] == "cwfr-0003"
+    assert row["rule_ids"]
+
+
+def test_runner_private_reviewer_csv_neutralizes_spreadsheet_formula_cells(tmp_path):
+    dataset = tmp_path / "dataset"
+    dataset.mkdir()
+    record = {"payload": "=formula-like reviewer payload", "label": "attack"}
+    (dataset / "records.jsonl").write_text(json.dumps(record) + "\n", encoding="utf-8")
+    output = tmp_path / "private-review" / "review.csv"
+
+    run_evaluation(
+        EvaluationRunConfig(adapters=(ASBAdapter(AdapterConfig(root=dataset)),), iterations=1),
+        private_review_csv=output,
+    )
+
+    rows = list(csv.DictReader(output.open(newline="", encoding="utf-8")))
+    assert rows[0]["raw_input"] == "'=formula-like reviewer payload"
+
+
+def test_runner_rejects_private_reviewer_csv_under_public_artifacts(tmp_path):
+    adapter = SyntheticAdapter(AdapterConfig(max_cases=1))
+    public_path = "artifacts/review.csv"
+
+    try:
+        run_evaluation(EvaluationRunConfig(adapters=(adapter,), iterations=1), private_review_csv=public_path)
+    except ValueError as exc:
+        assert "private reviewer CSV" in str(exc)
+    else:
+        raise AssertionError("expected private reviewer CSV path guard to reject public artifact path")

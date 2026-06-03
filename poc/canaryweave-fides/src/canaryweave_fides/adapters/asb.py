@@ -493,5 +493,7 @@ class ASBAdapter(DatasetAdapter):
             private_data={
                 "source_format": file_path.suffix.lower().lstrip(".") or "unknown",
                 "private_sha256": _sha256_text(private_text),
+                "raw_input": private_text,
+                "raw_output": "",
             },
         )
