@@ -14,6 +14,9 @@ from .base import AdapterResult, AdapterStatus, DatasetAdapter
 from .identifiers import public_hash, public_hmac_hex, public_id
 
 _TEXT_FIELD_NAMES = {
+    "attack goal",
+    "attacker instruction",
+    "attacker tool",
     "payload",
     "prompt",
     "instruction",
@@ -28,11 +31,14 @@ _TEXT_FIELD_NAMES = {
     "response",
     "completion",
     "tool_output",
+    "tool name",
     "trace",
+    "description",
+    "expected achievements",
 }
 _ID_FIELD_NAMES = ("id", "case_id", "record_id", "example_id", "sample_id", "name")
-_LABEL_FIELD_NAMES = ("label", "case_kind", "kind", "is_attack", "attack", "benign")
-_CATEGORY_FIELD_NAMES = ("category", "attack_category", "class", "type", "taxonomy")
+_LABEL_FIELD_NAMES = ("label", "case_kind", "kind", "is_attack", "attack", "benign", "Attack Type")
+_CATEGORY_FIELD_NAMES = ("category", "attack_category", "class", "type", "taxonomy", "Attack Type")
 _SURFACE_FIELD_NAMES = ("surface", "source", "channel", "modality")
 _SPLIT_FIELD_NAMES = ("split", "partition", "subset")
 _ALLOWED_SUFFIXES = (".jsonl", ".json", ".yaml", ".yml", ".csv", ".txt")
@@ -80,7 +86,7 @@ def _safe_key_path(path: tuple[str, ...]) -> str:
     for part in path:
         lowered = part.lower()
         if lowered in _TEXT_FIELD_NAMES:
-            safe_parts.append(lowered)
+            safe_parts.append(lowered.replace(" ", "_").replace("-", "_"))
         elif part.isdigit():
             safe_parts.append("index")
         else:
@@ -121,6 +127,10 @@ def _record_to_private_text(record: Mapping[str, Any]) -> tuple[str, tuple[str, 
 
 
 def _classify_kind(record: Mapping[str, Any]) -> str:
+    if _first_value(record, ("Attacker Tool", "Attacker Instruction", "Attack Type")) is not None:
+        return "attack"
+    if _first_value(record, ("Tool Name", "Expected Achievements")) is not None:
+        return "benign"
     value = _first_value(record, _LABEL_FIELD_NAMES)
     if isinstance(value, bool):
         return "attack" if value else "benign"
@@ -128,6 +138,41 @@ def _classify_kind(record: Mapping[str, Any]) -> str:
     if label in {"benign", "safe", "allow", "allowed", "negative", "clean", "control"}:
         return "benign"
     return "attack"
+
+
+def _optional_bool(value: Any) -> bool | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return value
+    text = str(value).strip().lower()
+    if text in {"true", "1", "yes", "y"}:
+        return True
+    if text in {"false", "0", "no", "n"}:
+        return False
+    return None
+
+
+def _asb_native_safe_features(record: Mapping[str, Any]) -> dict[str, Any]:
+    """Return public-safe ASB-native schema metadata without raw values."""
+    features: dict[str, Any] = {}
+    if _first_value(record, ("Attacker Tool", "Attacker Instruction", "Attack Type")) is not None:
+        features["asb_record_family"] = "attack_tool"
+    elif _first_value(record, ("Tool Name", "Expected Achievements")) is not None:
+        features["asb_record_family"] = "normal_tool"
+
+    attack_type = _first_value(record, ("Attack Type",))
+    if attack_type is not None:
+        features["asb_attack_type"] = _stable_label(attack_type, "unknown")
+
+    aggressive = _optional_bool(_first_value(record, ("Aggressive",)))
+    if aggressive is not None:
+        features["asb_aggressive"] = aggressive
+
+    corresponding_agent = _first_value(record, ("Corresponding Agent",))
+    if corresponding_agent is not None:
+        features["asb_corresponding_agent_hash"] = public_hash(str(corresponding_agent))
+    return features
 
 
 def _expected_behavior(kind: str) -> str:
@@ -404,6 +449,7 @@ class ASBAdapter(DatasetAdapter):
             "top_level_key_count": len(top_level_keys),
             "top_level_keys_hash": public_hash("\n".join(top_level_keys)),
             "native_id_hash": public_hash(str(native_id)) if native_id is not None else None,
+            **_asb_native_safe_features(record),
             **flags,
             **requested,
             "origin_labels": origin_labels,

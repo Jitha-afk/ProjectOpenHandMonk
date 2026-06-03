@@ -3,7 +3,7 @@
 Date: 2026-06-03
 Status: initial academic-style draft outline and results narrative
 Scope: `poc/canaryweave-fides`
-Primary public artifact: `artifacts/evals/public_gate_eval_report_50.json`
+Primary public artifacts: `artifacts/evals/public_gate_eval_report_50.json`, `artifacts/evals/fides_test_double_public.json`, and controlled-local `artifacts/evals/asb_controlled_public_report_1.json`
 
 ## Safety and claim boundary
 
@@ -44,16 +44,15 @@ Describe the current harness components:
 
 ### 4. Experimental setup
 
-The current report is a controlled local multi-dataset run with 50 iterations per loaded case. The public artifact reports:
+The checked-in public artifacts now represent three distinct evidence tiers and should not be merged into one claim:
 
-| Dataset adapter | Status in artifact | Unique cases | Case-iterations | Public interpretation |
-|---|---:|---:|---:|---|
-| synthetic | loaded | 4 | 200 | Public-safe structural fixtures for CI and rule regression. |
-| ASB | loaded | 878 | 43,900 | Controlled local ASB-derived facts; raw source remains private. |
-| AgentDefenseBench | loaded | 16,089 | 804,450 | Controlled local AgentDefenseBench-derived facts; raw source remains private. |
-| total | loaded | 16,971 | 848,550 | Mixed controlled run, not a public raw dataset release. |
+| Artifact | Scope | Dataset status | Iterations | Public interpretation |
+|---|---|---|---:|---|
+| `artifacts/evals/public_gate_eval_report_50.json` | CI/public smoke | synthetic loaded; optional ASB and AgentDefenseBench skipped when local roots are absent | 50 | Public-safe regression artifact for schema, rule execution, aggregate reporting, and safety scanners. |
+| `artifacts/evals/fides_test_double_public.json` | CI FIDES boundary test | synthetic loaded | 1 | Interface evidence for WARDEN-miss/FIDES-catch accounting with zero provider calls; not empirical LLM judge evidence. |
+| `artifacts/evals/asb_controlled_public_report_1.json` | controlled-local ASB pass | ASB loaded from a private local root | 1 | Public-safe aggregate ASB evidence; raw ASB source remains private and uncommitted. |
 
-The artifact also reports zero provider calls. Therefore, any WARDEN-plus-FIDES metrics in this run should be read as WARDEN-equivalent unless future runs explicitly enable and validate a non-disabled FIDES mode.
+All current checked-in artifacts report zero provider calls and exclude case-level rows, raw source material, model outputs, and judge transcripts. Earlier mixed ASB plus AgentDefenseBench runs should be treated as historical local experiments unless regenerated into a checked-in public-safe artifact.
 
 ### 5. Metrics
 
@@ -65,91 +64,82 @@ Use the public report definitions:
 - Safe pass-through rate: benign cases allowed divided by all benign cases.
 - Incremental WARDEN catches versus regex: attack case-iterations allowed by regex but blocked by WARDEN.
 - Incremental FIDES catches versus WARDEN: attack case-iterations allowed by WARDEN but blocked by WARDEN plus FIDES.
+- Expected-rule hit rate: mapped cases with public `cwfr-*` expected-rule metadata where the expected rule fired.
+- False-positive diagnostics: aggregate benign blocking counts by stack, dataset, category, and rule ID, with no case-level rows.
 
-Because the current report has only 50 benign case-iterations, benign impact metrics are preliminary and should not be generalized.
+### 6. Current checked-in aggregate results
 
-### 6. Current aggregate results
+The synthetic public smoke report gives the following aggregate security metrics:
 
-The public-safe report gives the following aggregate security metrics:
+| Stack | ASR | Recall | TP | FN | FP | TN | Benign refusal rate |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| no guard | 1.0000 | 0.0000 | 0 | 200 | 0 | 50 | 0.0000 |
+| regex baseline | 0.5000 | 0.5000 | 100 | 100 | 0 | 50 | 0.0000 |
+| WARDEN structured rules | 0.2500 | 0.7500 | 150 | 50 | 0 | 50 | 0.0000 |
+| WARDEN plus FIDES | 0.2500 | 0.7500 | 150 | 50 | 0 | 50 | 0.0000 |
 
-| Stack | ASR | Recall | F1 | TP | FN | FP | TN | Benign refusal rate | Safe pass-through rate |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| no guard | 1.0000 | 0.0000 | 0.0000 | 0 | 848,500 | 0 | 50 | 0.0000 | 1.0000 |
-| regex baseline | 0.9968 | 0.0032 | 0.0065 | 2,750 | 845,750 | 0 | 50 | 0.0000 | 1.0000 |
-| WARDEN structured rules | 0.9549 | 0.0451 | 0.0863 | 38,250 | 810,250 | 0 | 50 | 0.0000 | 1.0000 |
-| WARDEN plus FIDES | 0.9549 | 0.0451 | 0.0863 | 38,250 | 810,250 | 0 | 50 | 0.0000 | 1.0000 |
+The FIDES test-double artifact separately demonstrates one deterministic FIDES incremental catch on a synthetic WARDEN miss, with zero provider calls. This is interface evidence only.
 
-The report also gives:
+The controlled-local ASB artifact reports the current ASB research result:
 
-| Incremental metric | Count |
-|---|---:|
-| WARDEN incremental catches versus regex | 35,500 |
-| FIDES incremental catches versus WARDEN | 0 |
-| Provider calls | 0 |
-| Current WARDEN rule count | 8 |
+| Stack | ASR | Recall | TP | FN | FP | TN | Benign refusal rate |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| no guard | 1.0000 | 0.0000 | 0 | 858 | 0 | 20 | 0.0000 |
+| regex baseline | 0.9977 | 0.0023 | 2 | 856 | 0 | 20 | 0.0000 |
+| WARDEN structured rules | 0.7086 | 0.2914 | 250 | 608 | 5 | 15 | 0.2500 |
+| WARDEN plus FIDES | 0.7086 | 0.2914 | 250 | 608 | 5 | 15 | 0.2500 |
 
 ### 7. Results narrative
 
-#### 7.1 Aggregate pattern
+#### 7.1 Synthetic tier
 
-The controlled mixed run shows a measurable difference between the regex baseline and WARDEN. The regex baseline blocks 2,750 attack case-iterations, while WARDEN blocks 38,250. In the same aggregate denominator, ASR decreases from 0.9968 under regex to 0.9549 under WARDEN, and the public report attributes 35,500 additional attack case-iterations to WARDEN catches over regex.
-
-This is encouraging harness evidence for structured rules, but it is not yet strong thesis evidence. The remaining ASR is high at 0.9549, which means the majority of attack-labeled case-iterations are still allowed. The current WARDEN result demonstrates that the structured rule engine is connected to the multi-dataset runner and can catch mapped structural categories; it does not demonstrate broad dataset coverage.
-
-#### 7.2 Synthetic tier
-
-The synthetic tier is the strongest current regression signal because it is hand-authored to exercise known structural policy shapes and contains no raw external dataset material. In the current run, synthetic contributes 200 case-iterations, with 150 blocked or quarantined under WARDEN plus FIDES. This is consistent with three attack-like synthetic fixtures and one benign control repeated 50 times.
+The synthetic tier is the strongest current regression signal because it is hand-authored to exercise known structural policy shapes and contains no raw external dataset material. In the current public smoke run, synthetic contributes 250 case-iterations, with WARDEN blocking or quarantining 150 attack case-iterations and preserving all 50 benign case-iterations.
 
 Allowed claim: the schema, adapters, WARDEN rule execution, public report generation, and safety boundaries work on deterministic public-safe fixtures.
 
 Disallowed claim: synthetic results do not establish real-world effectiveness or coverage against ASB or AgentDefenseBench distributions.
 
-#### 7.3 Controlled local ASB tier
+#### 7.2 Controlled local ASB tier
 
-The ASB adapter loaded 878 controlled local cases, producing 43,900 case-iterations. WARDEN plus FIDES blocked or quarantined 50 of those case-iterations. The maintainability section reports ASB coverage by one current rule ID. This indicates that ASB is mostly a coverage gap in the present harness.
+The ASB-only artifact is the current controlled-local ASB evidence. ASB-native schema extraction now maps attack-tool and normal-tool record families into public-safe structural facts without exporting raw source. This produces measurable WARDEN coverage on ASB: 224 expected-rule cases, expected-rule hit rate 1.0000, six covered WARDEN rule families, and 248 WARDEN incremental catches versus regex.
 
-Allowed claim: ASB-derived facts can be loaded through the controlled adapter and evaluated without exposing raw source material in the public artifact.
+This is research progress, but it is not yet a clean security claim. WARDEN recall is 0.2914, ASR remains 0.7086, and WARDEN blocks 5 of 20 benign ASB cases. The new false-positive diagnostics attribute benign blocks to `cwfr-0003`, `cwfr-0105`, `cwfr-0106`, and `cwfr-0107`, making benign near-miss hardening the next ASB priority.
 
-Disallowed claim: current ASB coverage is not sufficient to claim that WARDEN meaningfully secures ASB as a dataset. The current result is better characterized as a controlled gap analysis showing that ASB fact extraction and attack-to-rule mappings need further work.
+Allowed claim: ASB-derived facts can be loaded through the controlled adapter and evaluated without exposing raw source material in public artifacts, and ASB-native schema extraction enables nonzero expected-rule evidence.
 
-#### 7.4 Controlled local AgentDefenseBench tier
+Disallowed claim: current ASB coverage is not sufficient to claim that WARDEN meaningfully secures ASB as a dataset. The result is best characterized as a controlled gap analysis with measurable progress and a clear false-positive hardening target.
 
-The AgentDefenseBench adapter loaded 16,089 controlled local cases, producing 804,450 case-iterations. WARDEN plus FIDES blocked or quarantined 38,050 of those case-iterations. The public report shows rule coverage across several WARDEN rule IDs for this dataset.
+#### 7.3 Controlled local AgentDefenseBench tier
 
-Allowed claim: the adapter and normalized fact model can drive WARDEN decisions on a larger controlled local dataset, and some structural categories align with existing WARDEN rules.
+No current checked-in public artifact loads AgentDefenseBench. The current public smoke report explicitly records AgentDefenseBench as skipped when its local root is absent. Any AgentDefenseBench results should be regenerated into a public-safe artifact before being used as current evidence.
 
-Disallowed claim: the current artifact does not prove broad AgentDefenseBench robustness. The run is dominated by attack-labeled records, has very limited benign denominator, and should be repeated on frozen splits with richer benign near-miss controls before drawing paper-level conclusions.
+#### 7.4 WARDEN interpretation
 
-#### 7.5 WARDEN interpretation
+WARDEN is the deterministic structured rule layer. The current checked-in artifacts prove that WARDEN executes real `.cwfr.yaml` rules and that public reports can summarize coverage, expected-rule hits, safe-fact completeness, and false-positive diagnostics without source leakage.
 
-WARDEN is the deterministic structured rule layer. The current public report lists eight unique rule IDs and dataset-level rule coverage. The main current result is that WARDEN catches more attack case-iterations than the regex baseline while preserving the small available benign control set.
+The more important scientific question is not raw block count alone, but whether WARDEN catches cases for defensible policy reasons that generalize across datasets while preserving benign near-misses. The ASB-only artifact shows progress on this question and also exposes the next blocker: benign disruption on ASB normal-tool records.
 
-The more important scientific question is not raw block count alone, but whether WARDEN catches cases for defensible policy reasons that generalize across datasets. The current artifact begins to answer that question through rule IDs and aggregate category counts, but it still needs stronger attack-to-rule mapping evidence, richer ASB normalization, and larger benign controls.
+#### 7.5 FIDES interpretation
 
-#### 7.6 FIDES interpretation
-
-The current public run does not measure real FIDES effectiveness. Provider calls are zero, transcripts are absent, and WARDEN plus FIDES has identical aggregate metrics to WARDEN. The report also shows zero FIDES incremental catches versus WARDEN.
-
-This is the correct conservative interpretation: FIDES is present as a guarded interface and evaluation stack, but the current empirical result is provider-disabled. The local test-double mode can exercise interface behavior and public-safe reporting, but it should not be presented as an external judge result. The provider-placeholder mode marks the future integration boundary and does not perform provider calls. Future paper claims about FIDES require an explicitly configured, transcript-private, provider-enabled or otherwise validated judge run.
+The current public smoke and ASB artifacts do not measure real FIDES effectiveness. Provider calls are zero, transcripts are absent, and WARDEN plus FIDES is WARDEN-equivalent in the provider-disabled reports. The separate FIDES test-double artifact validates accounting and report plumbing for a deterministic WARDEN-miss/FIDES-catch path, but it should not be described as empirical LLM judge performance.
 
 ### 8. Limitations
 
-1. Dataset custody and reproducibility: ASB and AgentDefenseBench are controlled local sources. The public report is reproducible only for users with equivalent local roots and configuration; raw source material is intentionally not committed.
-2. Sparse benign evidence: the current aggregate has only 50 benign case-iterations. The zero false-positive count is therefore a smoke signal, not a reliable benign-disruption estimate.
-3. High remaining ASR: WARDEN improves over regex in the mixed run but still allows most attack-labeled case-iterations.
-4. ASB coverage gap: ASB currently contributes many attack iterations but almost no WARDEN catches.
-5. Category heterogeneity: AgentDefenseBench-derived categories include broad safety and agent-security classes; current aggregate metrics should not be collapsed into a single universal security claim.
-6. FIDES not empirically evaluated: disabled/test-double/provider-placeholder modes are useful for safety and interface testing, but they do not establish real judge performance.
-7. No full agent runtime validation: the current gate evaluates normalized pre-context facts; it does not yet measure downstream agent task completion, tool execution, or recovery behavior in a full runtime.
-8. No statistical uncertainty yet: the current deterministic repeated-run report lacks confidence intervals, split variance, and holdout confirmation.
+1. Dataset custody and reproducibility: ASB is a controlled local source. The public ASB report is reproducible only for users with equivalent local roots and configuration; raw source material is intentionally not committed.
+2. Sparse benign evidence: the ASB artifact has only 20 benign cases. The 0.2500 benign refusal rate is important, but it needs larger benign near-miss controls for stable estimates.
+3. High remaining ASR: WARDEN improves over regex on ASB but still allows most attack-labeled cases.
+4. AgentDefenseBench not current: no checked-in current artifact loads AgentDefenseBench after this refinement pass.
+5. FIDES not empirically evaluated: disabled/test-double/provider-placeholder modes are useful for safety and interface testing, but they do not establish real judge performance.
+6. No full agent runtime validation: the current gate evaluates normalized pre-context facts; it does not yet measure downstream agent task completion, tool execution, or recovery behavior in a full runtime.
+7. No statistical uncertainty yet: the current deterministic reports lack confidence intervals, split variance, and holdout confirmation.
 
 ### 9. Next required experiments
 
 1. Freeze evaluation splits before additional tuning, with separate synthetic CI, controlled local development, controlled local test, and holdout partitions.
-2. Expand ASB fact extraction so ASB cases map into policy-relevant categories rather than mostly falling through as uncovered dataset-native cases.
-3. Complete and validate attack-to-rule mappings for every evaluated rule family, including expected-fire and should-not-fire cases.
-4. Add benign near-miss controls at scale for each rule family and each major dataset surface.
-5. Report WARDEN results by dataset, category, surface, and rule ID, with denominators large enough for interpretation.
+2. Add larger benign near-miss controls for ASB-normal-tool records and each major WARDEN rule family.
+3. Harden `cwfr-0003`, `cwfr-0105`, `cwfr-0106`, and `cwfr-0107` against the ASB benign false positives surfaced by `false_positive_diagnostics`.
+4. Preserve the current ASB expected-rule hit rate while reducing benign refusal; treat any recall increase without benign hardening as incomplete evidence.
+5. Regenerate AgentDefenseBench as its own checked-in public-safe aggregate artifact before using it in current claims.
 6. Run FIDES test-double experiments only as interface and reporting validation, clearly separated from empirical judge claims.
 7. Add a transcript-private provider-enabled FIDES experiment after safety review, reporting only aggregate call counts, costs, latencies, verdict distributions, and incremental catches.
 8. Add latency measurements for normalization, regex, WARDEN, and FIDES stages.
@@ -160,16 +150,8 @@ This is the correct conservative interpretation: FIDES is present as a guarded i
 
 A defensible future contribution would be:
 
-We present a leakage-safe controlled harness for comparing regex baselines, structured WARDEN rules, and a separately gated FIDES judge boundary on normalized multi-dataset agent-security cases. Initial controlled results show that WARDEN is connected end-to-end and improves over a simple regex baseline on the current mixed local run, while also revealing substantial ASB coverage gaps and no current empirical FIDES gain because provider calls are disabled. The method emphasizes explicit custody boundaries, public-safe aggregate reporting, and attack-to-rule mappings as prerequisites for stronger future claims.
+We present a leakage-safe controlled harness for comparing regex baselines, structured WARDEN rules, and a separately gated FIDES judge boundary on normalized agent-security cases. The current checked-in artifacts show that WARDEN is connected end-to-end, improves over a regex baseline on public synthetic fixtures, and produces measurable public-safe ASB evidence when a controlled local ASB root is available. The same evidence also identifies the next research blocker: ASB benign false positives and high remaining ASR. The method emphasizes explicit custody boundaries, public-safe aggregate reporting, expected-rule evidence, false-positive diagnostics, and attack-to-rule mappings as prerequisites for stronger future claims.
 
-### 11. Additional post-draft progress
+### 11. Current bottom line
 
-After the initial mixed run, the harness gained evidence-grade public diagnostics and a CI-safe FIDES test-double evaluation mode.
-
-The evidence diagnostics add disagreement matrices, per-dataset and per-category rule coverage, rules-with-no-coverage counts, FIDES call/catch counters, and missing-prerequisite summaries. These additions make the public reports more useful for paper-oriented analysis because they show not just whether a stack blocked a case, but where the current coverage is missing and which rules are actually responsible for catches.
-
-A separate FIDES test-double report now demonstrates the FIDES boundary on a deterministic WARDEN miss without provider calls or transcripts. In that synthetic public-safe run, WARDEN misses one attack-like fixture and the FIDES test-double blocks it, producing one FIDES incremental catch with zero provider calls. This is interface evidence only; it should not be described as empirical LLM judge performance. It does, however, prove that the harness can measure WARDEN-miss / FIDES-catch behavior once a real transcript-private judge is connected.
-
-### 12. Current bottom line
-
-The current harness is ready for an initial report draft, not a final paper claim. The public artifact shows meaningful engineering progress: multi-dataset adapters load controlled local ASB and AgentDefenseBench data, WARDEN executes real structured rules, public reports remain source-free, and aggregate WARDEN metrics improve over regex. The same artifact also makes the next research gap clear: ASB coverage is weak, benign controls are too sparse, and FIDES has not yet been empirically evaluated with a real judge beyond disabled or test-double boundaries.
+The harness is ready for an initial report draft and follow-up ASB hardening work, not a final paper claim. The current checked-in artifacts demonstrate engineering progress: real WARDEN rule execution, controlled ASB schema extraction, aggregate expected-rule evidence, aggregate false-positive diagnostics, FIDES test-double accounting, and public reports that remain source-free. They also make the next research gap clear: improve ASB benign near-miss behavior and regenerate any AgentDefenseBench evidence as a current checked-in public-safe artifact before claiming cross-dataset coverage.

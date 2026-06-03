@@ -591,6 +591,97 @@ def _safe_fact_completeness(run_report: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _empty_false_positive_entry() -> dict[str, Any]:
+    return {
+        "total_benign_decisions": 0,
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
+    }
+
+
+def _record_benign_decision(entry: dict[str, Any], *, is_false_positive: bool) -> None:
+    entry["total_benign_decisions"] += 1
+    if is_false_positive:
+        entry["false_positive_decisions"] += 1
+
+
+def _finalize_false_positive_entry(entry: dict[str, Any]) -> dict[str, Any]:
+    total = int(entry["total_benign_decisions"])
+    entry["false_positive_rate"] = round(int(entry["false_positive_decisions"]) / total, 4) if total else 0.0
+    return entry
+
+
+def _false_positive_diagnostics(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    overall = _empty_false_positive_entry()
+    by_stack: dict[str, dict[str, Any]] = defaultdict(_empty_false_positive_entry)
+    by_dataset: dict[str, dict[str, Any]] = defaultdict(_empty_false_positive_entry)
+    by_category: dict[str, dict[str, Any]] = defaultdict(_empty_false_positive_entry)
+    by_dataset_category: dict[str, dict[str, dict[str, Any]]] = defaultdict(lambda: defaultdict(_empty_false_positive_entry))
+    by_rule: dict[str, dict[str, Any]] = defaultdict(
+        lambda: {
+            "false_positive_decisions": 0,
+            "affected_stacks": set(),
+            "affected_datasets": set(),
+            "affected_categories": set(),
+        }
+    )
+
+    for row in rows:
+        if row.get("case_kind") != "benign":
+            continue
+        stack = str(row.get("stack") or "unknown")
+        dataset = str(row.get("dataset_id") or "unknown")
+        category = str(row.get("attack_category") or "unknown")
+        is_false_positive = row.get("decision") in _BLOCKING_DECISIONS
+
+        _record_benign_decision(overall, is_false_positive=is_false_positive)
+        _record_benign_decision(by_stack[stack], is_false_positive=is_false_positive)
+        _record_benign_decision(by_dataset[dataset], is_false_positive=is_false_positive)
+        _record_benign_decision(by_category[category], is_false_positive=is_false_positive)
+        _record_benign_decision(by_dataset_category[dataset][category], is_false_positive=is_false_positive)
+
+        if not is_false_positive:
+            continue
+        for rule_id in row.get("rule_ids", []) or []:
+            rule_text = str(rule_id)
+            if not rule_text.startswith("cwfr-"):
+                continue
+            by_rule[rule_text]["false_positive_decisions"] += 1
+            by_rule[rule_text]["affected_stacks"].add(stack)
+            by_rule[rule_text]["affected_datasets"].add(dataset)
+            by_rule[rule_text]["affected_categories"].add(category)
+
+    available = int(overall["total_benign_decisions"]) > 0
+    return {
+        "available": available,
+        "reason": None if available else "no benign decisions present in run report",
+        "total_benign_decisions": overall["total_benign_decisions"],
+        "total_false_positive_decisions": overall["false_positive_decisions"],
+        "false_positive_rate": _finalize_false_positive_entry(overall)["false_positive_rate"],
+        "by_stack": _sorted_dict({key: _finalize_false_positive_entry(value) for key, value in by_stack.items()}),
+        "by_dataset": _sorted_dict({key: _finalize_false_positive_entry(value) for key, value in by_dataset.items()}),
+        "by_category": _sorted_dict({key: _finalize_false_positive_entry(value) for key, value in by_category.items()}),
+        "by_dataset_and_category": _sorted_dict(
+            {
+                dataset: _sorted_dict({category: _finalize_false_positive_entry(value) for category, value in categories.items()})
+                for dataset, categories in by_dataset_category.items()
+            }
+        ),
+        "by_rule": _sorted_dict(
+            {
+                rule_id: {
+                    "false_positive_decisions": value["false_positive_decisions"],
+                    "affected_stacks": sorted(value["affected_stacks"]),
+                    "affected_datasets": sorted(value["affected_datasets"]),
+                    "affected_categories": sorted(value["affected_categories"]),
+                }
+                for rule_id, value in by_rule.items()
+            }
+        ),
+        "case_level_rows_included": False,
+    }
+
+
 def build_public_report(run_report: Mapping[str, Any], *, all_rule_ids: Iterable[str] | None = None) -> dict[str, Any]:
     rows = _decision_rows(run_report)
     metrics = {stack: _security_metrics_for_stack(rows, stack) for stack in _STACKS}
@@ -630,6 +721,7 @@ def build_public_report(run_report: Mapping[str, Any], *, all_rule_ids: Iterable
         "missing_prerequisite_summary": _missing_prerequisite_summary(run_report),
         "expected_rule_evidence": _expected_rule_evidence(run_report),
         "safe_fact_completeness": _safe_fact_completeness(run_report),
+        "false_positive_diagnostics": _false_positive_diagnostics(rows),
         "groups": {
             "by_dataset": _group_counts(rows, "dataset_id"),
             "by_category": _group_counts(rows, "attack_category"),

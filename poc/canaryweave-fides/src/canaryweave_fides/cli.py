@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from .fides import FidesIFCLayer
@@ -23,6 +24,7 @@ def run_smoke(output: Path | str | None = None) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
+    effective_argv = list(sys.argv[1:] if argv is None else argv)
     parser = argparse.ArgumentParser(description="CanaryWeave FIDES controlled smoke/eval runner")
     subparsers = parser.add_subparsers(dest="command")
 
@@ -47,7 +49,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fixture-set", default="smoke", choices=["smoke"], help=argparse.SUPPRESS)
     parser.add_argument("--output", type=Path, default=None, help=argparse.SUPPRESS)
 
-    args = parser.parse_args(argv)
+    args = parser.parse_args(effective_argv)
     if args.command == "eval":
         from .runner import EvaluationRunConfig, run_evaluation
 
@@ -65,7 +67,8 @@ def main(argv: list[str] | None = None) -> int:
                 selected = {str(dataset_id) for dataset_id in args.dataset}
                 adapters = tuple(adapter for adapter in adapters if adapter.dataset_id in selected)
             stacks = loaded.stacks
-            iterations = args.iterations if "--iterations" in (argv or []) else loaded.iterations
+            iterations_overridden = any(arg == "--iterations" or arg.startswith("--iterations=") for arg in effective_argv)
+            iterations = args.iterations if iterations_overridden else loaded.iterations
             default_output = loaded.default_output
             if not args.public_report and loaded.public_report is not None:
                 use_public_report = loaded.public_report
