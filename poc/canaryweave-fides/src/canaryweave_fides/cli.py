@@ -73,7 +73,18 @@ def main(argv: list[str] | None = None) -> int:
         if stacks is None:
             run_config = EvaluationRunConfig(adapters=adapters, iterations=iterations)
         else:
-            run_config = EvaluationRunConfig(adapters=adapters, iterations=iterations, stacks=stacks)
+            fides_mode = getattr(loaded, "fides_mode", None) if args.config is not None else None
+            fides_rules = getattr(loaded, "fides_test_double_evidence_rules", ()) if args.config is not None else ()
+            if fides_mode is None:
+                run_config = EvaluationRunConfig(adapters=adapters, iterations=iterations, stacks=stacks)
+            else:
+                run_config = EvaluationRunConfig(
+                    adapters=adapters,
+                    iterations=iterations,
+                    stacks=stacks,
+                    fides_mode=fides_mode,
+                    fides_test_double_evidence_rules=fides_rules,
+                )
         report = run_evaluation(run_config)
         missing = [
             result
