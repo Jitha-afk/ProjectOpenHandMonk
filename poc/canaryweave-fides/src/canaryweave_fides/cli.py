@@ -33,6 +33,7 @@ def main(argv: list[str] | None = None) -> int:
     eval_parser = subparsers.add_parser("eval", help="Run WARDEN/FIDES pre-context gate evaluation")
     eval_parser.add_argument("--iterations", type=int, default=50)
     eval_parser.add_argument("--output", type=Path, default=Path("artifacts/evals/gate_eval_report.json"))
+    eval_parser.add_argument("--public-report", action="store_true", help="Write aggregate public-safe report")
 
     parser.add_argument("--fixture-set", default="smoke", choices=["smoke"], help=argparse.SUPPRESS)
     parser.add_argument("--output", type=Path, default=None, help=argparse.SUPPRESS)
@@ -42,6 +43,10 @@ def main(argv: list[str] | None = None) -> int:
         from .runner import EvaluationRunConfig, run_evaluation
 
         report = run_evaluation(EvaluationRunConfig(iterations=args.iterations))
+        if args.public_report:
+            from .reporting import build_public_report
+
+            report = build_public_report(report)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps(report, indent=2, sort_keys=True))
