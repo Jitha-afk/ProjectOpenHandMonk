@@ -105,6 +105,78 @@ def test_rules_plus_fides_calls_judge_for_warden_miss_and_blocks_on_unsafe():
     assert decision.reason_codes == ("semantic_policy_violation",)
 
 
+def test_warden_blocks_protected_context_extraction_from_untrusted_source():
+    facts = NormalizedFacts.from_attack_case(
+        _case(
+            origin_labels=["tool_output"],
+            trust_labels=["untrusted"],
+            instruction_shape=False,
+            tool_plan_shape=False,
+            protected_context_extraction_shape=True,
+        )
+    )
+
+    decision = evaluate_stack(facts, StackName.YARA_RULES)
+
+    assert decision.decision is Decision.QUARANTINE
+    assert "cwfr-0108" in decision.rule_ids
+
+
+def test_warden_blocks_destructive_action_intent_without_granted_capability():
+    facts = NormalizedFacts.from_attack_case(
+        _case(
+            origin_labels=["tool_output"],
+            trust_labels=["untrusted"],
+            instruction_shape=False,
+            tool_plan_shape=True,
+            destructive_action_shape=True,
+            requested_tool="admin_action",
+            requested_capability="admin_action",
+            requested_action="destructive_update",
+        )
+    )
+
+    decision = evaluate_stack(facts, StackName.YARA_RULES)
+
+    assert decision.decision is Decision.BLOCK
+    assert "cwfr-0109" in decision.rule_ids
+
+
+def test_warden_quarantines_deceptive_social_engineering_tasking_from_untrusted_source():
+    facts = NormalizedFacts.from_attack_case(
+        _case(
+            origin_labels=["tool_output"],
+            trust_labels=["untrusted"],
+            instruction_shape=False,
+            tool_plan_shape=False,
+            social_engineering_shape=True,
+            deception_shape=True,
+        )
+    )
+
+    decision = evaluate_stack(facts, StackName.YARA_RULES)
+
+    assert decision.decision is Decision.QUARANTINE
+    assert "cwfr-0110" in decision.rule_ids
+
+
+def test_social_engineering_training_from_trusted_user_is_allowed():
+    facts = NormalizedFacts.from_attack_case(
+        _case(
+            origin_labels=["user"],
+            trust_labels=["trusted"],
+            instruction_shape=False,
+            tool_plan_shape=False,
+            social_engineering_shape=True,
+            deception_shape=True,
+        )
+    )
+
+    decision = evaluate_stack(facts, StackName.YARA_RULES)
+
+    assert "cwfr-0110" not in decision.rule_ids
+
+
 def test_evaluate_case_returns_all_stack_decisions():
     decisions = evaluate_case(_case(), fides_judge=StaticFidesJudge({}))
 

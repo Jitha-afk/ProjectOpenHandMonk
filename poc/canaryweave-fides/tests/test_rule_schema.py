@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_load_starter_rule_validates_required_metadata():
-    rule = load_rule_file(ROOT / "rules" / "mcp_agentic_misuse" / "server_sampling_origin_boundary.cwfr.yaml")
+    rule = load_rule_file(ROOT / "rules" / "mcp_agentic_misuse" / "server_sampling_origin_boundary.war")
     assert rule.id == "cwfr-0001"
     assert rule.name == "ServerSamplingOriginBoundary"
     assert rule.severity == "high"
@@ -41,8 +41,8 @@ def test_validate_rule_rejects_unknown_condition_signal():
 
 
 def test_load_rules_rejects_duplicate_rule_ids(tmp_path):
-    src = ROOT / "rules" / "mcp_agentic_misuse" / "server_sampling_origin_boundary.cwfr.yaml"
-    (tmp_path / "a.cwfr.yaml").write_text(src.read_text(), encoding="utf-8")
-    (tmp_path / "b.cwfr.yaml").write_text(src.read_text(), encoding="utf-8")
+    src = ROOT / "rules" / "mcp_agentic_misuse" / "server_sampling_origin_boundary.war"
+    (tmp_path / "a.war").write_text(src.read_text(), encoding="utf-8")
+    (tmp_path / "b.war").write_text(src.read_text(), encoding="utf-8")
     with pytest.raises(RuleValidationError, match="Duplicate rule id"):
         load_rules(tmp_path)

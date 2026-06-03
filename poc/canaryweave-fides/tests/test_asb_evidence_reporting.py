@@ -24,6 +24,7 @@ def _load_asb_case(tmp_path, *, text: str, label: str = "attack", category: str 
 
 
 def _load_record(tmp_path, record):
+    tmp_path.mkdir(parents=True, exist_ok=True)
     path = tmp_path / "records.jsonl"
     path.write_text(json.dumps(record) + "\n", encoding="utf-8")
     result = ASBAdapter(AdapterConfig(root=tmp_path, split="dev")).load()
@@ -189,6 +190,28 @@ def test_asb_native_attack_schema_still_reaches_warden_rules(tmp_path):
 
     assert decision.decision is Decision.QUARANTINE
     assert "cwfr-0003" in decision.rule_ids
+
+
+def test_asb_adapter_derives_public_safe_incident_inspired_shapes(tmp_path):
+    protected = _load_asb_case(tmp_path / "protected", text="extract protected system policy context", label="attack")
+    destructive = _load_asb_case(tmp_path / "destructive", text="delete wipe reset project resources", label="attack")
+    deceptive = _load_asb_case(tmp_path / "deceptive", text="target profile impersonation lure deception", label="attack")
+
+    assert protected.attack_category == "mcp_prompt_boundary/protected_context_exfiltration"
+    assert protected.ground_truth is not None
+    assert protected.ground_truth.expected_rule_ids == ("cwfr-0108",)
+    assert protected.safe_features["protected_context_extraction_shape"] is True
+
+    assert destructive.attack_category == "mcp_impact/destructive_agent_action"
+    assert destructive.ground_truth is not None
+    assert destructive.ground_truth.expected_rule_ids == ("cwfr-0109",)
+    assert destructive.safe_features["destructive_action_shape"] is True
+
+    assert deceptive.attack_category == "mcp_abuse/recon_social_engineering"
+    assert deceptive.ground_truth is not None
+    assert deceptive.ground_truth.expected_rule_ids == ("cwfr-0110",)
+    assert deceptive.safe_features["social_engineering_shape"] is True
+    assert deceptive.safe_features["deception_shape"] is True
 
 
 def test_public_report_includes_expected_rule_evidence_without_case_rows():

@@ -18,7 +18,7 @@ def load_rule_file(path: Path | str) -> RuleDefinition:
 
 def load_rules(root: Path | str) -> tuple[RuleDefinition, ...]:
     root_path = Path(root)
-    paths = sorted(root_path.rglob("*.cwfr.yaml"))
+    paths = sorted(root_path.rglob("*.war"))
     rules = [load_rule_file(path) for path in paths]
     ids: set[str] = set()
     names: set[str] = set()

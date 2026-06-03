@@ -14,7 +14,7 @@ WARDEN rule correctness is evaluated with explicit public-safe mappings between 
 - `impact_class`: one or more effects such as consequential action or protected data flow.
 - `evasion_class`: obfuscation/evasion label, or `none`.
 - `expected_behavior`: `allow`, `quarantine`, or `block`.
-- `expected_rule_ids`: WARDEN `.cwfr` rule IDs expected to fire.
+- `expected_rule_ids`: WARDEN `cwfr-*` rule IDs expected to fire.
 - `expected_fides_checks`: FIDES checks expected to catch WARDEN misses.
 - `should_not_fire_rule_ids`: false-positive guardrails.
 - `required_fields`: telemetry fields required for a fair rule evaluation.

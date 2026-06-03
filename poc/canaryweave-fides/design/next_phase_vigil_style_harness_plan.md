@@ -8,7 +8,7 @@
 
 **Architecture:** Build a simple Vigil-inspired toolkit layout around the existing `canaryweave_fides` package: `data/` for rule/eval artifacts and dataset specs, `docs/` for user-facing guidance, `scripts/` for smoke/eval commands, and `src/` for the reusable engine. Use adapters for ASB, AgentDefenseBench, and synthetic fixtures. Run a pre-context gate loop where deterministic rules fire first and FIDES judges only deterministic misses.
 
-**Tech Stack:** Python 3.11+, pytest, PyYAML, stdlib dataclasses, existing `.cwfr.yaml` rules, optional MCP simulation later, provider calls disabled by default.
+**Tech Stack:** Python 3.11+, pytest, PyYAML, stdlib dataclasses, existing `.war` rules, optional MCP simulation later, provider calls disabled by default.
 
 ---
 
@@ -65,7 +65,7 @@ poc/canaryweave-fides/
 │   ├── run_multi_dataset_eval.sh
 │   └── check_public_artifacts.py
 ├── rules/
-│   └── existing .cwfr.yaml rules
+│   └── existing .war rules
 ├── src/canaryweave_fides/
 │   └── reusable engine implementation
 ├── tests/
@@ -162,7 +162,7 @@ Rules are defender-maintainable and YARA-style:
 - safe fixtures;
 - expected action.
 
-The current `.cwfr.yaml` format can evolve toward an OPA-transferable representation. The point is that defenders write rules, not engine code.
+The current `.war` format can evolve toward an OPA-transferable representation. The point is that defenders write rules, not engine code.
 
 ### 4.4 `rules_plus_fides`
 

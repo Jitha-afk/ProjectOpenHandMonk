@@ -7,7 +7,7 @@ This document defines the evaluation plan for the next CanaryWeave FIDES phase. 
 Compare three defense stacks on the same ASB-derived cases:
 
 1. `regex_guard`: a text/signature baseline over visible, redacted text features.
-2. `structured_rule_guard`: `.cwfr.yaml` rules over `NormalizedTrace` records.
+2. `structured_rule_guard`: `.war` rules over `NormalizedTrace` records.
 3. `rules_plus_fides_ifc`: structured rules plus FIDES/IFC checks for trusted-action and permitted-flow policy violations.
 
 The evaluation should answer:
@@ -167,7 +167,7 @@ This gives a conservative but fair baseline: fast substring/signature matching w
 
 ### Structured rules
 
-The structured-rule stack evaluates `.cwfr.yaml` policies against the same `NormalizedTrace` records:
+The structured-rule stack evaluates `.war` policies against the same `NormalizedTrace` records:
 
 - Signals may use origin, surface, role, event order, capability, sink, schema shape, integrity/confidentiality labels, canary movement, and safe text-structure features.
 - Rules should emit matched signal IDs, rule IDs, severity, and final action.

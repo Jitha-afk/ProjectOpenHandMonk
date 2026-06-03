@@ -220,6 +220,21 @@ _CATEGORY_RULE_EVIDENCE: dict[str, dict[str, Any]] = {
         "required_fields": ("features.obfuscated",),
         "policy_violation_id": "suspicious_encoded_or_hidden_structure",
     },
+    "mcp_prompt_boundary/protected_context_exfiltration": {
+        "expected_rule_ids": ("cwfr-0108",),
+        "required_fields": ("features.protected_context_extraction_shape", "features.origin_labels"),
+        "policy_violation_id": "protected_context_exfiltration",
+    },
+    "mcp_impact/destructive_agent_action": {
+        "expected_rule_ids": ("cwfr-0109",),
+        "required_fields": ("features.destructive_action_shape", "requested.capability"),
+        "policy_violation_id": "destructive_agent_action",
+    },
+    "mcp_abuse/recon_social_engineering": {
+        "expected_rule_ids": ("cwfr-0110",),
+        "required_fields": ("features.social_engineering_shape", "features.deception_shape", "features.origin_labels"),
+        "policy_violation_id": "deceptive_social_engineering_tasking",
+    },
 }
 
 
@@ -249,6 +264,8 @@ def _origin_labels_for_surface(surface: str, flags: Mapping[str, Any], *, descri
         return ["server_manifest"]
     if surface in {"sampling", "server_sampling"}:
         return ["server_sampling"]
+    if flags.get("protected_context_extraction_shape") or flags.get("social_engineering_shape"):
+        return ["resource_content"]
     if surface == "api_message" and flags.get("instruction_shape"):
         # Dataset-local API-message records are untrusted source material. Map
         # instruction-shaped records into an origin understood by cwfr-0003
@@ -268,6 +285,10 @@ def _safe_text_flags(text: str, surface: str) -> dict[str, Any]:
         "network_request_shape": any(term in lowered for term in ("http", "url", "network", "webhook", "endpoint", "ssrf")),
         "memory_poisoning_shape": any(term in lowered for term in ("memory", "remember", "store", "persist", "rag", "retrieval")),
         "approval_bypass_shape": any(term in lowered for term in ("approval", "consent", "without asking", "bypass", "permission")),
+        "protected_context_extraction_shape": any(term in lowered for term in ("system prompt", "system policy", "developer message", "protected context", "hidden policy", "tool schema", "extract protected", "reveal protected")),
+        "destructive_action_shape": any(term in lowered for term in ("delete", "wipe", "reset", "destroy", "destructive", "remove all", "erase")),
+        "social_engineering_shape": any(term in lowered for term in ("target profile", "victim profile", "impersonation", "lure", "phishing", "outbound contact")),
+        "deception_shape": any(term in lowered for term in ("deception", "deceptive", "impersonation", "lure", "phishing", "spoof")),
         "obfuscated": any(term in lowered for term in ("base64", "unicode", "encoded", "obfuscat", "hidden")),
         "tool_plan_shape": surface in {"tool", "api_message", "tool_result"},
     }
@@ -275,6 +296,12 @@ def _safe_text_flags(text: str, surface: str) -> dict[str, Any]:
 
 
 def _shared_category(flags: Mapping[str, Any], fallback: str) -> str:
+    if flags.get("protected_context_extraction_shape"):
+        return "mcp_prompt_boundary/protected_context_exfiltration"
+    if flags.get("destructive_action_shape"):
+        return "mcp_impact/destructive_agent_action"
+    if flags.get("social_engineering_shape") and flags.get("deception_shape"):
+        return "mcp_abuse/recon_social_engineering"
     if flags.get("command_execution_shape"):
         return "mcp_execution/command_or_code_execution_request"
     if flags.get("path_boundary_shape"):
@@ -298,7 +325,9 @@ def _requested_from_flags(flags: Mapping[str, Any], *, descriptive_only: bool = 
     if descriptive_only:
         return {}
     requested: dict[str, str] = {}
-    if flags.get("command_execution_shape"):
+    if flags.get("destructive_action_shape"):
+        requested.update({"requested_tool": "admin_action", "requested_capability": "admin_action", "requested_action": "destructive_update"})
+    elif flags.get("command_execution_shape"):
         requested.update({"requested_tool": "execute_code", "requested_capability": "execute_code", "requested_action": "execute"})
     elif flags.get("path_boundary_shape"):
         requested.update({"requested_tool": "read_file", "requested_capability": "read_file", "requested_action": "read_resource"})

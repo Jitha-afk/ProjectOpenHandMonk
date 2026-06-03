@@ -213,7 +213,7 @@ Run the same cases through these stacks:
 
 3. `yara_rules`
    - Defender-maintainable deterministic rules with YARA-like metadata, strings/signals, conditions, tags, and stable semantics.
-   - Can be represented in `.cwfr.yaml` while borrowing YARA's mental model.
+   - Can be represented in `.war` while borrowing YARA's mental model.
 
 4. `rules_plus_fides`
    - Runs `yara_rules` first.

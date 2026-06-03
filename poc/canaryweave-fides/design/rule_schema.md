@@ -1,6 +1,6 @@
 # CanaryWeave FIDES Rule Schema
 
-Rules use `.cwfr.yaml` files. The format is YAML-based and built for defender-authored policy detections: metadata, pattern blocks, semantic intent, FIDES judge checks, named protocol signals, boolean conditions, fixtures, and safety notes.
+Rules use `.war` files. The format is YAML-based and built for defender-authored policy detections: metadata, pattern blocks, semantic intent, FIDES judge checks, named protocol signals, boolean conditions, fixtures, and safety notes.
 
 ## Required fields
 

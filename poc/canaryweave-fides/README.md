@@ -8,7 +8,7 @@ The research claim is intentionally narrow:
 
 Within controlled MCP security benchmarks, a human-reviewable structured rule layer can improve over ordinary regex pattern matching because it evaluates policy-relevant context, not only text substrings. Adding FIDES/IFC can then reduce remaining policy-relevant ASR by tracking whether low-integrity or restricted data caused consequential actions or crossed permitted sinks.
 
-This mirrors the OPA/Rego philosophy: decouple policy decision-making from enforcement, feed the policy engine structured data, and let defenders author declarative, reviewable policies. Here, the structured input is a NormalizedTrace, the policy artifacts are `.cwfr.yaml` rules, and enforcement happens inside a quarantined `query_llm` gate.
+This mirrors the OPA/Rego philosophy: decouple policy decision-making from enforcement, feed the policy engine structured data, and let defenders author declarative, reviewable policies. Here, the structured input is a NormalizedTrace, the policy artifacts are `.war` rules, and enforcement happens inside a quarantined `query_llm` gate.
 
 ## What this POC demonstrates
 
@@ -72,7 +72,7 @@ canaryweave-fides/
 │   ├── prompts/           # FIDES judge contract, provider disabled by default
 │   └── yara/              # regex baseline and YARA-style rule manifests
 ├── docs/                  # thesis, rules, datasets, judge, eval guidance
-├── rules/                 # .cwfr.yaml structured rules
+├── rules/                 # .war structured rules
 ├── src/canaryweave_fides/ # rule engine, FIDES/IFC, query_llm, metrics
 ├── tests/                 # pytest suite
 ├── research/              # source-grounded research notes
@@ -82,6 +82,6 @@ canaryweave-fides/
 ```
 
 WARDEN is the deterministic rule stack: regex baseline, YARA-style manifests,
-current `.cwfr.yaml` rules, and future policy engines. FIDES is the separate
+current `.war` rules, and future policy engines. FIDES is the separate
 judge layer for deterministic misses. Public configs and reports must remain
 free of raw dataset payloads, raw prompts, and judge transcripts.

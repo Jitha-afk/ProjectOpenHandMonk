@@ -15,7 +15,7 @@ PUBLIC_ROOTS = [
     ROOT / "tests",
     ROOT / "artifacts",
 ]
-TEXT_SUFFIXES = {".md", ".py", ".yaml", ".yml", ".json", ".sh", ".toml"}
+TEXT_SUFFIXES = {".md", ".py", ".yaml", ".yml", ".json", ".sh", ".toml", ".war"}
 
 DISALLOWED_SHAPES = [
     "http" + "://",

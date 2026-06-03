@@ -81,7 +81,7 @@ def test_public_docs_do_not_reference_inspiration_project_name():
     for root in PUBLIC_DOC_ROOTS:
         paths = [root] if root.is_file() else list(root.rglob("*"))
         for path in paths:
-            if path.is_file() and path.suffix in {".md", ".yaml", ".yml"}:
+            if path.is_file() and path.suffix in {".md", ".yaml", ".yml", ".war"}:
                 text = path.read_text(encoding="utf-8", errors="ignore").lower()
                 if banned in text:
                     offenders.append(str(path.relative_to(ROOT)))

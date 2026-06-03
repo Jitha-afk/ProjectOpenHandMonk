@@ -511,6 +511,10 @@ _FACT_FLAG_KEYS = (
     "network_request_shape",
     "memory_poisoning_shape",
     "approval_bypass_shape",
+    "protected_context_extraction_shape",
+    "destructive_action_shape",
+    "social_engineering_shape",
+    "deception_shape",
     "tool_plan_shape",
     "obfuscated",
 )
