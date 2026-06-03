@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "analyzing-threat-actor-ttps-with-mitre-attack": {
+      "source": "mukul975/anthropic-cybersecurity-skills",
+      "sourceType": "github",
+      "skillPath": "skills/analyzing-threat-actor-ttps-with-mitre-attack/SKILL.md",
+      "computedHash": "3308ba56039cfb11a2745bb9af9f480c6e23febd0aa3c5be360c1c1cbe05e4ed"
+    }
+  }
+}
