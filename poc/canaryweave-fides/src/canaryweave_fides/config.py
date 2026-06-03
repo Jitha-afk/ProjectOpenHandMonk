@@ -8,6 +8,7 @@ import yaml
 
 from .adapters import AdapterConfig, DatasetAdapter, create_adapter
 from .decisions import StackName
+from .gate import FidesJudgeMode
 
 
 @dataclass(frozen=True)
@@ -15,6 +16,8 @@ class LoadedEvalConfig:
     adapters: tuple[DatasetAdapter, ...]
     iterations: int
     stacks: tuple[StackName, ...]
+    fides_mode: FidesJudgeMode = FidesJudgeMode.DISABLED
+    fides_test_double_evidence_rules: tuple[Mapping[str, Any], ...] = ()
     public_report: bool | None = None
     default_output: Path | None = None
 
@@ -128,6 +131,10 @@ def load_eval_config(
         adapters=adapters,
         iterations=int(runner.get("iterations", 50)),
         stacks=configured_stacks,
+        fides_mode=FidesJudgeMode.coerce(runner.get("fides_mode", FidesJudgeMode.DISABLED)),
+        fides_test_double_evidence_rules=tuple(
+            dict(rule) for rule in runner.get("fides_test_double_evidence_rules", ())
+        ),
         public_report=(outputs.get("include_case_level_rows") is False),
         default_output=_resolve_path(outputs.get("default_report"), base=base),
     )
