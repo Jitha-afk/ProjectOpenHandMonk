@@ -162,6 +162,14 @@ A defensible future contribution would be:
 
 We present a leakage-safe controlled harness for comparing regex baselines, structured WARDEN rules, and a separately gated FIDES judge boundary on normalized multi-dataset agent-security cases. Initial controlled results show that WARDEN is connected end-to-end and improves over a simple regex baseline on the current mixed local run, while also revealing substantial ASB coverage gaps and no current empirical FIDES gain because provider calls are disabled. The method emphasizes explicit custody boundaries, public-safe aggregate reporting, and attack-to-rule mappings as prerequisites for stronger future claims.
 
-### 11. Current bottom line
+### 11. Additional post-draft progress
 
-The current harness is ready for an initial report draft, not a final paper claim. The public artifact shows meaningful engineering progress: multi-dataset adapters load controlled local ASB and AgentDefenseBench data, WARDEN executes real structured rules, public reports remain source-free, and aggregate WARDEN metrics improve over regex. The same artifact also makes the next research gap clear: ASB coverage is weak, benign controls are too sparse, and FIDES has not yet been empirically evaluated beyond disabled or test-double boundaries.
+After the initial mixed run, the harness gained evidence-grade public diagnostics and a CI-safe FIDES test-double evaluation mode.
+
+The evidence diagnostics add disagreement matrices, per-dataset and per-category rule coverage, rules-with-no-coverage counts, FIDES call/catch counters, and missing-prerequisite summaries. These additions make the public reports more useful for paper-oriented analysis because they show not just whether a stack blocked a case, but where the current coverage is missing and which rules are actually responsible for catches.
+
+A separate FIDES test-double report now demonstrates the FIDES boundary on a deterministic WARDEN miss without provider calls or transcripts. In that synthetic public-safe run, WARDEN misses one attack-like fixture and the FIDES test-double blocks it, producing one FIDES incremental catch with zero provider calls. This is interface evidence only; it should not be described as empirical LLM judge performance. It does, however, prove that the harness can measure WARDEN-miss / FIDES-catch behavior once a real transcript-private judge is connected.
+
+### 12. Current bottom line
+
+The current harness is ready for an initial report draft, not a final paper claim. The public artifact shows meaningful engineering progress: multi-dataset adapters load controlled local ASB and AgentDefenseBench data, WARDEN executes real structured rules, public reports remain source-free, and aggregate WARDEN metrics improve over regex. The same artifact also makes the next research gap clear: ASB coverage is weak, benign controls are too sparse, and FIDES has not yet been empirically evaluated with a real judge beyond disabled or test-double boundaries.
