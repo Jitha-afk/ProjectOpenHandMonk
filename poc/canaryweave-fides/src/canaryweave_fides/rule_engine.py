@@ -66,6 +66,14 @@ class RuleEngine:
                 event.canary_present and event.sink not in policy.allowed_canary_sinks
                 for event in events
             )
+        if signal.type == "feature_flag":
+            feature = str(params.get("feature"))
+            expected = bool(params.get("value", True))
+            return any(bool(event.metadata.get(feature, False)) is expected for event in events)
+        if signal.type == "event_field_contains":
+            field = str(params["field"])
+            needle = str(params["value"]).lower()
+            return any(needle in str(event.field_value(field) or "").lower() for event in events)
         if signal.type == "text_structure":
             feature = params.get("feature")
             if feature == "hidden_unicode":

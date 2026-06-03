@@ -1,0 +1,36 @@
+id: cwfr-0105
+name: PathOrUriBoundaryEscape
+version: 0.1.0
+category: mcp_resource_boundary/path_or_uri_boundary_escape
+severity: high
+scope: event_window
+description: Detects path, URI, or resource-boundary escape shape paired with denied file/resource capability.
+meta:
+  author: Project Open Hand Monk
+  status: experimental
+  attack_refs:
+    - framework: ATT&CK
+      tactic: Collection
+      mapping_strength: analogical
+  defense_refs:
+    - framework: D3FEND
+      name: File Access Mediation
+keywords:
+  - name: path_boundary_shape
+    type: feature
+    feature: path_boundary_shape
+signals:
+  - name: path_boundary_shape
+    type: feature_flag
+    feature: path_boundary_shape
+  - name: capability_not_granted
+    type: capability_policy
+    relation: not_in_allowed_capabilities
+condition: signals.path_boundary_shape and signals.capability_not_granted
+recommended_action: block_and_audit
+fixtures:
+  positive:
+    - synthetic_path_boundary_escape
+  negative:
+    - bnm.resource.path_text_no_action
+safety_notes: Structural path-boundary indicators only; no sensitive filesystem examples.

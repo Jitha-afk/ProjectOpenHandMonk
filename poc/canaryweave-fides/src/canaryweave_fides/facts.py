@@ -95,7 +95,19 @@ class NormalizedFacts:
         ):
             if source in safe:
                 features[target] = features[target] or bool(safe[source])
-        for key in ("length", "sha256", "text_hash", "public_hash", "schema_shape"):
+        for key in (
+            "length",
+            "sha256",
+            "text_hash",
+            "public_hash",
+            "schema_shape",
+            "command_execution_shape",
+            "credential_or_secret_shape",
+            "path_boundary_shape",
+            "network_request_shape",
+            "memory_poisoning_shape",
+            "approval_bypass_shape",
+        ):
             if key in safe:
                 features[key] = safe[key]
 
