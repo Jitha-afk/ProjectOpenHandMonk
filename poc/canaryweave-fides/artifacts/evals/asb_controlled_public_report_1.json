@@ -15,28 +15,28 @@
   "disagreement_matrix": {
     "case_level_rows_included": false,
     "joint_patterns": {
-      "allow|allow|allow": 623,
-      "allow|block|block": 95,
-      "allow|quarantine|quarantine": 158,
+      "allow|allow|allow": 628,
+      "allow|block|block": 92,
+      "allow|quarantine|quarantine": 156,
       "block|quarantine|quarantine": 2
     },
     "pairs": {
       "regex_baseline__rules_plus_fides": {
-        "different_action": 255,
-        "different_block_outcome": 253,
-        "left_allows_right_blocks": 253,
+        "different_action": 250,
+        "different_block_outcome": 248,
+        "left_allows_right_blocks": 248,
         "left_blocks_right_allows": 0,
-        "same_action": 623,
-        "same_block_outcome": 625,
+        "same_action": 628,
+        "same_block_outcome": 630,
         "total_compared": 878
       },
       "regex_baseline__yara_rules": {
-        "different_action": 255,
-        "different_block_outcome": 253,
-        "left_allows_right_blocks": 253,
+        "different_action": 250,
+        "different_block_outcome": 248,
+        "left_allows_right_blocks": 248,
         "left_blocks_right_allows": 0,
-        "same_action": 623,
-        "same_block_outcome": 625,
+        "same_action": 628,
+        "same_block_outcome": 630,
         "total_compared": 878
       },
       "yara_rules__rules_plus_fides": {
@@ -381,30 +381,30 @@
         "total_benign_decisions": 60
       },
       "mcp_execution/command_or_code_execution_request": {
-        "false_positive_decisions": 2,
-        "false_positive_rate": 0.5,
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
         "total_benign_decisions": 4
       },
       "mcp_network/unapproved_network_request": {
-        "false_positive_decisions": 2,
-        "false_positive_rate": 0.5,
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
         "total_benign_decisions": 4
       },
       "mcp_prompt_boundary/instruction_hierarchy_violation": {
-        "false_positive_decisions": 4,
-        "false_positive_rate": 0.5,
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
         "total_benign_decisions": 8
       },
       "mcp_resource_boundary/path_or_uri_boundary_escape": {
-        "false_positive_decisions": 2,
-        "false_positive_rate": 0.5,
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
         "total_benign_decisions": 4
       }
     },
     "by_dataset": {
       "asb": {
-        "false_positive_decisions": 10,
-        "false_positive_rate": 0.125,
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
         "total_benign_decisions": 80
       }
     },
@@ -416,82 +416,28 @@
           "total_benign_decisions": 60
         },
         "mcp_execution/command_or_code_execution_request": {
-          "false_positive_decisions": 2,
-          "false_positive_rate": 0.5,
+          "false_positive_decisions": 0,
+          "false_positive_rate": 0.0,
           "total_benign_decisions": 4
         },
         "mcp_network/unapproved_network_request": {
-          "false_positive_decisions": 2,
-          "false_positive_rate": 0.5,
+          "false_positive_decisions": 0,
+          "false_positive_rate": 0.0,
           "total_benign_decisions": 4
         },
         "mcp_prompt_boundary/instruction_hierarchy_violation": {
-          "false_positive_decisions": 4,
-          "false_positive_rate": 0.5,
+          "false_positive_decisions": 0,
+          "false_positive_rate": 0.0,
           "total_benign_decisions": 8
         },
         "mcp_resource_boundary/path_or_uri_boundary_escape": {
-          "false_positive_decisions": 2,
-          "false_positive_rate": 0.5,
+          "false_positive_decisions": 0,
+          "false_positive_rate": 0.0,
           "total_benign_decisions": 4
         }
       }
     },
-    "by_rule": {
-      "cwfr-0003": {
-        "affected_categories": [
-          "mcp_network/unapproved_network_request",
-          "mcp_prompt_boundary/instruction_hierarchy_violation"
-        ],
-        "affected_datasets": [
-          "asb"
-        ],
-        "affected_stacks": [
-          "rules_plus_fides",
-          "yara_rules"
-        ],
-        "false_positive_decisions": 6
-      },
-      "cwfr-0105": {
-        "affected_categories": [
-          "mcp_resource_boundary/path_or_uri_boundary_escape"
-        ],
-        "affected_datasets": [
-          "asb"
-        ],
-        "affected_stacks": [
-          "rules_plus_fides",
-          "yara_rules"
-        ],
-        "false_positive_decisions": 2
-      },
-      "cwfr-0106": {
-        "affected_categories": [
-          "mcp_execution/command_or_code_execution_request"
-        ],
-        "affected_datasets": [
-          "asb"
-        ],
-        "affected_stacks": [
-          "rules_plus_fides",
-          "yara_rules"
-        ],
-        "false_positive_decisions": 2
-      },
-      "cwfr-0107": {
-        "affected_categories": [
-          "mcp_network/unapproved_network_request"
-        ],
-        "affected_datasets": [
-          "asb"
-        ],
-        "affected_stacks": [
-          "rules_plus_fides",
-          "yara_rules"
-        ],
-        "false_positive_decisions": 2
-      }
-    },
+    "by_rule": {},
     "by_stack": {
       "no_guard": {
         "false_positive_decisions": 0,
@@ -504,21 +450,21 @@
         "total_benign_decisions": 20
       },
       "rules_plus_fides": {
-        "false_positive_decisions": 5,
-        "false_positive_rate": 0.25,
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
         "total_benign_decisions": 20
       },
       "yara_rules": {
-        "false_positive_decisions": 5,
-        "false_positive_rate": 0.25,
+        "false_positive_decisions": 0,
+        "false_positive_rate": 0.0,
         "total_benign_decisions": 20
       }
     },
     "case_level_rows_included": false,
-    "false_positive_rate": 0.125,
+    "false_positive_rate": 0.0,
     "reason": null,
     "total_benign_decisions": 80,
-    "total_false_positive_decisions": 10
+    "total_false_positive_decisions": 0
   },
   "groups": {
     "by_category": {
@@ -539,19 +485,19 @@
         "total": 76
       },
       "mcp_execution/command_or_code_execution_request": {
-        "blocked_or_quarantined": 21,
+        "blocked_or_quarantined": 20,
         "total": 21
       },
       "mcp_network/unapproved_network_request": {
-        "blocked_or_quarantined": 14,
+        "blocked_or_quarantined": 13,
         "total": 14
       },
       "mcp_prompt_boundary/instruction_hierarchy_violation": {
-        "blocked_or_quarantined": 136,
+        "blocked_or_quarantined": 134,
         "total": 136
       },
       "mcp_resource_boundary/path_or_uri_boundary_escape": {
-        "blocked_or_quarantined": 40,
+        "blocked_or_quarantined": 39,
         "total": 40
       },
       "mcp_tool_authority/approval_or_consent_bypass": {
@@ -565,20 +511,20 @@
     },
     "by_dataset": {
       "asb": {
-        "blocked_or_quarantined": 255,
+        "blocked_or_quarantined": 250,
         "total": 878
       }
     },
     "by_surface": {
       "api_message": {
-        "blocked_or_quarantined": 255,
+        "blocked_or_quarantined": 250,
         "total": 878
       }
     }
   },
   "incremental_metrics": {
     "attack_case_denominator": 858,
-    "fides_calls": 623,
+    "fides_calls": 628,
     "fides_incremental_catch_rate_vs_all_attacks": 0.0,
     "fides_incremental_catch_rate_vs_warden_misses": 0.0,
     "fides_incremental_catches_vs_warden": 0,
@@ -631,7 +577,7 @@
           "cwfr-0106",
           "cwfr-0107"
         ],
-        "hit_count": 29,
+        "hit_count": 28,
         "total_rule_count": 8
       },
       "mcp_network/unapproved_network_request": {
@@ -641,7 +587,7 @@
           "cwfr-0003",
           "cwfr-0107"
         ],
-        "hit_count": 18,
+        "hit_count": 16,
         "total_rule_count": 8
       },
       "mcp_prompt_boundary/instruction_hierarchy_violation": {
@@ -650,7 +596,7 @@
         "covered_rule_ids": [
           "cwfr-0003"
         ],
-        "hit_count": 136,
+        "hit_count": 134,
         "total_rule_count": 8
       },
       "mcp_resource_boundary/path_or_uri_boundary_escape": {
@@ -661,7 +607,7 @@
           "cwfr-0105",
           "cwfr-0107"
         ],
-        "hit_count": 48,
+        "hit_count": 47,
         "total_rule_count": 8
       },
       "mcp_tool_authority/approval_or_consent_bypass": {
@@ -686,7 +632,7 @@
           "cwfr-0106",
           "cwfr-0107"
         ],
-        "hit_count": 291,
+        "hit_count": 285,
         "total_rule_count": 8
       }
     },
@@ -712,7 +658,7 @@
             "cwfr-0106",
             "cwfr-0107"
           ],
-          "hit_count": 29,
+          "hit_count": 28,
           "total_rule_count": 8
         },
         "mcp_network/unapproved_network_request": {
@@ -722,7 +668,7 @@
             "cwfr-0003",
             "cwfr-0107"
           ],
-          "hit_count": 18,
+          "hit_count": 16,
           "total_rule_count": 8
         },
         "mcp_prompt_boundary/instruction_hierarchy_violation": {
@@ -731,7 +677,7 @@
           "covered_rule_ids": [
             "cwfr-0003"
           ],
-          "hit_count": 136,
+          "hit_count": 134,
           "total_rule_count": 8
         },
         "mcp_resource_boundary/path_or_uri_boundary_escape": {
@@ -742,7 +688,7 @@
             "cwfr-0105",
             "cwfr-0107"
           ],
-          "hit_count": 48,
+          "hit_count": 47,
           "total_rule_count": 8
         },
         "mcp_tool_authority/approval_or_consent_bypass": {
@@ -768,7 +714,7 @@
           "cwfr-0106",
           "cwfr-0107"
         ],
-        "hit_count": 291,
+        "hit_count": 285,
         "total_rule_count": 8
       }
     },
@@ -952,8 +898,8 @@
         "obfuscated_ratio": 0.0,
         "path_boundary_shape_count": 0,
         "path_boundary_shape_ratio": 0.0,
-        "requested_capability_present_count": 21,
-        "requested_capability_present_ratio": 1.0,
+        "requested_capability_present_count": 20,
+        "requested_capability_present_ratio": 0.9524,
         "requested_sink_present_count": 6,
         "requested_sink_present_ratio": 0.2857,
         "tool_plan_shape_count": 21,
@@ -983,10 +929,10 @@
         "obfuscated_ratio": 0.0,
         "path_boundary_shape_count": 0,
         "path_boundary_shape_ratio": 0.0,
-        "requested_capability_present_count": 14,
-        "requested_capability_present_ratio": 1.0,
-        "requested_sink_present_count": 14,
-        "requested_sink_present_ratio": 1.0,
+        "requested_capability_present_count": 13,
+        "requested_capability_present_ratio": 0.9286,
+        "requested_sink_present_count": 13,
+        "requested_sink_present_ratio": 0.9286,
         "tool_plan_shape_count": 14,
         "tool_plan_shape_ratio": 1.0,
         "total_cases": 14
@@ -1045,8 +991,8 @@
         "obfuscated_ratio": 0.0,
         "path_boundary_shape_count": 40,
         "path_boundary_shape_ratio": 1.0,
-        "requested_capability_present_count": 40,
-        "requested_capability_present_ratio": 1.0,
+        "requested_capability_present_count": 39,
+        "requested_capability_present_ratio": 0.975,
         "requested_sink_present_count": 6,
         "requested_sink_present_ratio": 0.15,
         "tool_plan_shape_count": 40,
@@ -1140,10 +1086,10 @@
         "obfuscated_ratio": 0.0023,
         "path_boundary_shape_count": 40,
         "path_boundary_shape_ratio": 0.0456,
-        "requested_capability_present_count": 99,
-        "requested_capability_present_ratio": 0.1128,
-        "requested_sink_present_count": 102,
-        "requested_sink_present_ratio": 0.1162,
+        "requested_capability_present_count": 96,
+        "requested_capability_present_ratio": 0.1093,
+        "requested_sink_present_count": 101,
+        "requested_sink_present_ratio": 0.115,
         "tool_plan_shape_count": 878,
         "tool_plan_shape_ratio": 1.0,
         "total_cases": 878
@@ -1298,8 +1244,8 @@
           "obfuscated_ratio": 0.0,
           "path_boundary_shape_count": 0,
           "path_boundary_shape_ratio": 0.0,
-          "requested_capability_present_count": 21,
-          "requested_capability_present_ratio": 1.0,
+          "requested_capability_present_count": 20,
+          "requested_capability_present_ratio": 0.9524,
           "requested_sink_present_count": 6,
           "requested_sink_present_ratio": 0.2857,
           "tool_plan_shape_count": 21,
@@ -1329,10 +1275,10 @@
           "obfuscated_ratio": 0.0,
           "path_boundary_shape_count": 0,
           "path_boundary_shape_ratio": 0.0,
-          "requested_capability_present_count": 14,
-          "requested_capability_present_ratio": 1.0,
-          "requested_sink_present_count": 14,
-          "requested_sink_present_ratio": 1.0,
+          "requested_capability_present_count": 13,
+          "requested_capability_present_ratio": 0.9286,
+          "requested_sink_present_count": 13,
+          "requested_sink_present_ratio": 0.9286,
           "tool_plan_shape_count": 14,
           "tool_plan_shape_ratio": 1.0,
           "total_cases": 14
@@ -1391,8 +1337,8 @@
           "obfuscated_ratio": 0.0,
           "path_boundary_shape_count": 40,
           "path_boundary_shape_ratio": 1.0,
-          "requested_capability_present_count": 40,
-          "requested_capability_present_ratio": 1.0,
+          "requested_capability_present_count": 39,
+          "requested_capability_present_ratio": 0.975,
           "requested_sink_present_count": 6,
           "requested_sink_present_ratio": 0.15,
           "tool_plan_shape_count": 40,
@@ -1484,10 +1430,10 @@
     "obfuscated_ratio": 0.0023,
     "path_boundary_shape_count": 40,
     "path_boundary_shape_ratio": 0.0456,
-    "requested_capability_present_count": 99,
-    "requested_capability_present_ratio": 0.1128,
-    "requested_sink_present_count": 102,
-    "requested_sink_present_ratio": 0.1162,
+    "requested_capability_present_count": 96,
+    "requested_capability_present_ratio": 0.1093,
+    "requested_sink_present_count": 101,
+    "requested_sink_present_ratio": 0.115,
     "tool_plan_shape_count": 878,
     "tool_plan_shape_ratio": 1.0,
     "total_cases": 878
@@ -1539,14 +1485,14 @@
       "asr_reduction_vs_regex": 0.2891,
       "attack_cases": 858,
       "benign_cases": 20,
-      "benign_refusal_rate": 0.25,
-      "f1": 0.4492,
+      "benign_refusal_rate": 0.0,
+      "f1": 0.4513,
       "fn": 608,
-      "fp": 5,
-      "precision": 0.9804,
+      "fp": 0,
+      "precision": 1.0,
       "recall": 0.2914,
-      "safe_pass_through_rate": 0.75,
-      "tn": 15,
+      "safe_pass_through_rate": 1.0,
+      "tn": 20,
       "tp": 250
     },
     "yara_rules": {
@@ -1555,14 +1501,14 @@
       "asr_reduction_vs_regex": 0.2891,
       "attack_cases": 858,
       "benign_cases": 20,
-      "benign_refusal_rate": 0.25,
-      "f1": 0.4492,
+      "benign_refusal_rate": 0.0,
+      "f1": 0.4513,
       "fn": 608,
-      "fp": 5,
-      "precision": 0.9804,
+      "fp": 0,
+      "precision": 1.0,
       "recall": 0.2914,
-      "safe_pass_through_rate": 0.75,
-      "tn": 15,
+      "safe_pass_through_rate": 1.0,
+      "tn": 20,
       "tp": 250
     }
   },

@@ -238,7 +238,9 @@ def _rule_evidence_for_category(category: str, case_kind: str, flags: Mapping[st
     return dict(_CATEGORY_RULE_EVIDENCE.get(category, {}))
 
 
-def _origin_labels_for_surface(surface: str, flags: Mapping[str, Any]) -> list[str]:
+def _origin_labels_for_surface(surface: str, flags: Mapping[str, Any], *, descriptive_only: bool = False) -> list[str]:
+    if descriptive_only:
+        return ["api_message"]
     if surface in {"tool", "tool_result"}:
         return ["tool_output"]
     if surface in {"resource", "mcp_resource"}:
@@ -292,7 +294,9 @@ def _shared_category(flags: Mapping[str, Any], fallback: str) -> str:
     return fallback
 
 
-def _requested_from_flags(flags: Mapping[str, Any]) -> dict[str, str]:
+def _requested_from_flags(flags: Mapping[str, Any], *, descriptive_only: bool = False) -> dict[str, str]:
+    if descriptive_only:
+        return {}
     requested: dict[str, str] = {}
     if flags.get("command_execution_shape"):
         requested.update({"requested_tool": "execute_code", "requested_capability": "execute_code", "requested_action": "execute"})
@@ -433,9 +437,11 @@ class ASBAdapter(DatasetAdapter):
         surface = _stable_label(_first_value(record, _SURFACE_FIELD_NAMES), "api_message")
         top_level_keys = tuple(sorted(str(key) for key in record.keys()))
         flags = _safe_text_flags(private_text, surface)
+        native_features = _asb_native_safe_features(record)
+        descriptive_only = native_features.get("asb_record_family") == "normal_tool"
         shared_category = _shared_category(flags, ground_truth.attack_category)
-        requested = _requested_from_flags(flags)
-        origin_labels = _origin_labels_for_surface(surface, flags)
+        requested = _requested_from_flags(flags, descriptive_only=descriptive_only)
+        origin_labels = _origin_labels_for_surface(surface, flags, descriptive_only=descriptive_only)
         case_kind_value = getattr(ground_truth.case_kind, "value", str(ground_truth.case_kind))
         rule_evidence = _rule_evidence_for_category(shared_category, case_kind_value, flags)
 
@@ -449,7 +455,7 @@ class ASBAdapter(DatasetAdapter):
             "top_level_key_count": len(top_level_keys),
             "top_level_keys_hash": public_hash("\n".join(top_level_keys)),
             "native_id_hash": public_hash(str(native_id)) if native_id is not None else None,
-            **_asb_native_safe_features(record),
+            **native_features,
             **flags,
             **requested,
             "origin_labels": origin_labels,
