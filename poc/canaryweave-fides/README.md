@@ -51,15 +51,78 @@ The quarantined LLM path is represented by `query_llm` and a deterministic model
 
 ## Quickstart
 
+Prerequisites on a fresh machine:
+
+- Python 3.10+ for the core source-tree harness.
+- `uv` for reproducible local execution.
+- Python 3.11+ if you install the optional GitHub Copilot SDK FIDES provider.
+
 From this directory:
 
 ```bash
 uv run --with pytest --with PyYAML pytest -q
-PYTHONPATH=src python3 -m canaryweave_fides.cli --fixture-set smoke --output artifacts/smoke_report.json
-python3 scripts/check_markdown_fences.py
+uv run python -m canaryweave_fides.cli --fixture-set smoke --output artifacts/smoke_report.json
+uv run python scripts/check_markdown_fences.py
+uv run python scripts/check_public_artifacts.py
 ```
 
 The smoke report is written to `artifacts/smoke_report.json`.
+Optional controlled datasets are not committed. If absent, ASB and
+AgentDefenseBench adapters report `skipped_missing_local_path`.
+
+```bash
+export CANARYWEAVE_ASB_ROOT=/path/to/controlled/ASB
+export CANARYWEAVE_AGENTDEFENSEBENCH_ROOT=/path/to/controlled/AgentDefenseBench
+```
+
+Private reviewer CSVs and raw reverse-engineering data must stay under ignored
+controlled paths such as `reverse-engineering/` and must not be committed.
+
+## Modular harness CLI
+
+Single prompt WARDEN scan:
+
+```bash
+uv run python -m canaryweave_fides.cli warden check \
+  --prompt-file /path/to/public-safe-prompt.txt \
+  --origin tool_output \
+  --trust untrusted \
+  --output /tmp/warden_check.json
+```
+
+Single prompt WARDEN plus deterministic FIDES test double:
+
+```bash
+uv run python -m canaryweave_fides.cli judge one \
+  --prompt "ordinary public-safe task request" \
+  --fides-mode test_double \
+  --test-verdict unsafe \
+  --output /tmp/judge_one.json
+```
+
+Prompt-file scan over JSONL/CSV/TXT without echoing raw prompts into the report:
+
+```bash
+uv run python -m canaryweave_fides.cli bench scan \
+  --input /path/to/prompts.jsonl \
+  --input-format jsonl \
+  --text-field prompt \
+  --id-field id \
+  --output /tmp/bench_scan.json
+```
+
+Optional FIDES provider inspection is provider-free by default:
+
+```bash
+uv run python -m canaryweave_fides.cli provider status --provider copilot_sdk --json
+uv run python -m canaryweave_fides.cli provider models --provider copilot_sdk --json
+uv run python -m canaryweave_fides.cli provider doctor --provider copilot_sdk --model MODEL --json
+```
+
+Live Copilot SDK FIDES calls are disabled unless both `--fides-mode copilot_sdk`
+and `--provider-calls-enabled` are supplied with an explicit `--model`. Provider
+prompts are built from redacted normalized facts only; public outputs omit raw
+prompts, provider responses, and judge transcripts.
 
 ## Structure
 

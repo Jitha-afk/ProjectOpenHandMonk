@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from itertools import combinations
-from pathlib import Path
 from statistics import mean
 from typing import Any, Iterable, Mapping
 
@@ -103,13 +102,10 @@ def _group_counts(rows: list[dict[str, Any]], field: str) -> dict[str, dict[str,
 
 
 def _default_rule_ids() -> set[str]:
-    try:
-        from .rule_loader import load_rules
+    from .resources import rules_root
+    from .rule_loader import load_rules
 
-        rules_root = Path(__file__).resolve().parents[2] / "rules"
-        return {rule.id for rule in load_rules(rules_root)}
-    except Exception:
-        return set()
+    return {rule.id for rule in load_rules(rules_root())}
 
 
 def _sorted_dict(value: Mapping[str, Any]) -> dict[str, Any]:

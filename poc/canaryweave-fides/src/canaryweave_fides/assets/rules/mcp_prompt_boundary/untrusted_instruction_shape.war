@@ -1,0 +1,27 @@
+id: cwfr-0003
+name: UntrustedInstructionShape
+version: 0.1.0
+category: mcp_prompt_boundary/untrusted_instruction_structure
+severity: medium
+scope: text_field
+description: Detects instruction-like structure in an untrusted MCP field using structural markers rather than copied payload strings.
+signals:
+  - name: untrusted_origin
+    type: event_field_in
+    field: origin
+    values:
+      - resource_content
+      - tool_output
+      - server_manifest
+      - server_sampling
+  - name: instruction_shape_present
+    type: text_structure
+    feature: untrusted_instruction_shape
+condition: untrusted_origin and instruction_shape_present
+recommended_action: quarantine
+fixtures:
+  positive:
+    - untrusted_instruction_shape
+  negative:
+    - host_authorized_tool_plan
+safety_notes: Structural demonstration text only; excludes payload examples.

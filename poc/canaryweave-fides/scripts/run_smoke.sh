@@ -4,8 +4,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-PYTHONPATH=src python3 -m canaryweave_fides.cli \
+uv run python -m canaryweave_fides.cli \
   --fixture-set smoke \
   --output artifacts/smoke_report.json
 
-python3 scripts/check_public_artifacts.py
+uv run python scripts/check_public_artifacts.py

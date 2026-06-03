@@ -3,13 +3,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import lru_cache
-from pathlib import Path
 from typing import Any, Iterable, Mapping, Protocol, Sequence
 
 from .cases import AttackCase
 from .decisions import BlockedBy, Decision, FidesVerdict, GateDecision, StackName
 from .facts import NormalizedFacts
+from .fides_prompt import build_fides_judge_prompt, parse_fides_judge_response
 from .models import PolicyContext, TraceEvent
+from .providers import CopilotSdkJudgeProvider, JudgeProvider, JudgeProviderConfig
+from .resources import rules_root
 from .rule_engine import RuleEngine
 from .rule_loader import load_rules
 
@@ -28,6 +30,7 @@ class FidesJudgeMode(_StringEnum):
     DISABLED = "disabled"
     TEST_DOUBLE = "test_double"
     PROVIDER_PLACEHOLDER = "provider_placeholder"
+    COPILOT_SDK = "copilot_sdk"
 
 
 @dataclass(frozen=True)
@@ -285,10 +288,37 @@ class ProviderPlaceholderFidesJudge:
         )
 
 
+class ProviderBackedFidesJudge:
+    """Provider-backed FIDES judge over public-safe normalized facts."""
+
+    mode = FidesJudgeMode.COPILOT_SDK
+
+    def __init__(self, provider: JudgeProvider):
+        self.provider = provider
+        self.calls = 0
+
+    def judge(self, facts: NormalizedFacts) -> FidesJudgeResult:
+        self.calls += 1
+        prompt = build_fides_judge_prompt(facts, warden_miss_context={"case_id": facts.case_id})
+        response = self.provider.judge(prompt, case_id=facts.case_id, request_id=f"fides-{self.calls}")
+        parsed = parse_fides_judge_response(response.text)
+        return FidesJudgeResult(
+            verdict=parsed["verdict"],
+            confidence=parsed["confidence"],
+            reason_codes=tuple(parsed["reason_codes"]),
+            recommended_decision=parsed["recommended_decision"],
+            latency_ms=response.latency_ms,
+            provider_calls=response.provider_calls,
+            judge_transcript=response.text,
+        )
+
+
 def build_fides_judge(
     mode: FidesJudgeMode | str = FidesJudgeMode.DISABLED,
     *,
     results: Mapping[str, FidesJudgeResult | Mapping[str, object]] | None = None,
+    provider: JudgeProvider | None = None,
+    provider_config: JudgeProviderConfig | None = None,
 ) -> FidesJudge:
     judge_mode = FidesJudgeMode.coerce(mode)
     if judge_mode == FidesJudgeMode.DISABLED:
@@ -297,7 +327,25 @@ def build_fides_judge(
         return StaticFidesJudge(results)
     if judge_mode == FidesJudgeMode.PROVIDER_PLACEHOLDER:
         return ProviderPlaceholderFidesJudge()
+    if judge_mode == FidesJudgeMode.COPILOT_SDK:
+        configured_provider = provider or CopilotSdkJudgeProvider(provider_config or JudgeProviderConfig(provider="copilot_sdk"))
+        return ProviderBackedFidesJudge(configured_provider)
     raise ValueError(f"unsupported FIDES judge mode: {mode}")
+
+
+def _decision_rank(decision: Decision | str) -> int:
+    coerced = Decision.coerce(decision)
+    if coerced == Decision.BLOCK:
+        return 2
+    if coerced == Decision.QUARANTINE:
+        return 1
+    return 0
+
+
+def _more_restrictive_decision(left: Decision | str, right: Decision | str) -> Decision:
+    left_decision = Decision.coerce(left)
+    right_decision = Decision.coerce(right)
+    return left_decision if _decision_rank(left_decision) >= _decision_rank(right_decision) else right_decision
 
 
 def _recommended_decision_for_verdict(verdict: FidesVerdict) -> Decision:
@@ -335,8 +383,7 @@ def _sink_allowed(facts: NormalizedFacts) -> bool | None:
 
 @lru_cache(maxsize=1)
 def _default_rule_engine() -> RuleEngine:
-    rules_root = Path(__file__).resolve().parents[2] / "rules"
-    return RuleEngine(load_rules(rules_root))
+    return RuleEngine(load_rules(rules_root()))
 
 
 def _facts_to_trace_and_policy(facts: NormalizedFacts) -> tuple[tuple[TraceEvent, ...], PolicyContext]:
@@ -459,22 +506,26 @@ def evaluate_stack(
             )
         judge = fides_judge or DisabledFidesJudge()
         verdict = judge.judge(facts)
-        if verdict.verdict == FidesVerdict.UNSAFE:
+        effective_decision = _more_restrictive_decision(
+            _recommended_decision_for_verdict(FidesVerdict.coerce(verdict.verdict)),
+            Decision.coerce(verdict.recommended_decision),
+        )
+        if effective_decision == Decision.BLOCK:
             return GateDecision(
                 stack=StackName.RULES_PLUS_FIDES,
                 decision=Decision.BLOCK,
                 blocked_by=BlockedBy.FIDES_JUDGE,
-                fides_verdict=FidesVerdict.UNSAFE,
+                fides_verdict=verdict.verdict,
                 reason_codes=verdict.reason_codes,
                 latency_ms=verdict.latency_ms,
                 provider_calls=verdict.provider_calls,
             )
-        if verdict.verdict == FidesVerdict.UNCERTAIN:
+        if effective_decision == Decision.QUARANTINE:
             return GateDecision(
                 stack=StackName.RULES_PLUS_FIDES,
                 decision=Decision.QUARANTINE,
                 blocked_by=BlockedBy.FIDES_JUDGE,
-                fides_verdict=FidesVerdict.UNCERTAIN,
+                fides_verdict=verdict.verdict,
                 reason_codes=verdict.reason_codes,
                 latency_ms=verdict.latency_ms,
                 provider_calls=verdict.provider_calls,
