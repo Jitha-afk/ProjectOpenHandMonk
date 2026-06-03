@@ -21,7 +21,7 @@ print('multi-dataset config ok')
 PY
 
 PYTHONPATH=src python3 -m canaryweave_fides.cli eval \
-  --iterations 50 \
+  --config data/evals/multi_dataset_gate.yaml \
   --public-report \
   --output artifacts/evals/public_gate_eval_report_50.json
 

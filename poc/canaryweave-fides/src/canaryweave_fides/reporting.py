@@ -13,6 +13,7 @@ def _decision_rows(run_report: Mapping[str, Any]) -> list[dict[str, Any]]:
         if not isinstance(case_result, Mapping):
             continue
         base = {
+            "case_id": case_result.get("case_id"),
             "dataset_id": case_result.get("dataset_id"),
             "case_kind": case_result.get("case_kind"),
             "attack_category": case_result.get("attack_category"),
@@ -55,23 +56,27 @@ def _security_metrics_for_stack(rows: list[dict[str, Any]], stack: str) -> dict[
     }
 
 
-def _blocked_case_keys(rows: list[dict[str, Any]], stack: str, attack_only: bool = False) -> set[tuple[Any, Any, Any]]:
-    keys: set[tuple[Any, Any, Any]] = set()
+def _case_key(row: Mapping[str, Any]) -> tuple[Any, Any, Any, Any]:
+    return (row.get("dataset_id"), row.get("case_id"), row.get("iteration"), row.get("attack_category"))
+
+
+def _blocked_case_keys(rows: list[dict[str, Any]], stack: str, attack_only: bool = False) -> set[tuple[Any, Any, Any, Any]]:
+    keys: set[tuple[Any, Any, Any, Any]] = set()
     for row in rows:
         if row.get("stack") != stack:
             continue
         if attack_only and row.get("case_kind") != "attack":
             continue
         if row.get("decision") in {"block", "quarantine"}:
-            keys.add((row.get("dataset_id"), row.get("iteration"), row.get("attack_category")))
+            keys.add(_case_key(row))
     return keys
 
 
-def _allowed_attack_keys(rows: list[dict[str, Any]], stack: str) -> set[tuple[Any, Any, Any]]:
-    keys: set[tuple[Any, Any, Any]] = set()
+def _allowed_attack_keys(rows: list[dict[str, Any]], stack: str) -> set[tuple[Any, Any, Any, Any]]:
+    keys: set[tuple[Any, Any, Any, Any]] = set()
     for row in rows:
         if row.get("stack") == stack and row.get("case_kind") == "attack" and row.get("decision") == "allow":
-            keys.add((row.get("dataset_id"), row.get("iteration"), row.get("attack_category")))
+            keys.add(_case_key(row))
     return keys
 
 
@@ -137,7 +142,19 @@ def build_public_report(run_report: Mapping[str, Any]) -> dict[str, Any]:
             "public_safe": True,
             "case_level_rows_included": False,
             "source_material_included": False,
+            "model_outputs_included": False,
             "judge_transcripts_included": False,
         },
+        "adapter_results": [
+            {
+                "dataset_id": result.get("dataset_id"),
+                "status": result.get("status"),
+                "case_count": result.get("case_count"),
+                "message": result.get("message"),
+                "safe_metadata": result.get("safe_metadata", {}),
+            }
+            for result in run_report.get("adapter_results", [])
+            if isinstance(result, Mapping)
+        ],
         "provider_calls": run_report.get("provider_calls", 0),
     }

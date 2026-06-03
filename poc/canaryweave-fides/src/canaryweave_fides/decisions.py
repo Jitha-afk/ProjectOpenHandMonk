@@ -37,6 +37,7 @@ class FidesVerdict(_StringEnum):
     SAFE = "safe"
     UNSAFE = "unsafe"
     UNCERTAIN = "uncertain"
+    DISABLED = "disabled"
     NOT_CALLED = "not_called"
 
 

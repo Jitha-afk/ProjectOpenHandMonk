@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping
 
-from .cases import AttackCase, CaseKind, _as_mapping, _public_safe
+from .cases import AttackCase, _as_mapping, _public_safe
 
 
 _FLAG_KEYS = (
@@ -51,8 +51,6 @@ class NormalizedFacts:
     case_id: str
     dataset_id: str
     split: str
-    case_kind: str
-    attack_category: str
     surface: str
     origin_labels: tuple[str, ...] = ()
     trust_labels: tuple[str, ...] = ()
@@ -68,8 +66,6 @@ class NormalizedFacts:
         object.__setattr__(self, "case_id", str(self.case_id))
         object.__setattr__(self, "dataset_id", str(self.dataset_id))
         object.__setattr__(self, "split", str(self.split))
-        object.__setattr__(self, "case_kind", str(self.case_kind))
-        object.__setattr__(self, "attack_category", str(self.attack_category))
         object.__setattr__(self, "surface", str(self.surface))
         object.__setattr__(self, "origin_labels", _as_tuple(self.origin_labels))
         object.__setattr__(self, "trust_labels", _as_tuple(self.trust_labels))
@@ -99,7 +95,7 @@ class NormalizedFacts:
         ):
             if source in safe:
                 features[target] = features[target] or bool(safe[source])
-        for key in ("length", "sha256", "text_hash", "schema_shape"):
+        for key in ("length", "sha256", "text_hash", "public_hash", "schema_shape"):
             if key in safe:
                 features[key] = safe[key]
 
@@ -140,8 +136,6 @@ class NormalizedFacts:
             case_id=case.case_id,
             dataset_id=case.dataset_id,
             split=case.split,
-            case_kind=CaseKind.coerce(case.case_kind).value,
-            attack_category=case.attack_category,
             surface=case.surface,
             origin_labels=origin_labels,
             trust_labels=trust_labels,
@@ -167,8 +161,6 @@ class NormalizedFacts:
             "case_id": self.case_id,
             "dataset_id": self.dataset_id,
             "split": self.split,
-            "case_kind": self.case_kind,
-            "attack_category": self.attack_category,
             "surface": self.surface,
             "origin_labels": _public_safe(self.origin_labels),
             "trust_labels": _public_safe(self.trust_labels),
@@ -187,8 +179,6 @@ class NormalizedFacts:
             case_id=str(data["case_id"]),
             dataset_id=str(data["dataset_id"]),
             split=str(data["split"]),
-            case_kind=str(data["case_kind"]),
-            attack_category=str(data["attack_category"]),
             surface=str(data["surface"]),
             origin_labels=_as_tuple(data.get("origin_labels")),
             trust_labels=_as_tuple(data.get("trust_labels")),

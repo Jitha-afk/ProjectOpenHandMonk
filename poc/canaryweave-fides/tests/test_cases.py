@@ -30,6 +30,8 @@ def test_attack_case_public_export_excludes_private_custody_fields():
     assert "private_data" not in public
     assert "_private_note" not in public["safe_features"]
     assert public["safe_features"]["origin_labels"] == ["tool_output"]
+    assert public["ground_truth"]["case_kind"] == "attack"
+    assert public["ground_truth"]["expected_behavior"] == "block"
     assert public["policy_context"]["allowed_sinks"] == ["local_audit"]
     json.dumps(public)
 
@@ -51,7 +53,40 @@ def test_attack_case_from_dict_round_trips_public_schema_without_raw_ref():
 
     assert case.raw_ref is None
     assert case.iteration_seed is None
-    assert case.to_dict() == {**public, "iteration_seed": None}
+    assert case.to_dict() == {
+        **public,
+        "iteration_seed": None,
+        "ground_truth": {
+            "case_kind": "benign",
+            "expected_behavior": "allow",
+            "attack_category": "benign_control",
+            "expected_rule_ids": [],
+            "labels": {},
+        },
+    }
+
+
+def test_ground_truth_is_separate_from_safe_features_and_normalized_facts():
+    from canaryweave_fides.facts import NormalizedFacts
+
+    case = AttackCase(
+        case_id="case-label-separation",
+        dataset_id="synthetic",
+        split="ci",
+        case_kind="attack",
+        attack_category="label_only_category",
+        surface="prompt",
+        safe_features={"origin_labels": ["user"], "instruction_shape": False},
+        policy_context={"trusted_origins": ["user"]},
+        expected_behavior="block",
+    )
+
+    facts_blob = json.dumps(NormalizedFacts.from_attack_case(case).to_dict(), sort_keys=True)
+
+    assert "label_only_category" not in facts_blob
+    assert "case_kind" not in facts_blob
+    assert "expected_behavior" not in facts_blob
+    assert case.to_dict()["ground_truth"]["attack_category"] == "label_only_category"
 
 
 def test_attack_case_private_import_keeps_raw_ref_but_never_publicly_exports_it():

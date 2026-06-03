@@ -1,7 +1,19 @@
+import pytest
+
 from canaryweave_fides.cases import AttackCase
 from canaryweave_fides.decisions import BlockedBy, Decision, FidesVerdict, StackName
 from canaryweave_fides.facts import NormalizedFacts
-from canaryweave_fides.gate import FidesJudgeResult, StaticFidesJudge, evaluate_case, evaluate_stack
+from canaryweave_fides.gate import (
+    DisabledFidesJudge,
+    FidesJudgeMode,
+    FidesJudgeResult,
+    ProviderPlaceholderFidesJudge,
+    StaticFidesJudge,
+    build_fides_judge,
+    evaluate_case,
+    evaluate_stack,
+)
+from canaryweave_fides.rule_engine import RuleEngine
 
 
 def _case(**safe_features):
@@ -47,8 +59,17 @@ def test_warden_yara_rules_block_untrusted_tool_plan_with_denied_capability():
 
     assert decision.decision is Decision.BLOCK
     assert decision.blocked_by is BlockedBy.YARA_RULE
-    assert "warden.capability_not_allowed" in decision.rule_ids
-    assert "warden.untrusted_tool_plan" in decision.rule_ids
+    assert "cwfr-0001" in decision.rule_ids
+    assert all(rule_id.startswith("cwfr-") for rule_id in decision.rule_ids)
+    assert not any(rule_id.startswith("warden.") for rule_id in decision.rule_ids)
+
+
+def test_warden_uses_rule_engine_instead_of_hardcoded_heuristics():
+    facts = NormalizedFacts.from_attack_case(_case())
+    decision = evaluate_stack(facts, StackName.YARA_RULES, rule_engine=RuleEngine(()))
+
+    assert decision.decision is Decision.ALLOW
+    assert decision.rule_ids == ()
 
 
 def test_rules_plus_fides_does_not_call_fides_when_warden_blocks():
@@ -93,3 +114,64 @@ def test_evaluate_case_returns_all_stack_decisions():
         StackName.YARA_RULES,
         StackName.RULES_PLUS_FIDES,
     )
+
+
+def test_rules_plus_fides_default_mode_is_disabled_and_does_not_call_provider():
+    case = _case(
+        origin_labels=["user"],
+        trust_labels=["trusted"],
+        instruction_shape=False,
+        tool_plan_shape=False,
+        requested_tool="read_task",
+        requested_sink="local_audit",
+    )
+    facts = NormalizedFacts.from_attack_case(case)
+
+    decision = evaluate_stack(facts, StackName.RULES_PLUS_FIDES)
+
+    assert decision.decision is Decision.ALLOW
+    assert decision.fides_verdict is FidesVerdict.DISABLED
+    assert decision.provider_calls == 0
+    assert "fides.disabled" in decision.reason_codes
+
+
+def test_fides_judge_modes_are_explicit():
+    assert [mode.value for mode in FidesJudgeMode] == ["disabled", "test_double", "provider_placeholder"]
+    assert isinstance(build_fides_judge("disabled"), DisabledFidesJudge)
+    assert isinstance(build_fides_judge("test_double"), StaticFidesJudge)
+    assert isinstance(build_fides_judge("provider_placeholder"), ProviderPlaceholderFidesJudge)
+
+
+def test_provider_placeholder_never_makes_real_provider_calls():
+    facts = NormalizedFacts.from_attack_case(
+        _case(
+            origin_labels=["user"],
+            trust_labels=["trusted"],
+            instruction_shape=False,
+            tool_plan_shape=False,
+            requested_tool="read_task",
+            requested_sink="local_audit",
+        )
+    )
+
+    with pytest.raises(NotImplementedError, match="provider_placeholder"):
+        ProviderPlaceholderFidesJudge().judge(facts)
+
+
+def test_fides_judge_result_public_serialization_omits_transcript():
+    transcript = "PRIVATE_JUDGE_TRANSCRIPT_SHOULD_NOT_BE_PUBLIC"
+    result = FidesJudgeResult(
+        verdict="unsafe",
+        confidence=0.77,
+        reason_codes=("semantic_policy_violation",),
+        recommended_decision="block",
+        judge_transcript=transcript,
+    )
+
+    public = result.to_dict()
+    assert "judge_transcript" not in public
+    assert transcript not in str(public)
+    assert public["transcript_included"] is False
+
+    private = result.to_private_dict()
+    assert private["judge_transcript"] == transcript

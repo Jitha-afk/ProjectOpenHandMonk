@@ -24,6 +24,48 @@ class ExpectedBehavior(_StringEnum):
     BLOCK = "block"
 
 
+@dataclass(frozen=True)
+class GroundTruth:
+    """Evaluation-only labels kept out of detector facts.
+
+    WARDEN/FIDES receive NormalizedFacts derived from safe_features and
+    policy_context. These labels are for scoring/reporting after decisions have
+    been made, not for detection.
+    """
+
+    case_kind: CaseKind | str
+    expected_behavior: ExpectedBehavior | str = ExpectedBehavior.ALLOW
+    attack_category: str = "unspecified"
+    expected_rule_ids: tuple[str, ...] = ()
+    labels: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "case_kind", CaseKind.coerce(self.case_kind))
+        object.__setattr__(self, "expected_behavior", ExpectedBehavior.coerce(self.expected_behavior))
+        object.__setattr__(self, "attack_category", str(self.attack_category))
+        object.__setattr__(self, "expected_rule_ids", tuple(str(rule_id) for rule_id in self.expected_rule_ids))
+        object.__setattr__(self, "labels", _as_mapping(self.labels))
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "case_kind": CaseKind.coerce(self.case_kind).value,
+            "expected_behavior": ExpectedBehavior.coerce(self.expected_behavior).value,
+            "attack_category": self.attack_category,
+            "expected_rule_ids": list(self.expected_rule_ids),
+            "labels": _public_safe(self.labels),
+        }
+
+    @classmethod
+    def from_mapping(cls, data: Mapping[str, Any]) -> "GroundTruth":
+        return cls(
+            case_kind=data["case_kind"],
+            expected_behavior=data.get("expected_behavior", ExpectedBehavior.ALLOW),
+            attack_category=str(data.get("attack_category", "unspecified")),
+            expected_rule_ids=tuple(str(rule_id) for rule_id in data.get("expected_rule_ids", ())),
+            labels=_as_mapping(data.get("labels", {})),
+        )
+
+
 _PRIVATE_KEYS = {"raw_ref", "private_data"}
 
 
@@ -72,6 +114,7 @@ class AttackCase:
     safe_features: Mapping[str, Any] = field(default_factory=dict)
     policy_context: Mapping[str, Any] = field(default_factory=dict)
     expected_behavior: ExpectedBehavior | str = ExpectedBehavior.ALLOW
+    ground_truth: GroundTruth | Mapping[str, Any] | None = None
     iteration_seed: int | None = None
     raw_ref: str | None = field(default=None, repr=False, compare=False)
     private_data: Mapping[str, Any] = field(default_factory=dict, repr=False, compare=False)
@@ -84,6 +127,20 @@ class AttackCase:
         object.__setattr__(self, "attack_category", str(self.attack_category))
         object.__setattr__(self, "surface", str(self.surface))
         object.__setattr__(self, "expected_behavior", ExpectedBehavior.coerce(self.expected_behavior))
+        if self.ground_truth is None:
+            ground_truth = GroundTruth(
+                case_kind=self.case_kind,
+                expected_behavior=self.expected_behavior,
+                attack_category=self.attack_category,
+            )
+        elif isinstance(self.ground_truth, GroundTruth):
+            ground_truth = self.ground_truth
+        else:
+            ground_truth = GroundTruth.from_mapping(self.ground_truth)
+        object.__setattr__(self, "ground_truth", ground_truth)
+        object.__setattr__(self, "case_kind", ground_truth.case_kind)
+        object.__setattr__(self, "expected_behavior", ground_truth.expected_behavior)
+        object.__setattr__(self, "attack_category", ground_truth.attack_category)
         object.__setattr__(self, "safe_features", _as_mapping(self.safe_features))
         object.__setattr__(self, "policy_context", _as_mapping(self.policy_context))
         object.__setattr__(self, "private_data", _as_mapping(self.private_data))
@@ -107,6 +164,7 @@ class AttackCase:
             "safe_features": _public_safe(self.safe_features),
             "policy_context": _public_safe(self.policy_context),
             "expected_behavior": expected_behavior.value,
+            "ground_truth": self.ground_truth.to_dict(),
         }
 
     @classmethod
@@ -123,6 +181,13 @@ class AttackCase:
         missing = [key for key in required if key not in data]
         if missing:
             raise ValueError(f"AttackCase missing required fields: {', '.join(missing)}")
+        ground_truth = data.get("ground_truth")
+        if ground_truth is None:
+            ground_truth = {
+                "case_kind": data["case_kind"],
+                "expected_behavior": data["expected_behavior"],
+                "attack_category": data["attack_category"],
+            }
         return cls(
             case_id=str(data["case_id"]),
             dataset_id=str(data["dataset_id"]),
@@ -134,6 +199,7 @@ class AttackCase:
             safe_features=_as_mapping(data.get("safe_features", {})),
             policy_context=_as_mapping(data.get("policy_context", {})),
             expected_behavior=data["expected_behavior"],
+            ground_truth=ground_truth,
             raw_ref=data.get("raw_ref"),
             private_data=_as_mapping(data.get("private_data", {})),
         )

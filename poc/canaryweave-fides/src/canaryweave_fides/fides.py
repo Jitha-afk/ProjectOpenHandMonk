@@ -1,6 +1,22 @@
 from __future__ import annotations
 
+from enum import Enum
+from typing import Any
+
 from .models import FidesVerdict, PolicyContext, TraceEvent
+
+
+class FidesIFCMode(str, Enum):
+    DISABLED = "disabled"
+    TEST_DOUBLE = "test_double"
+
+    @classmethod
+    def coerce(cls, value: Any) -> "FidesIFCMode":
+        if isinstance(value, cls):
+            return value
+        if isinstance(value, bool):
+            return cls.TEST_DOUBLE if value else cls.DISABLED
+        return cls(str(value))
 
 
 class FidesIFCLayer:
@@ -12,8 +28,14 @@ class FidesIFCLayer:
     ground truth; it is an optional layer on top of deterministic rules.
     """
 
-    def __init__(self, enabled: bool = True):
-        self.enabled = enabled
+    def __init__(self, mode: FidesIFCMode | str | bool = FidesIFCMode.DISABLED, *, enabled: bool | None = None):
+        if enabled is not None:
+            mode = FidesIFCMode.TEST_DOUBLE if enabled else FidesIFCMode.DISABLED
+        self.mode = FidesIFCMode.coerce(mode)
+
+    @property
+    def enabled(self) -> bool:
+        return self.mode != FidesIFCMode.DISABLED
 
     def evaluate(self, trace: tuple[TraceEvent, ...], policy: PolicyContext) -> FidesVerdict:
         if not self.enabled:
