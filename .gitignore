@@ -205,3 +205,12 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Controlled private research data and local review artifacts
+reverse-engineering/
+poc/canaryweave-fides/reverse-engineering/
+*.private.csv
+*_private.csv
+*private-review*.csv
+*judge_transcript*
+*transcript*.jsonl

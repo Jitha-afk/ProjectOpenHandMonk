@@ -9,6 +9,7 @@ import yaml
 from .adapters import AdapterConfig, DatasetAdapter, create_adapter
 from .decisions import StackName
 from .gate import FidesJudgeMode
+from .resources import conf_root, resource_root
 
 
 @dataclass(frozen=True)
@@ -32,7 +33,7 @@ def _read_yaml(path: Path) -> dict[str, Any]:
 
 
 def _repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    return resource_root()
 
 
 def _resolve_path(value: Any, *, base: Path) -> Path | None:
@@ -44,7 +45,7 @@ def _resolve_path(value: Any, *, base: Path) -> Path | None:
 
 def _dataset_catalog(path: Path | None, *, base: Path) -> dict[str, Mapping[str, Any]]:
     if path is None:
-        path = base / "conf" / "datasets.yaml"
+        path = conf_root() / "datasets.yaml"
     data = _read_yaml(path)
     datasets = data.get("datasets", {})
     if not isinstance(datasets, Mapping):
@@ -54,7 +55,7 @@ def _dataset_catalog(path: Path | None, *, base: Path) -> dict[str, Mapping[str,
 
 def _stack_order(path: Path | None, *, base: Path) -> tuple[StackName, ...]:
     if path is None:
-        path = base / "conf" / "stacks.yaml"
+        path = conf_root() / "stacks.yaml"
     data = _read_yaml(path)
     values = data.get("stack_order", ())
     if not isinstance(values, list):

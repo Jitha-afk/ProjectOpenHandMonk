@@ -208,7 +208,7 @@ def test_rules_plus_fides_default_mode_is_disabled_and_does_not_call_provider():
 
 
 def test_fides_judge_modes_are_explicit():
-    assert [mode.value for mode in FidesJudgeMode] == ["disabled", "test_double", "provider_placeholder"]
+    assert [mode.value for mode in FidesJudgeMode] == ["disabled", "test_double", "provider_placeholder", "copilot_sdk"]
     assert isinstance(build_fides_judge("disabled"), DisabledFidesJudge)
     assert isinstance(build_fides_judge("test_double"), StaticFidesJudge)
     assert isinstance(build_fides_judge("provider_placeholder"), ProviderPlaceholderFidesJudge)

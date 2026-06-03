@@ -28,7 +28,7 @@ For signature-improvement loops, the eval runner can also write a private review
 
 ```bash
 CANARYWEAVE_ASB_ROOT=/path/to/controlled/ASB \
-PYTHONPATH=src python3 -m canaryweave_fides.cli eval \
+uv run python -m canaryweave_fides.cli eval \
   --config data/evals/multi_dataset_gate.yaml \
   --dataset asb \
   --iterations 1 \
@@ -44,7 +44,7 @@ Keep reviewer CSVs under a git-ignored controlled path such as `reverse-engineer
 Before committing this milestone, run:
 
 ```bash
-python3 scripts/check_markdown_fences.py
+uv run python scripts/check_markdown_fences.py
 uv run --with pytest --with PyYAML pytest -q
 ```
 
@@ -53,7 +53,7 @@ uv run --with pytest --with PyYAML pytest -q
 Run:
 
 ```bash
-python3 scripts/check_public_artifacts.py
+uv run python scripts/check_public_artifacts.py
 ```
 
 The safety scanner rejects common raw payload shapes, credential-like strings, and provider transcript markers in public roots.
