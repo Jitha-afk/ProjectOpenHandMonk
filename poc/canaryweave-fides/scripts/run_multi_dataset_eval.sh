@@ -6,7 +6,6 @@ cd "$ROOT"
 
 python3 - <<'PY'
 from pathlib import Path
-import sys
 import yaml
 
 required = [
@@ -19,8 +18,11 @@ for path in required:
     with path.open('r', encoding='utf-8') as handle:
         yaml.safe_load(handle)
 print('multi-dataset config ok')
-print('multi-dataset executable runner is not implemented in Milestone 1')
-sys.exit(0)
 PY
+
+PYTHONPATH=src python3 -m canaryweave_fides.cli eval \
+  --iterations 50 \
+  --public-report \
+  --output artifacts/evals/public_gate_eval_report_50.json
 
 python3 scripts/check_public_artifacts.py
