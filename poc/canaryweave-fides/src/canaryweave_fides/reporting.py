@@ -401,6 +401,196 @@ def _missing_prerequisite_summary(run_report: Mapping[str, Any]) -> dict[str, An
     }
 
 
+def _expected_rule_ids(case_result: Mapping[str, Any]) -> tuple[str, ...]:
+    ground_truth = case_result.get("ground_truth")
+    if isinstance(ground_truth, Mapping):
+        return tuple(
+            str(rule_id)
+            for rule_id in ground_truth.get("expected_rule_ids") or ()
+            if str(rule_id).startswith("cwfr-")
+        )
+    return ()
+
+
+def _observed_warden_rule_ids(case_result: Mapping[str, Any]) -> set[str]:
+    observed: set[str] = set()
+    for decision in case_result.get("decisions", []) or []:
+        if not isinstance(decision, Mapping):
+            continue
+        if decision.get("stack") not in {"yara_rules", "rules_plus_fides"}:
+            continue
+        for rule_id in decision.get("rule_ids", []) or []:
+            rule_text = str(rule_id)
+            if rule_text.startswith("cwfr-"):
+                observed.add(rule_text)
+    return observed
+
+
+def _empty_expected_rule_entry() -> dict[str, Any]:
+    return {
+        "total_cases": 0,
+        "cases_with_expected_rules": 0,
+        "cases_without_expected_rules": 0,
+        "expected_rule_hits": 0,
+        "expected_rule_misses": 0,
+        "expected_rule_hit_rate": 0.0,
+        "unique_expected_rule_ids": [],
+        "unique_hit_rule_ids": [],
+        "unique_missed_rule_ids": [],
+    }
+
+
+def _finalize_expected_rule_entry(entry: dict[str, Any]) -> dict[str, Any]:
+    denominator = int(entry["cases_with_expected_rules"])
+    entry["expected_rule_hit_rate"] = round(int(entry["expected_rule_hits"]) / denominator, 4) if denominator else 0.0
+    for key in ("unique_expected_rule_ids", "unique_hit_rule_ids", "unique_missed_rule_ids"):
+        entry[key] = sorted(entry[key])
+    return entry
+
+
+def _record_expected_rule_entry(entry: dict[str, Any], expected: tuple[str, ...], observed: set[str]) -> None:
+    entry["total_cases"] += 1
+    if not expected:
+        entry["cases_without_expected_rules"] += 1
+        return
+    expected_set = set(expected)
+    hit_ids = expected_set & observed
+    missed_ids = expected_set - observed
+    entry["cases_with_expected_rules"] += 1
+    entry["unique_expected_rule_ids"] = set(entry["unique_expected_rule_ids"]) | expected_set
+    if hit_ids:
+        entry["expected_rule_hits"] += 1
+        entry["unique_hit_rule_ids"] = set(entry["unique_hit_rule_ids"]) | hit_ids
+    else:
+        entry["expected_rule_misses"] += 1
+    if missed_ids:
+        entry["unique_missed_rule_ids"] = set(entry["unique_missed_rule_ids"]) | missed_ids
+
+
+def _expected_rule_evidence(run_report: Mapping[str, Any]) -> dict[str, Any]:
+    overall = _empty_expected_rule_entry()
+    by_dataset: dict[str, dict[str, Any]] = defaultdict(_empty_expected_rule_entry)
+    by_category: dict[str, dict[str, Any]] = defaultdict(_empty_expected_rule_entry)
+    by_dataset_category: dict[str, dict[str, dict[str, Any]]] = defaultdict(lambda: defaultdict(_empty_expected_rule_entry))
+
+    for case_result in run_report.get("case_results", []):
+        if not isinstance(case_result, Mapping):
+            continue
+        expected = _expected_rule_ids(case_result)
+        observed = _observed_warden_rule_ids(case_result)
+        dataset = str(case_result.get("dataset_id") or "unknown")
+        category = str(case_result.get("attack_category") or "unknown")
+        _record_expected_rule_entry(overall, expected, observed)
+        _record_expected_rule_entry(by_dataset[dataset], expected, observed)
+        _record_expected_rule_entry(by_category[category], expected, observed)
+        _record_expected_rule_entry(by_dataset_category[dataset][category], expected, observed)
+
+    available = int(overall["cases_with_expected_rules"]) > 0
+    return {
+        "available": available,
+        "reason": None if available else "no expected_rule_ids metadata present in case results",
+        **_finalize_expected_rule_entry(overall),
+        "by_dataset": _sorted_dict({key: _finalize_expected_rule_entry(value) for key, value in by_dataset.items()}),
+        "by_category": _sorted_dict({key: _finalize_expected_rule_entry(value) for key, value in by_category.items()}),
+        "by_dataset_and_category": _sorted_dict(
+            {
+                dataset: _sorted_dict({category: _finalize_expected_rule_entry(value) for category, value in categories.items()})
+                for dataset, categories in by_dataset_category.items()
+            }
+        ),
+        "case_level_rows_included": False,
+    }
+
+
+_FACT_FLAG_KEYS = (
+    "command_execution_shape",
+    "instruction_shape",
+    "credential_or_secret_shape",
+    "exfiltration_shape",
+    "path_boundary_shape",
+    "network_request_shape",
+    "memory_poisoning_shape",
+    "approval_bypass_shape",
+    "tool_plan_shape",
+    "obfuscated",
+)
+
+
+def _empty_fact_entry() -> dict[str, Any]:
+    entry: dict[str, Any] = {
+        "total_cases": 0,
+        "requested_capability_present_count": 0,
+        "requested_capability_present_ratio": 0.0,
+        "requested_sink_present_count": 0,
+        "requested_sink_present_ratio": 0.0,
+        "mapped_category_count": 0,
+        "mapped_category_ratio": 0.0,
+        "dataset_native_fallback_count": 0,
+        "dataset_native_fallback_ratio": 0.0,
+    }
+    for key in _FACT_FLAG_KEYS:
+        entry[f"{key}_count"] = 0
+        entry[f"{key}_ratio"] = 0.0
+    return entry
+
+
+def _record_fact_entry(entry: dict[str, Any], case_result: Mapping[str, Any]) -> None:
+    raw_safe_features = case_result.get("safe_features")
+    safe_features = raw_safe_features if isinstance(raw_safe_features, Mapping) else {}
+    category = str(case_result.get("attack_category") or "unknown")
+    entry["total_cases"] += 1
+    for key in _FACT_FLAG_KEYS:
+        if bool(safe_features.get(key, False)):
+            entry[f"{key}_count"] += 1
+    if _present(safe_features.get("requested_capability") or safe_features.get("capability") or safe_features.get("requested_tool")):
+        entry["requested_capability_present_count"] += 1
+    if _present(safe_features.get("requested_sink") or safe_features.get("sink") or safe_features.get("target_sink")):
+        entry["requested_sink_present_count"] += 1
+    if category in {"dataset_native", "unknown"}:
+        entry["dataset_native_fallback_count"] += 1
+    else:
+        entry["mapped_category_count"] += 1
+
+
+def _finalize_fact_entry(entry: dict[str, Any]) -> dict[str, Any]:
+    total = int(entry["total_cases"])
+    for key in _FACT_FLAG_KEYS:
+        entry[f"{key}_ratio"] = round(int(entry[f"{key}_count"]) / total, 4) if total else 0.0
+    for key in ("requested_capability_present", "requested_sink_present", "mapped_category", "dataset_native_fallback"):
+        entry[f"{key}_ratio"] = round(int(entry[f"{key}_count"]) / total, 4) if total else 0.0
+    return entry
+
+
+def _safe_fact_completeness(run_report: Mapping[str, Any]) -> dict[str, Any]:
+    overall = _empty_fact_entry()
+    by_dataset: dict[str, dict[str, Any]] = defaultdict(_empty_fact_entry)
+    by_category: dict[str, dict[str, Any]] = defaultdict(_empty_fact_entry)
+    by_dataset_category: dict[str, dict[str, dict[str, Any]]] = defaultdict(lambda: defaultdict(_empty_fact_entry))
+
+    for case_result in run_report.get("case_results", []):
+        if not isinstance(case_result, Mapping):
+            continue
+        dataset = str(case_result.get("dataset_id") or "unknown")
+        category = str(case_result.get("attack_category") or "unknown")
+        _record_fact_entry(overall, case_result)
+        _record_fact_entry(by_dataset[dataset], case_result)
+        _record_fact_entry(by_category[category], case_result)
+        _record_fact_entry(by_dataset_category[dataset][category], case_result)
+
+    return {
+        **_finalize_fact_entry(overall),
+        "by_dataset": _sorted_dict({key: _finalize_fact_entry(value) for key, value in by_dataset.items()}),
+        "by_category": _sorted_dict({key: _finalize_fact_entry(value) for key, value in by_category.items()}),
+        "by_dataset_and_category": _sorted_dict(
+            {
+                dataset: _sorted_dict({category: _finalize_fact_entry(value) for category, value in categories.items()})
+                for dataset, categories in by_dataset_category.items()
+            }
+        ),
+        "case_level_rows_included": False,
+    }
+
+
 def build_public_report(run_report: Mapping[str, Any], *, all_rule_ids: Iterable[str] | None = None) -> dict[str, Any]:
     rows = _decision_rows(run_report)
     metrics = {stack: _security_metrics_for_stack(rows, stack) for stack in _STACKS}
@@ -438,6 +628,8 @@ def build_public_report(run_report: Mapping[str, Any], *, all_rule_ids: Iterable
             "rule_coverage_by_dataset_and_category": coverage["rule_coverage_by_dataset_and_category"],
         },
         "missing_prerequisite_summary": _missing_prerequisite_summary(run_report),
+        "expected_rule_evidence": _expected_rule_evidence(run_report),
+        "safe_fact_completeness": _safe_fact_completeness(run_report),
         "groups": {
             "by_dataset": _group_counts(rows, "dataset_id"),
             "by_category": _group_counts(rows, "attack_category"),

@@ -144,6 +144,70 @@ def _truth_from_record(record: Mapping[str, Any]) -> GroundTruth:
     )
 
 
+_CATEGORY_RULE_EVIDENCE: dict[str, dict[str, Any]] = {
+    "mcp_execution/command_or_code_execution_request": {
+        "expected_rule_ids": ("cwfr-0106",),
+        "required_fields": ("features.command_execution_shape", "requested.capability"),
+        "policy_violation_id": "untrusted_execution_request",
+    },
+    "mcp_resource_boundary/path_or_uri_boundary_escape": {
+        "expected_rule_ids": ("cwfr-0105",),
+        "required_fields": ("features.path_boundary_shape", "requested.capability"),
+        "policy_violation_id": "resource_boundary_escape",
+    },
+    "mcp_network/unapproved_network_request": {
+        "expected_rule_ids": ("cwfr-0107",),
+        "required_fields": ("features.network_request_shape", "requested.capability"),
+        "policy_violation_id": "unapproved_network_request",
+    },
+    "mcp_data_flow/credential_or_secret_exposure": {
+        "expected_rule_ids": ("cwfr-0104",),
+        "required_fields": ("features.credential_or_secret_shape",),
+        "policy_violation_id": "credential_or_secret_exposure",
+    },
+    "mcp_prompt_boundary/instruction_hierarchy_violation": {
+        "expected_rule_ids": ("cwfr-0003",),
+        "required_fields": ("features.instruction_shape", "features.origin_labels"),
+        "policy_violation_id": "instruction_hierarchy_violation",
+    },
+    "mcp_suspicious_structure/encoding_or_obfuscation": {
+        "expected_rule_ids": ("cwfr-0004",),
+        "required_fields": ("features.obfuscated",),
+        "policy_violation_id": "suspicious_encoded_or_hidden_structure",
+    },
+}
+
+
+def _rule_evidence_for_category(category: str, case_kind: str, flags: Mapping[str, Any]) -> dict[str, Any]:
+    """Return public-safe scoring metadata for mapped attack categories.
+
+    These labels are used only by evaluation/reporting. They are not consumed by
+    WARDEN/FIDES detector facts. A category alone is not enough for expected-rule
+    evidence when multiple safe shapes share a broad category; only attach a rule
+    expectation when the exact facts required by that rule are present.
+    """
+    if case_kind != "attack":
+        return {}
+    if category == "mcp_data_flow/credential_or_secret_exposure" and not flags.get("credential_or_secret_shape"):
+        return {}
+    return dict(_CATEGORY_RULE_EVIDENCE.get(category, {}))
+
+
+def _origin_labels_for_surface(surface: str, flags: Mapping[str, Any]) -> list[str]:
+    if surface in {"tool", "tool_result"}:
+        return ["tool_output"]
+    if surface in {"resource", "mcp_resource"}:
+        return ["resource_content"]
+    if surface in {"manifest", "server_manifest"}:
+        return ["server_manifest"]
+    if surface in {"sampling", "server_sampling"}:
+        return ["server_sampling"]
+    if surface == "api_message" and flags.get("instruction_shape"):
+        # Dataset-local API-message records are untrusted source material. Map
+        # instruction-shaped records into an origin understood by cwfr-0003
+        # without using dataset labels or raw text.
+        return ["resource_content"]
+    return ["api_message"]
 
 
 def _safe_text_flags(text: str, surface: str) -> dict[str, Any]:
@@ -154,7 +218,7 @@ def _safe_text_flags(text: str, surface: str) -> dict[str, Any]:
         "credential_or_secret_shape": any(term in lowered for term in ("credential", "secret", "token", "password", "private key", "api key")),
         "exfiltration_shape": any(term in lowered for term in ("exfil", "send", "upload", "leak", "external", "webhook", "remote")),
         "path_boundary_shape": any(term in lowered for term in ("path", "file", "directory", "traversal", "workspace", "passwd", "parent directory")),
-        "network_request_shape": any(term in lowered for term in ("http", "url", "network", "request", "webhook", "api", "endpoint", "ssrf")),
+        "network_request_shape": any(term in lowered for term in ("http", "url", "network", "webhook", "endpoint", "ssrf")),
         "memory_poisoning_shape": any(term in lowered for term in ("memory", "remember", "store", "persist", "rag", "retrieval")),
         "approval_bypass_shape": any(term in lowered for term in ("approval", "consent", "without asking", "bypass", "permission")),
         "obfuscated": any(term in lowered for term in ("base64", "unicode", "encoded", "obfuscat", "hidden")),
@@ -168,10 +232,10 @@ def _shared_category(flags: Mapping[str, Any], fallback: str) -> str:
         return "mcp_execution/command_or_code_execution_request"
     if flags.get("path_boundary_shape"):
         return "mcp_resource_boundary/path_or_uri_boundary_escape"
-    if flags.get("network_request_shape"):
-        return "mcp_network/unapproved_network_request"
     if flags.get("credential_or_secret_shape") or flags.get("exfiltration_shape"):
         return "mcp_data_flow/credential_or_secret_exposure"
+    if flags.get("network_request_shape"):
+        return "mcp_network/unapproved_network_request"
     if flags.get("memory_poisoning_shape"):
         return "mcp_context_integrity/memory_or_rag_poisoning"
     if flags.get("approval_bypass_shape"):
@@ -326,6 +390,9 @@ class ASBAdapter(DatasetAdapter):
         flags = _safe_text_flags(private_text, surface)
         shared_category = _shared_category(flags, ground_truth.attack_category)
         requested = _requested_from_flags(flags)
+        origin_labels = _origin_labels_for_surface(surface, flags)
+        case_kind_value = getattr(ground_truth.case_kind, "value", str(ground_truth.case_kind))
+        rule_evidence = _rule_evidence_for_category(shared_category, case_kind_value, flags)
 
         safe_features = {
             "length": len(private_text),
@@ -339,16 +406,26 @@ class ASBAdapter(DatasetAdapter):
             "native_id_hash": public_hash(str(native_id)) if native_id is not None else None,
             **flags,
             **requested,
-            "origin_labels": ["tool_output" if surface in {"tool", "tool_result"} else "resource_content" if surface in {"resource", "mcp_resource"} else "api_message"],
+            "origin_labels": origin_labels,
             "trust_labels": ["untrusted"],
         }
         safe_features = {key: value for key, value in safe_features.items() if value is not None}
+        labels = dict(ground_truth.labels)
+        if rule_evidence:
+            labels.update(
+                {
+                    "required_fields": list(rule_evidence.get("required_fields", ())),
+                    "policy_violation_id": rule_evidence.get("policy_violation_id"),
+                    "source_tier": "controlled_local",
+                }
+            )
+        labels = {key: value for key, value in labels.items() if value is not None}
         ground_truth = GroundTruth(
             case_kind=ground_truth.case_kind,
             expected_behavior=ground_truth.expected_behavior,
             attack_category=shared_category,
-            expected_rule_ids=ground_truth.expected_rule_ids,
-            labels=ground_truth.labels,
+            expected_rule_ids=tuple(rule_evidence.get("expected_rule_ids", ground_truth.expected_rule_ids)),
+            labels=labels,
         )
 
         return AttackCase(
