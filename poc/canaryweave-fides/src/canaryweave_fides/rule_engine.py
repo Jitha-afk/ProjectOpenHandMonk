@@ -76,7 +76,21 @@ class RuleEngine:
         raise RuleEngineError(f"Unsupported signal type: {signal.type}")
 
     def _eval_condition(self, condition: str, values: dict[str, bool]) -> bool:
-        def replace(match: re.Match[str]) -> str:
+        def replace_namespaced(match: re.Match[str]) -> str:
+            namespace = match.group(1)
+            name = match.group(2)
+            if namespace == "signals":
+                if name not in values:
+                    raise RuleEngineError(f"Unknown condition token: signals.{name}")
+                return "True" if values[name] else "False"
+            # Non-deterministic sections are validated by the schema but are not
+            # evaluated by this deterministic engine. They stay false here and
+            # are handled by their own semantic/FIDES stages in the gate.
+            return "False"
+
+        expr = re.sub(r"\b(signals|keywords|semantics|fides)\.([A-Za-z_][A-Za-z0-9_]*)\b", replace_namespaced, condition)
+
+        def replace_bare(match: re.Match[str]) -> str:
             token = match.group(0)
             lower = token.lower()
             if lower in {"and", "or", "not", "true", "false"}:
@@ -85,7 +99,7 @@ class RuleEngine:
                 raise RuleEngineError(f"Unknown condition token: {token}")
             return "True" if values[token] else "False"
 
-        expr = re.sub(r"\b[A-Za-z_][A-Za-z0-9_]*\b", replace, condition)
+        expr = re.sub(r"\b[A-Za-z_][A-Za-z0-9_]*\b", replace_bare, expr)
         if not re.fullmatch(r"[TrueFalsandornt ()]+", expr):
             raise RuleEngineError(f"Unsafe condition expression: {condition}")
         return bool(eval(expr, {"__builtins__": {}}, {}))

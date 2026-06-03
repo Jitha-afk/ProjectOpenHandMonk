@@ -6,7 +6,7 @@ Scope: `poc/canaryweave-fides`
 
 Terminology:
 
-- **WARDEN**: deterministic YARA/NOVA/OPA/Vigil-style rule engine.
+- **WARDEN**: deterministic YARA/OPA/Vigil-style rule engine.
 - **FIDES**: separate LLM-as-judge layer for WARDEN misses.
 
 ## Reviewers
