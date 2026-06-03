@@ -69,7 +69,7 @@ canaryweave-fides/
 ├── src/canaryweave_fides/ # rule engine, FIDES/IFC, query_llm, metrics
 ├── tests/                 # pytest suite
 ├── research/              # source-grounded research notes
-├── design/                # design docs
+├── design/                # design docs, including evaluation methodology
 ├── scripts/               # local verification helpers
 └── artifacts/             # generated smoke reports
 ```
