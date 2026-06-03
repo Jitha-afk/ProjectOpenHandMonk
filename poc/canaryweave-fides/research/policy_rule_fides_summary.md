@@ -1,10 +1,10 @@
-# NOVA, OPA/Rego, and FIDES Research Framing
+# Policy Rules, OPA/Rego, and FIDES Research Framing
 
 ## Source-grounded anchors
 
 OPA describes itself as a general-purpose policy engine that decouples policy decision-making from policy enforcement. Software supplies structured data as input, and OPA evaluates that input against declarative policies. Its philosophy page emphasizes that policies should be specified declaratively, updated without recompiling or redeploying services, and managed by the people responsible for policy.
 
-NOVA-style rules are useful inspiration because they make detections human-reviewable: metadata, named signals, condition logic, tests, and optional semantic or LLM sections. This POC borrows that shape without copying NOVA grammar, rule names, payload strings, UUIDs, or prompt-only assumptions.
+Human-reviewable detection rules are useful because they combine metadata, named signals, condition logic, tests, and optional semantic or judge-assisted sections. This POC uses that defender-friendly shape while keeping its own YAML schema, rule IDs, payload safety model, and MCP-native assumptions.
 
 FIDES/IFC contributes a second layer: track confidentiality and integrity labels, propagate taint, enforce trusted-action and permitted-flow policies, and use quarantined inspection only through controlled interfaces.
 

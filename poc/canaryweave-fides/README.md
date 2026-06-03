@@ -1,6 +1,6 @@
 # CanaryWeave FIDES
 
-Controlled research POC for comparing a traditional regex/signature guard, a renamed NOVA-style structured rule layer, and an optional FIDES/IFC layer around quarantined `query_llm` calls.
+Controlled research POC for comparing a traditional regex/signature guard, a defender-authored structured WARDEN rule layer, and an optional FIDES/IFC layer around quarantined `query_llm` calls.
 
 ## Thesis
 

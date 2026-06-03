@@ -6,7 +6,7 @@ Defender-maintainable deterministic policy rules should run before untrusted dat
 
 ## WARDEN and FIDES
 
-WARDEN is the deterministic gate. In this POC it includes regex, YARA-style manifests, existing `.cwfr.yaml` rules, and future NOVA or OPA-like policy engines.
+WARDEN is the deterministic gate. In this POC it includes regex, YARA-style manifests, existing `.cwfr.yaml` rules, and future OPA-like policy engines.
 
 FIDES is a separate LLM-as-judge layer for WARDEN misses. It is not the rule engine. It receives a public-safe policy view and returns a structured verdict.
 
