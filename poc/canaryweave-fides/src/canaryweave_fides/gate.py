@@ -245,6 +245,14 @@ def _facts_to_trace_and_policy(facts: NormalizedFacts) -> tuple[tuple[TraceEvent
         text_parts.append(facts.redacted_text)
     if bool(facts.features.get("instruction_shape")):
         text_parts.append("policy boundary directive structure")
+    if bool(facts.features.get("command_execution_shape")):
+        text_parts.append("execution request structure")
+    if bool(facts.features.get("path_boundary_shape")):
+        text_parts.append("resource boundary request structure")
+    if bool(facts.features.get("network_request_shape")):
+        text_parts.append("external request structure")
+    if bool(facts.features.get("credential_or_secret_shape")):
+        text_parts.append("protected credential material structure")
     if bool(facts.features.get("obfuscated")):
         text_parts.append("hidden" + "\u200b" + "structure")
     if bool(facts.features.get("canary_present")):
@@ -262,7 +270,8 @@ def _facts_to_trace_and_policy(facts: NormalizedFacts) -> tuple[tuple[TraceEvent
         sink=str(requested_sink) if requested_sink is not None else None,
         canary_present=bool(facts.features.get("canary_present")),
         integrity="low" if "untrusted" in facts.trust_labels else "high",
-        consequential_action=bool(facts.features.get("tool_plan_shape")) or bool(facts.requested.get("action")),
+        consequential_action=bool(facts.features.get("tool_plan_shape")) or bool(facts.requested.get("action")) or bool(requested_capability),
+        metadata={**dict(facts.features), "requested": dict(facts.requested), "policy": dict(facts.policy)},
     )
     policy = PolicyContext(
         allowed_capabilities=tuple(str(item) for item in facts.policy.get("allowed_capabilities", ())),

@@ -76,7 +76,7 @@ def test_asb_adapter_maps_tiny_synthetic_fixture_to_safe_features_only(tmp_path)
     assert safe["source_format"] == "jsonl"
     assert safe["payload_field_count"] == 1
     assert "payload" in safe["payload_field_paths"]
-    assert safe["trust_labels"] == ["dataset_local"]
+    assert safe["trust_labels"] == ["untrusted"]
     assert safe["native_id_hash"].startswith("hmac-sha256:")
     assert case.ground_truth.case_kind.value == "attack"
     assert case.ground_truth.expected_behavior.value == "block"

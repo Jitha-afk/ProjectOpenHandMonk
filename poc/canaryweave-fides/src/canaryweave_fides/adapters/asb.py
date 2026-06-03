@@ -144,6 +144,59 @@ def _truth_from_record(record: Mapping[str, Any]) -> GroundTruth:
     )
 
 
+
+
+def _safe_text_flags(text: str, surface: str) -> dict[str, Any]:
+    lowered = text.lower()
+    flags = {
+        "instruction_shape": any(term in lowered for term in ("ignore", "override", "policy", "instruction", "developer", "system", "role", "jailbreak")),
+        "command_execution_shape": any(term in lowered for term in ("shell", "command", "execute", "script", "python", "bash", "powershell", "terminal")),
+        "credential_or_secret_shape": any(term in lowered for term in ("credential", "secret", "token", "password", "private key", "api key")),
+        "exfiltration_shape": any(term in lowered for term in ("exfil", "send", "upload", "leak", "external", "webhook", "remote")),
+        "path_boundary_shape": any(term in lowered for term in ("path", "file", "directory", "traversal", "workspace", "passwd", "parent directory")),
+        "network_request_shape": any(term in lowered for term in ("http", "url", "network", "request", "webhook", "api", "endpoint", "ssrf")),
+        "memory_poisoning_shape": any(term in lowered for term in ("memory", "remember", "store", "persist", "rag", "retrieval")),
+        "approval_bypass_shape": any(term in lowered for term in ("approval", "consent", "without asking", "bypass", "permission")),
+        "obfuscated": any(term in lowered for term in ("base64", "unicode", "encoded", "obfuscat", "hidden")),
+        "tool_plan_shape": surface in {"tool", "api_message", "tool_result"},
+    }
+    return flags
+
+
+def _shared_category(flags: Mapping[str, Any], fallback: str) -> str:
+    if flags.get("command_execution_shape"):
+        return "mcp_execution/command_or_code_execution_request"
+    if flags.get("path_boundary_shape"):
+        return "mcp_resource_boundary/path_or_uri_boundary_escape"
+    if flags.get("network_request_shape"):
+        return "mcp_network/unapproved_network_request"
+    if flags.get("credential_or_secret_shape") or flags.get("exfiltration_shape"):
+        return "mcp_data_flow/credential_or_secret_exposure"
+    if flags.get("memory_poisoning_shape"):
+        return "mcp_context_integrity/memory_or_rag_poisoning"
+    if flags.get("approval_bypass_shape"):
+        return "mcp_tool_authority/approval_or_consent_bypass"
+    if flags.get("instruction_shape"):
+        return "mcp_prompt_boundary/instruction_hierarchy_violation"
+    if flags.get("obfuscated"):
+        return "mcp_suspicious_structure/encoding_or_obfuscation"
+    return fallback
+
+
+def _requested_from_flags(flags: Mapping[str, Any]) -> dict[str, str]:
+    requested: dict[str, str] = {}
+    if flags.get("command_execution_shape"):
+        requested.update({"requested_tool": "execute_code", "requested_capability": "execute_code", "requested_action": "execute"})
+    elif flags.get("path_boundary_shape"):
+        requested.update({"requested_tool": "read_file", "requested_capability": "read_file", "requested_action": "read_resource"})
+    elif flags.get("network_request_shape"):
+        requested.update({"requested_tool": "network_request", "requested_capability": "network_request", "requested_action": "external_request"})
+    elif flags.get("memory_poisoning_shape"):
+        requested.update({"requested_tool": "memory_write", "requested_capability": "memory_write", "requested_action": "persist_context"})
+    if flags.get("exfiltration_shape") or flags.get("credential_or_secret_shape") or flags.get("network_request_shape"):
+        requested["requested_sink"] = "external_sink"
+    return requested
+
 def _load_json_records(path: Path) -> Iterable[Mapping[str, Any]]:
     data = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(data, Mapping):
@@ -270,6 +323,9 @@ class ASBAdapter(DatasetAdapter):
         ground_truth = _truth_from_record(record)
         surface = _stable_label(_first_value(record, _SURFACE_FIELD_NAMES), "api_message")
         top_level_keys = tuple(sorted(str(key) for key in record.keys()))
+        flags = _safe_text_flags(private_text, surface)
+        shared_category = _shared_category(flags, ground_truth.attack_category)
+        requested = _requested_from_flags(flags)
 
         safe_features = {
             "length": len(private_text),
@@ -281,12 +337,19 @@ class ASBAdapter(DatasetAdapter):
             "top_level_key_count": len(top_level_keys),
             "top_level_keys_hash": public_hash("\n".join(top_level_keys)),
             "native_id_hash": public_hash(str(native_id)) if native_id is not None else None,
-            "instruction_shape": bool(payload_paths),
-            "tool_plan_shape": surface in {"tool", "api_message", "tool_result"},
-            "origin_labels": [surface],
-            "trust_labels": ["dataset_local"],
+            **flags,
+            **requested,
+            "origin_labels": ["tool_output" if surface in {"tool", "tool_result"} else "resource_content" if surface in {"resource", "mcp_resource"} else "api_message"],
+            "trust_labels": ["untrusted"],
         }
         safe_features = {key: value for key, value in safe_features.items() if value is not None}
+        ground_truth = GroundTruth(
+            case_kind=ground_truth.case_kind,
+            expected_behavior=ground_truth.expected_behavior,
+            attack_category=shared_category,
+            expected_rule_ids=ground_truth.expected_rule_ids,
+            labels=ground_truth.labels,
+        )
 
         return AttackCase(
             case_id=public_id(self.dataset_id, opaque_material),
