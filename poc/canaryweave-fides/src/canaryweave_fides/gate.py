@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Mapping, Protocol, Sequence
+from typing import Any, Iterable, Mapping, Protocol, Sequence
 
 from .cases import AttackCase
 from .decisions import BlockedBy, Decision, FidesVerdict, GateDecision, StackName
@@ -123,7 +123,8 @@ class StaticFidesJudge:
 
     This is only a CI/test harness for the FIDES interface. The deterministic
     policy engine is WARDEN; FIDES itself remains the LLM-as-judge layer in the
-    research architecture.
+    research architecture. Test-double results are public-safe by construction:
+    they never record provider calls and never retain judge transcripts.
     """
 
     mode = FidesJudgeMode.TEST_DOUBLE
@@ -136,7 +137,7 @@ class StaticFidesJudge:
         self.calls += 1
         result = self.results.get(facts.case_id)
         if isinstance(result, FidesJudgeResult):
-            return result
+            return _as_test_double_result(result)
         if isinstance(result, Mapping):
             raw_verdict = result.get("verdict", FidesVerdict.SAFE)
             verdict = FidesVerdict.coerce(raw_verdict)
@@ -144,16 +145,14 @@ class StaticFidesJudge:
             confidence = float(str(raw_confidence)) if raw_confidence is not None else (1.0 if verdict == FidesVerdict.SAFE else 0.0)
             raw_recommended = result.get("recommended_decision")
             recommended_decision = None if raw_recommended is None else str(raw_recommended)
-            raw_transcript = result.get("judge_transcript")
-            judge_transcript = None if raw_transcript is None else str(raw_transcript)
             return FidesJudgeResult(
                 verdict=verdict,
                 confidence=confidence,
                 reason_codes=tuple(str(code) for code in result.get("reason_codes", ())),
                 recommended_decision=recommended_decision,
                 latency_ms=result.get("latency_ms"),
-                provider_calls=int(result.get("provider_calls", 0)),
-                judge_transcript=judge_transcript,
+                provider_calls=0,
+                judge_transcript=None,
             )
         return FidesJudgeResult(
             verdict=FidesVerdict.SAFE,
@@ -162,6 +161,113 @@ class StaticFidesJudge:
             recommended_decision=Decision.ALLOW,
             provider_calls=0,
         )
+
+
+
+def _as_test_double_result(result: FidesJudgeResult) -> FidesJudgeResult:
+    """Return a transcript-free, zero-provider copy of a fixture verdict."""
+    return FidesJudgeResult(
+        verdict=result.verdict,
+        confidence=result.confidence,
+        reason_codes=result.reason_codes,
+        recommended_decision=result.recommended_decision,
+        latency_ms=result.latency_ms,
+        provider_calls=0,
+        judge_transcript=None,
+    )
+
+
+def _tuple_match(actual: str | None, allowed: object) -> bool:
+    if allowed in (None, (), [], set(), frozenset()):
+        return True
+    values = {str(item) for item in allowed} if isinstance(allowed, (list, tuple, set, frozenset)) else {str(allowed)}
+    return actual in values
+
+
+def _matches_expected_fields(source: Mapping[str, Any], expected: Mapping[str, Any] | None) -> bool:
+    if not expected:
+        return True
+    for key, expected_value in expected.items():
+        if source.get(str(key)) != expected_value:
+            return False
+    return True
+
+
+def _matches_test_double_rule(case: AttackCase, rule: Mapping[str, Any]) -> bool:
+    match = rule.get("match", {})
+    if not isinstance(match, Mapping) or not match:
+        raise ValueError("FIDES test-double evidence rules require a non-empty match mapping")
+    if not _tuple_match(case.case_id, match.get("case_ids")):
+        return False
+    if not _tuple_match(case.dataset_id, match.get("dataset_ids")):
+        return False
+    if not _tuple_match(case.attack_category, match.get("attack_categories")):
+        return False
+    if not _tuple_match(case.surface, match.get("surfaces")):
+        return False
+    if not _tuple_match(case.case_kind.value, match.get("case_kinds")):
+        return False
+    if not _tuple_match(case.expected_behavior.value, match.get("expected_behaviors")):
+        return False
+    safe_features = match.get("safe_features")
+    if safe_features is not None and not isinstance(safe_features, Mapping):
+        raise ValueError("FIDES test-double match.safe_features must be a mapping")
+    return _matches_expected_fields(case.safe_features, safe_features)
+
+
+def _test_double_result_from_rule(rule: Mapping[str, Any]) -> FidesJudgeResult:
+    rule_id = str(rule.get("id") or "fixture_verdict")
+    reason_codes = tuple(str(code) for code in (rule.get("reason_codes") or ()))
+    if not reason_codes:
+        reason_codes = (f"fides.test_double.{rule_id}",)
+    if int(rule.get("provider_calls") or 0) != 0:
+        raise ValueError("FIDES test-double evidence rules must declare provider_calls as 0 or omit it")
+    if rule.get("judge_transcript") is not None:
+        raise ValueError("FIDES test-double evidence rules must not include judge transcripts")
+    latency_value = rule.get("latency_ms", 0.0)
+    latency_ms = None if latency_value is None else float(latency_value)
+    recommended = rule.get("recommended_decision")
+    return FidesJudgeResult(
+        verdict=FidesVerdict.coerce(rule.get("verdict", FidesVerdict.UNSAFE)),
+        confidence=float(rule.get("confidence", 0.9)),
+        reason_codes=reason_codes,
+        recommended_decision=None if recommended is None else Decision.coerce(recommended),
+        latency_ms=latency_ms,
+        provider_calls=0,
+        judge_transcript=None,
+    )
+
+
+def build_test_double_evidence_results(
+    cases: Iterable[AttackCase],
+    rules: Iterable[Mapping[str, Any]],
+) -> dict[str, FidesJudgeResult]:
+    """Create deterministic fixture verdicts for selected public-safe cases.
+
+    Matching happens against public `AttackCase` labels/features, allowing CI and
+    public evidence runs to simulate a FIDES judge catch on WARDEN misses without
+    provider calls, prompt transcripts, model outputs, or raw payload custody.
+    The gate still invokes FIDES only after WARDEN allows a case.
+    """
+    results: dict[str, FidesJudgeResult] = {}
+    ordered_cases = tuple(sorted(cases, key=lambda case: (case.dataset_id, case.case_id)))
+    for raw_rule in rules:
+        rule = dict(raw_rule)
+        max_catches = rule.get("max_catches")
+        remaining = None if max_catches in (None, "") else int(max_catches)
+        if remaining is not None and remaining < 0:
+            raise ValueError("FIDES test-double max_catches must be non-negative")
+        verdict = _test_double_result_from_rule(rule)
+        for case in ordered_cases:
+            if remaining == 0:
+                break
+            if case.case_id in results:
+                continue
+            if _matches_test_double_rule(case, rule):
+                results[case.case_id] = verdict
+                if remaining is not None:
+                    remaining -= 1
+    return results
 
 
 class ProviderPlaceholderFidesJudge:

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 from .adapters import AdapterConfig, DatasetAdapter, SyntheticAdapter
-from .cases import AttackCase
+from .cases import AttackCase, GroundTruth, _public_safe
 from .decisions import Decision, GateDecision, StackName
-from .gate import FidesJudge, FidesJudgeMode, build_fides_judge, evaluate_case
+from .gate import FidesJudge, FidesJudgeMode, StaticFidesJudge, build_fides_judge, build_test_double_evidence_results, evaluate_case
 from .rule_engine import RuleEngine
 
 
@@ -15,6 +15,7 @@ class EvaluationRunConfig:
     adapters: tuple[DatasetAdapter, ...] = ()
     iterations: int = 50
     fides_mode: FidesJudgeMode | str = FidesJudgeMode.DISABLED
+    fides_test_double_evidence_rules: tuple[Mapping[str, Any], ...] = ()
     stacks: tuple[StackName | str, ...] = (
         StackName.NO_GUARD,
         StackName.REGEX_BASELINE,
@@ -27,6 +28,7 @@ class EvaluationRunConfig:
         object.__setattr__(self, "adapters", adapters)
         object.__setattr__(self, "iterations", int(self.iterations))
         object.__setattr__(self, "fides_mode", FidesJudgeMode.coerce(self.fides_mode))
+        object.__setattr__(self, "fides_test_double_evidence_rules", tuple(dict(rule) for rule in self.fides_test_double_evidence_rules))
         object.__setattr__(self, "stacks", tuple(StackName.coerce(stack) for stack in self.stacks))
         if self.iterations < 1:
             raise ValueError("iterations must be >= 1")
@@ -69,11 +71,20 @@ def run_evaluation(
 ) -> dict[str, object]:
     config = config or EvaluationRunConfig()
     stacks = tuple(StackName.coerce(stack) for stack in config.stacks)
-    judge = fides_judge or build_fides_judge(config.fides_mode)
     adapter_results = [adapter.load() for adapter in config.adapters]
     cases: list[AttackCase] = []
     for result in adapter_results:
         cases.extend(result.cases)
+
+    test_double_results = {}
+    if config.fides_mode == FidesJudgeMode.TEST_DOUBLE and config.fides_test_double_evidence_rules:
+        test_double_results = build_test_double_evidence_results(cases, config.fides_test_double_evidence_rules)
+    if fides_judge is not None:
+        judge = fides_judge
+    elif test_double_results:
+        judge = StaticFidesJudge(test_double_results)
+    else:
+        judge = build_fides_judge(config.fides_mode)
 
     stack_counts = _empty_stack_counts(stacks)
     per_case_results: list[dict[str, object]] = []
@@ -96,6 +107,13 @@ def run_evaluation(
                     "attack_category": iteration_case.attack_category,
                     "surface": iteration_case.surface,
                     "iteration": iteration,
+                    "safe_features": _public_safe(iteration_case.safe_features),
+                    "policy_context": _public_safe(iteration_case.policy_context),
+                    "ground_truth": (
+                        iteration_case.ground_truth.to_dict()
+                        if isinstance(iteration_case.ground_truth, GroundTruth)
+                        else _public_safe(iteration_case.ground_truth or {})
+                    ),
                     **summary,
                 }
             )
@@ -107,6 +125,14 @@ def run_evaluation(
         "total_cases": len(cases),
         "total_iterations": total_iterations,
         "fides_mode": FidesJudgeMode.coerce(config.fides_mode).value,
+        "fides_test_double": {
+            "enabled": config.fides_mode == FidesJudgeMode.TEST_DOUBLE,
+            "evidence_rules_configured": len(config.fides_test_double_evidence_rules),
+            "fixture_verdicts_configured": len(test_double_results),
+            "provider_calls_enabled": False,
+            "judge_transcripts_included": False,
+            "label": "FIDES TEST DOUBLE EVIDENCE MODE" if config.fides_mode == FidesJudgeMode.TEST_DOUBLE else "FIDES DISABLED",
+        },
         "defense_stacks": stack_counts,
         "adapter_results": [result.to_dict() for result in adapter_results],
         "case_results": per_case_results,
