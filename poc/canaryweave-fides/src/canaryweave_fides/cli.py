@@ -23,11 +23,32 @@ def run_smoke(output: Path | str | None = None) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="CanaryWeave FIDES controlled smoke runner")
-    parser.add_argument("--fixture-set", default="smoke", choices=["smoke"])
-    parser.add_argument("--output", type=Path, default=Path("artifacts/smoke_report.json"))
+    parser = argparse.ArgumentParser(description="CanaryWeave FIDES controlled smoke/eval runner")
+    subparsers = parser.add_subparsers(dest="command")
+
+    smoke = subparsers.add_parser("smoke", help="Run legacy smoke report")
+    smoke.add_argument("--fixture-set", default="smoke", choices=["smoke"])
+    smoke.add_argument("--output", type=Path, default=Path("artifacts/smoke_report.json"))
+
+    eval_parser = subparsers.add_parser("eval", help="Run WARDEN/FIDES pre-context gate evaluation")
+    eval_parser.add_argument("--iterations", type=int, default=50)
+    eval_parser.add_argument("--output", type=Path, default=Path("artifacts/evals/gate_eval_report.json"))
+
+    parser.add_argument("--fixture-set", default="smoke", choices=["smoke"], help=argparse.SUPPRESS)
+    parser.add_argument("--output", type=Path, default=None, help=argparse.SUPPRESS)
+
     args = parser.parse_args(argv)
-    report = run_smoke(args.output)
+    if args.command == "eval":
+        from .runner import EvaluationRunConfig, run_evaluation
+
+        report = run_evaluation(EvaluationRunConfig(iterations=args.iterations))
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0
+
+    output = args.output or Path("artifacts/smoke_report.json")
+    report = run_smoke(output)
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0
 
