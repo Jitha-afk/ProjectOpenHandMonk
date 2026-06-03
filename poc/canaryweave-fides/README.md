@@ -65,6 +65,13 @@ The smoke report is written to `artifacts/smoke_report.json`.
 
 ```text
 canaryweave-fides/
+├── conf/                  # Vigil-style harness defaults, datasets, stacks
+├── data/
+│   ├── datasets/          # public-safe dataset adapter specs
+│   ├── evals/             # smoke and multi-dataset eval configs
+│   ├── prompts/           # FIDES judge contract, provider disabled by default
+│   └── yara/              # regex baseline and YARA-style rule manifests
+├── docs/                  # thesis, rules, datasets, judge, eval guidance
 ├── rules/                 # .cwfr.yaml structured rules
 ├── src/canaryweave_fides/ # rule engine, FIDES/IFC, query_llm, metrics
 ├── tests/                 # pytest suite
@@ -73,3 +80,8 @@ canaryweave-fides/
 ├── scripts/               # local verification helpers
 └── artifacts/             # generated smoke reports
 ```
+
+WARDEN is the deterministic rule stack: regex baseline, YARA-style manifests,
+current `.cwfr.yaml` rules, and future policy engines. FIDES is the separate
+judge layer for deterministic misses. Public configs and reports must remain
+free of raw dataset payloads, raw prompts, and judge transcripts.
