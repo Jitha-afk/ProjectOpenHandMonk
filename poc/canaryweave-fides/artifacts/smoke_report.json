@@ -1,17 +1,18 @@
 {
   "asr_reduction": {
-    "rules_plus_fides_ifc_absolute": 0.7143,
-    "structured_rules_absolute": 0.5714
+    "rules_plus_fides_ifc_absolute": 1.0,
+    "structured_rules_absolute": 0.8
   },
   "attack_cases": 5,
   "defense_stacks": {
     "no_guard": {
       "allowed": 7,
-      "asr": 0.7143,
+      "asr": 1.0,
       "blocked": 0
     },
     "regex_guard": {
       "allowed": 5,
+      "asr": 0.8,
       "blocked": 2,
       "f1": 0.2857,
       "precision": 0.5,
@@ -20,6 +21,7 @@
     },
     "rules_plus_fides_ifc": {
       "allowed": 2,
+      "asr": 0.0,
       "blocked": 5,
       "f1": 1.0,
       "precision": 1.0,
@@ -28,6 +30,7 @@
     },
     "structured_rule_guard": {
       "allowed": 3,
+      "asr": 0.2,
       "blocked": 4,
       "f1": 0.8889,
       "precision": 1.0,

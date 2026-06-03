@@ -38,7 +38,7 @@ def test_gate_decision_represents_all_required_enum_values():
     ]
     assert [decision.value for decision in Decision] == ["allow", "quarantine", "block"]
     assert [blocked_by.value for blocked_by in BlockedBy] == ["regex", "yara_rule", "fides_judge", "none"]
-    assert [verdict.value for verdict in FidesVerdict] == ["safe", "unsafe", "uncertain", "not_called"]
+    assert [verdict.value for verdict in FidesVerdict] == ["safe", "unsafe", "uncertain", "disabled", "not_called"]
 
 
 def test_gate_decision_from_dict_accepts_strings_and_round_trips_lists():

@@ -15,7 +15,16 @@ from .adapters import (
 from .cases import AttackCase, CaseKind, ExpectedBehavior
 from .decisions import BlockedBy, Decision, FidesVerdict, GateDecision, StackName
 from .facts import NormalizedFacts
-from .gate import FidesJudgeResult, StaticFidesJudge, evaluate_case, evaluate_stack
+from .gate import (
+    DisabledFidesJudge,
+    FidesJudgeMode,
+    FidesJudgeResult,
+    ProviderPlaceholderFidesJudge,
+    StaticFidesJudge,
+    build_fides_judge,
+    evaluate_case,
+    evaluate_stack,
+)
 
 __version__ = "0.1.0"
 
@@ -30,14 +39,18 @@ __all__ = [
     "CaseKind",
     "DatasetAdapter",
     "Decision",
+    "DisabledFidesJudge",
     "ExpectedBehavior",
+    "FidesJudgeMode",
     "FidesJudgeResult",
     "FidesVerdict",
     "GateDecision",
     "NormalizedFacts",
+    "ProviderPlaceholderFidesJudge",
     "StackName",
     "StaticFidesJudge",
     "SyntheticAdapter",
+    "build_fides_judge",
     "evaluate_case",
     "evaluate_stack",
     "create_adapter",

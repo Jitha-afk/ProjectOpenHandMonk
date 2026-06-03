@@ -1,9 +1,45 @@
 {
+  "adapter_results": [
+    {
+      "case_count": 4,
+      "dataset_id": "synthetic",
+      "message": "synthetic adapter loaded 4 public-safe cases",
+      "safe_metadata": {
+        "public_safe": true,
+        "source": "hand_authored_ci"
+      },
+      "status": "loaded"
+    },
+    {
+      "case_count": 878,
+      "dataset_id": "asb",
+      "message": "asb adapter loaded 878 cases with 1 unreadable files skipped",
+      "safe_metadata": {
+        "files_inspected": 46,
+        "public_export": "redacted_features_only",
+        "unreadable_files": 1
+      },
+      "status": "loaded"
+    },
+    {
+      "case_count": 0,
+      "dataset_id": "agentdefensebench",
+      "message": "agentdefensebench skipped: missing configured local dataset path",
+      "safe_metadata": {
+        "absent_behavior": "skipped_missing_local_path"
+      },
+      "status": "skipped_missing_local_path"
+    }
+  ],
   "groups": {
     "by_category": {
       "benign_control": {
         "blocked_or_quarantined": 0,
         "total": 50
+      },
+      "dataset_native": {
+        "blocked_or_quarantined": 0,
+        "total": 43900
       },
       "hidden_unicode": {
         "blocked_or_quarantined": 50,
@@ -19,12 +55,20 @@
       }
     },
     "by_dataset": {
+      "asb": {
+        "blocked_or_quarantined": 0,
+        "total": 43900
+      },
       "synthetic": {
         "blocked_or_quarantined": 150,
         "total": 200
       }
     },
     "by_surface": {
+      "api_message": {
+        "blocked_or_quarantined": 0,
+        "total": 43900
+      },
       "mcp_resource": {
         "blocked_or_quarantined": 50,
         "total": 50
@@ -51,25 +95,26 @@
   "maintainability_metrics": {
     "dataset_rule_coverage": {
       "synthetic": [
-        "warden.canary_sink_violation",
-        "warden.capability_not_allowed",
-        "warden.hidden_instruction_shape",
-        "warden.untrusted_tool_plan"
+        "cwfr-0001",
+        "cwfr-0002",
+        "cwfr-0003",
+        "cwfr-0004"
       ]
     },
     "rule_count": 4,
     "rule_engine_codename": "WARDEN",
     "unique_rule_ids": [
-      "warden.canary_sink_violation",
-      "warden.capability_not_allowed",
-      "warden.hidden_instruction_shape",
-      "warden.untrusted_tool_plan"
+      "cwfr-0001",
+      "cwfr-0002",
+      "cwfr-0003",
+      "cwfr-0004"
     ]
   },
   "provider_calls": 0,
   "safety": {
     "case_level_rows_included": false,
     "judge_transcripts_included": false,
+    "model_outputs_included": false,
     "public_safe": true,
     "source_material_included": false
   },
@@ -78,12 +123,12 @@
     "no_guard": {
       "asr": 1.0,
       "asr_reduction_vs_no_guard": 0.0,
-      "asr_reduction_vs_regex": -0.6667,
-      "attack_cases": 150,
+      "asr_reduction_vs_regex": -0.0023,
+      "attack_cases": 44050,
       "benign_cases": 50,
       "benign_refusal_rate": 0.0,
       "f1": 0.0,
-      "fn": 150,
+      "fn": 44050,
       "fp": 0,
       "precision": 0.0,
       "recall": 0.0,
@@ -92,55 +137,55 @@
       "tp": 0
     },
     "regex_baseline": {
-      "asr": 0.3333,
-      "asr_reduction_vs_no_guard": 0.6667,
+      "asr": 0.9977,
+      "asr_reduction_vs_no_guard": 0.0023,
       "asr_reduction_vs_regex": 0.0,
-      "attack_cases": 150,
+      "attack_cases": 44050,
       "benign_cases": 50,
       "benign_refusal_rate": 0.0,
-      "f1": 0.8,
-      "fn": 50,
+      "f1": 0.0045,
+      "fn": 43950,
       "fp": 0,
       "precision": 1.0,
-      "recall": 0.6667,
+      "recall": 0.0023,
       "safe_pass_through_rate": 1.0,
       "tn": 50,
       "tp": 100
     },
     "rules_plus_fides": {
-      "asr": 0.0,
-      "asr_reduction_vs_no_guard": 1.0,
-      "asr_reduction_vs_regex": 0.3333,
-      "attack_cases": 150,
+      "asr": 0.9966,
+      "asr_reduction_vs_no_guard": 0.0034,
+      "asr_reduction_vs_regex": 0.0011,
+      "attack_cases": 44050,
       "benign_cases": 50,
       "benign_refusal_rate": 0.0,
-      "f1": 1.0,
-      "fn": 0,
+      "f1": 0.0068,
+      "fn": 43900,
       "fp": 0,
       "precision": 1.0,
-      "recall": 1.0,
+      "recall": 0.0034,
       "safe_pass_through_rate": 1.0,
       "tn": 50,
       "tp": 150
     },
     "yara_rules": {
-      "asr": 0.0,
-      "asr_reduction_vs_no_guard": 1.0,
-      "asr_reduction_vs_regex": 0.3333,
-      "attack_cases": 150,
+      "asr": 0.9966,
+      "asr_reduction_vs_no_guard": 0.0034,
+      "asr_reduction_vs_regex": 0.0011,
+      "attack_cases": 44050,
       "benign_cases": 50,
       "benign_refusal_rate": 0.0,
-      "f1": 1.0,
-      "fn": 0,
+      "f1": 0.0068,
+      "fn": 43900,
       "fp": 0,
       "precision": 1.0,
-      "recall": 1.0,
+      "recall": 0.0034,
       "safe_pass_through_rate": 1.0,
       "tn": 50,
       "tp": 150
     }
   },
   "source_schema_version": "canaryweave_fides.gate_eval.v1",
-  "total_cases": 4,
-  "total_iterations": 200
+  "total_cases": 882,
+  "total_iterations": 44100
 }

@@ -93,8 +93,6 @@ def test_normalized_facts_from_dict_round_trips_json_safe_public_view():
         case_id="case-012",
         dataset_id="synthetic",
         split="ci",
-        case_kind="attack",
-        attack_category="hidden_unicode",
         surface="prompt",
         origin_labels=("resource_content",),
         trust_labels=("untrusted",),

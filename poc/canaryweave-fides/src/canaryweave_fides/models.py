@@ -69,9 +69,28 @@ class FidesVerdict:
     blocks: bool
     policy_checks: tuple[str, ...] = ()
     rationale_short: str = ""
+    judge_transcript: str | None = field(default=None, repr=False, compare=False)
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        """Public-safe verdict export; raw judge transcripts are never included."""
+        return {
+            "verdict": self.verdict,
+            "confidence": self.confidence,
+            "blocks": self.blocks,
+            "policy_checks": list(self.policy_checks),
+            "rationale_short": self.rationale_short,
+            "transcript_included": False,
+        }
+
+    def to_private_dict(self) -> dict[str, Any]:
+        return {
+            "verdict": self.verdict,
+            "confidence": self.confidence,
+            "blocks": self.blocks,
+            "policy_checks": list(self.policy_checks),
+            "rationale_short": self.rationale_short,
+            "judge_transcript": self.judge_transcript,
+        }
 
 
 @dataclass(frozen=True)
@@ -85,6 +104,13 @@ class QueryResult:
     output_text: str = ""
 
     def to_dict(self) -> dict[str, Any]:
+        """Public-safe query result export.
+
+        The quarantined model output and any judge transcript remain private
+        custody fields and are intentionally omitted from default serialization.
+        Use to_private_dict() for local debugging artifacts that must not be
+        published.
+        """
         return {
             "allowed": self.allowed,
             "model_called": self.model_called,
@@ -92,5 +118,17 @@ class QueryResult:
             "preflight": self.preflight.to_dict(),
             "postflight": self.postflight.to_dict() if self.postflight else None,
             "fides": self.fides.to_dict() if self.fides else None,
+            "model_output_included": False,
+            "judge_transcript_included": False,
+        }
+
+    def to_private_dict(self) -> dict[str, Any]:
+        return {
+            "allowed": self.allowed,
+            "model_called": self.model_called,
+            "blocked_by": self.blocked_by,
+            "preflight": self.preflight.to_dict(),
+            "postflight": self.postflight.to_dict() if self.postflight else None,
+            "fides": self.fides.to_private_dict() if self.fides else None,
             "output_text": self.output_text,
         }

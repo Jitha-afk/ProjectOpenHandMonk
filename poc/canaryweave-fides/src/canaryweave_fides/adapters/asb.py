@@ -8,9 +8,10 @@ from typing import Any, Iterable, Mapping
 
 import yaml
 
-from canaryweave_fides.cases import AttackCase
+from canaryweave_fides.cases import AttackCase, GroundTruth
 
 from .base import AdapterResult, AdapterStatus, DatasetAdapter
+from .identifiers import public_hash, public_hmac_hex, public_id
 
 _TEXT_FIELD_NAMES = {
     "payload",
@@ -39,10 +40,6 @@ _ALLOWED_SUFFIXES = (".jsonl", ".json", ".yaml", ".yml", ".csv", ".txt")
 
 def _sha256_text(text: str) -> str:
     return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-
-def _short_hash(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
 
 
 def _stable_label(value: Any, default: str) -> str:
@@ -135,6 +132,16 @@ def _classify_kind(record: Mapping[str, Any]) -> str:
 
 def _expected_behavior(kind: str) -> str:
     return "allow" if kind == "benign" else "block"
+
+
+def _truth_from_record(record: Mapping[str, Any]) -> GroundTruth:
+    case_kind = _classify_kind(record)
+    return GroundTruth(
+        case_kind=case_kind,
+        expected_behavior=_expected_behavior(case_kind),
+        attack_category=_stable_label(_first_value(record, _CATEGORY_FIELD_NAMES), "dataset_native"),
+        labels={"dataset_label_present": _first_value(record, _LABEL_FIELD_NAMES) is not None},
+    )
 
 
 def _load_json_records(path: Path) -> Iterable[Mapping[str, Any]]:
@@ -257,37 +264,36 @@ class ASBAdapter(DatasetAdapter):
         private_text, payload_paths = _record_to_private_text(record)
         native_id = _first_value(record, _ID_FIELD_NAMES)
         rel_path = file_path.relative_to(root) if file_path != root else Path(file_path.name)
-        raw_ref = f"{self.dataset_id}:file_hash={_short_hash(str(rel_path))}#record={index}"
+        raw_ref = f"{self.dataset_id}:file_hmac={public_hmac_hex(str(rel_path), length=16)}#record={index}"
         opaque_material = f"{rel_path}:{index}:{native_id}:{_sha256_text(private_text)}"
         split = _stable_label(_first_value(record, _SPLIT_FIELD_NAMES), self.config.split or "dev")
-        case_kind = _classify_kind(record)
-        attack_category = _stable_label(_first_value(record, _CATEGORY_FIELD_NAMES), "dataset_native")
+        ground_truth = _truth_from_record(record)
         surface = _stable_label(_first_value(record, _SURFACE_FIELD_NAMES), "api_message")
         top_level_keys = tuple(sorted(str(key) for key in record.keys()))
 
         safe_features = {
             "length": len(private_text),
-            "sha256": _sha256_text(private_text),
+            "public_hash": public_hash(private_text),
             "schema_shape": _shape(record),
             "source_format": file_path.suffix.lower().lstrip(".") or "unknown",
             "payload_field_count": len(payload_paths),
             "payload_field_paths": payload_paths,
             "top_level_key_count": len(top_level_keys),
-            "top_level_keys_hash": _sha256_text("\n".join(top_level_keys)),
-            "native_id_hash": _sha256_text(str(native_id)) if native_id is not None else None,
+            "top_level_keys_hash": public_hash("\n".join(top_level_keys)),
+            "native_id_hash": public_hash(str(native_id)) if native_id is not None else None,
             "instruction_shape": bool(payload_paths),
             "tool_plan_shape": surface in {"tool", "api_message", "tool_result"},
             "origin_labels": [surface],
-            "trust_labels": ["untrusted" if case_kind == "attack" else "trusted"],
+            "trust_labels": ["dataset_local"],
         }
         safe_features = {key: value for key, value in safe_features.items() if value is not None}
 
         return AttackCase(
-            case_id=f"{self.dataset_id}.{_short_hash(opaque_material)}",
+            case_id=public_id(self.dataset_id, opaque_material),
             dataset_id=self.dataset_id,
             split=split,
-            case_kind=case_kind,
-            attack_category=attack_category,
+            case_kind=ground_truth.case_kind,
+            attack_category=ground_truth.attack_category,
             surface=surface,
             safe_features=safe_features,
             policy_context={
@@ -295,7 +301,11 @@ class ASBAdapter(DatasetAdapter):
                 "allowed_tools": ["read_task", "summarize_note"],
                 "allowed_sinks": ["local_audit", "user_response"],
             },
-            expected_behavior=_expected_behavior(case_kind),
+            expected_behavior=ground_truth.expected_behavior,
+            ground_truth=ground_truth,
             raw_ref=raw_ref,
-            private_data={"source_format": file_path.suffix.lower().lstrip(".") or "unknown"},
+            private_data={
+                "source_format": file_path.suffix.lower().lstrip(".") or "unknown",
+                "private_sha256": _sha256_text(private_text),
+            },
         )
