@@ -1,0 +1,19 @@
+id: cwfr-0002
+name: CanaryBoundaryCrossing
+version: 0.1.0
+category: mcp_agentic_misuse/unauthorized_data_flow
+severity: critical
+scope: trace
+description: Detects a benign canary marker appearing outside an allowed event or sink boundary.
+signals:
+  - name: canary_outside_allowed_sink
+    type: canary_flow
+    relation: outside_allowed_sink
+condition: canary_outside_allowed_sink
+recommended_action: block_and_audit
+fixtures:
+  positive:
+    - canary_boundary_crossing
+  negative:
+    - canary_allowed_sink
+safety_notes: Uses benign synthetic marker labels only.
