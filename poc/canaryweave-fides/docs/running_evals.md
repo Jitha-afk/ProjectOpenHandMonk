@@ -12,7 +12,7 @@ scripts/run_smoke.sh
 
 The script runs the existing CLI smoke path and then checks public artifacts.
 
-## Multi-dataset placeholder
+## Multi-dataset eval
 
 From `poc/canaryweave-fides`:
 
@@ -20,7 +20,24 @@ From `poc/canaryweave-fides`:
 scripts/run_multi_dataset_eval.sh
 ```
 
-In Milestone 1 this script validates configuration files and reports that the executable multi-dataset runner is not implemented yet. Later milestones will connect it to adapters and the gate runner.
+The script validates the config files, runs the configured public-safe multi-dataset eval, and then checks public artifacts. Optional controlled datasets are reported as `skipped_missing_local_path` when their local roots are absent.
+
+## Private reviewer CSV
+
+For signature-improvement loops, the eval runner can also write a private reviewer CSV with raw input/output custody fields and per-stack labels:
+
+```bash
+CANARYWEAVE_ASB_ROOT=/path/to/controlled/ASB \
+PYTHONPATH=src python3 -m canaryweave_fides.cli eval \
+  --config data/evals/multi_dataset_gate.yaml \
+  --dataset asb \
+  --iterations 1 \
+  --output artifacts/evals/asb_controlled_public_report_1.json \
+  --private-review-csv reverse-engineering/review/asb_gate_review.csv \
+  --public-report
+```
+
+Keep reviewer CSVs under a git-ignored controlled path such as `reverse-engineering/review/`. They may contain raw source snippets, raw decision outputs, and labels intended for human review; they are not public artifacts and must not be committed.
 
 ## Required verification
 

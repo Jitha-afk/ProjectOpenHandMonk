@@ -39,6 +39,12 @@ def main(argv: list[str] | None = None) -> int:
     eval_parser.add_argument("--dataset", action="append", default=None, help="Limit run to one or more configured dataset IDs")
     eval_parser.add_argument("--iterations", type=int, default=50)
     eval_parser.add_argument("--output", type=Path, default=Path("artifacts/evals/gate_eval_report.json"))
+    eval_parser.add_argument(
+        "--private-review-csv",
+        type=Path,
+        default=None,
+        help="Optional private reviewer CSV with raw input/output custody fields; keep under a git-ignored controlled path",
+    )
     eval_parser.add_argument("--public-report", action="store_true", help="Write aggregate public-safe report")
     eval_parser.add_argument(
         "--fail-on-missing-optional-dataset",
@@ -88,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
                     fides_mode=fides_mode,
                     fides_test_double_evidence_rules=fides_rules,
                 )
-        report = run_evaluation(run_config)
+        report = run_evaluation(run_config, private_review_csv=args.private_review_csv)
         missing = [
             result
             for result in report.get("adapter_results", [])
