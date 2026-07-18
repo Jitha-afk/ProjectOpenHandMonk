@@ -1,0 +1,15 @@
+%% Figure 1: AGT mcp-scan repair lifecycle
+flowchart LR
+    A["Drifted contract<br/>Tutorial promised mcp-scan<br/>Packaging/router did not expose it"] --> B["Repair packaged CLI<br/>mcp-scan console script"]
+    B --> C["Live MCP metadata inspection<br/>initialize -> initialized -> list primitives"]
+    C --> D["Normalize primitives<br/>tools, resources, templates, prompts"]
+    D --> E["Reuse MCPSecurityScanner<br/>hidden instructions, risky schemas,<br/>command-shaped fields"]
+    E --> F["User-facing evidence<br/>JSON, Markdown/table, exit codes,<br/>fingerprints"]
+    F --> G["Regression evidence<br/>active tests + sandbox validation"]
+
+    classDef problem fill:#fff3bf,stroke:#f08c00,color:#3b2f00;
+    classDef repair fill:#d0ebff,stroke:#1971c2,color:#102a43;
+    classDef evidence fill:#d3f9d8,stroke:#2b8a3e,color:#123b1e;
+    class A problem;
+    class B,C,D,E repair;
+    class F,G evidence;
