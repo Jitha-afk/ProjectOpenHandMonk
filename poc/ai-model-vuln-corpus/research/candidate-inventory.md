@@ -22,6 +22,7 @@ Strongest early candidates are not "mystery malware models" from the internet. T
 - Rapid7, "From .pth to p0wned": reports malicious PyTorch `.pth` files uploaded to Hugging Face that executed system commands and downloaded RAT payloads. https://www.rapid7.com/blog/post/from-pth-to-p0wned-abuse-of-pickle-files-in-ai-model-supply-chains/
 - Trail of Bits Fickling: explicitly supports detecting and creating malicious pickle / PyTorch files, including PyTorch polyglots. https://github.com/trailofbits/fickling
 - PyTorch serialization notes: `torch.load(..., weights_only=False)` can result in arbitrary code execution; safer `weights_only=True` exists for trusted workflows. https://pytorch.org/docs/stable/notes/serialization.html
+- PyTorch TorchScript documentation: TorchScript is a separate serialized program/archive workflow that may also use the `.pt` extension and should be classified independently from pickle-backed checkpoints. https://docs.pytorch.org/docs/stable/jit.html
 - scikit-learn model persistence: pickle/joblib/cloudpickle loading can execute arbitrary code. https://scikit-learn.org/stable/model_persistence.html
 - joblib persistence docs: `joblib.load()` is based on pickle and arbitrary Python code can execute when loading. https://joblib.readthedocs.io/en/stable/persistence.html
 - dill docs: dill extends Python pickle and can serialize broad interpreter state. https://dill.readthedocs.io/en/latest/
@@ -68,7 +69,8 @@ Strongest early candidates are not "mystery malware models" from the internet. T
 Covered with strong or moderate evidence in this pass:
 
 - `.pkl` / `.pickle`: strong
-- `.pt` / `.pth`: strong
+- `.pt` / `.pth` pickle-backed checkpoints: strong for unsafe-deserialization risk
+- TorchScript `.pt`: separate archive/runtime format; moderate coverage only. It must not inherit pickle-checkpoint claims solely from the extension and needs its own static archive/operator validation path.
 - `.joblib`: strong
 - `.dill`: moderate-strong
 - `.npy` / `.npz`: strong
