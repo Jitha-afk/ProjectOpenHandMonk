@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "canaryweave-fides"
+version = "0.1.0"
+description = "Controlled MCP policy-rule and FIDES/IFC evaluation POC"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Project Open Hand Monk" }]
+license = "MIT"
+dependencies = ["PyYAML>=6.0", "rich>=13.7"]
+
+[project.optional-dependencies]
+copilot = ["github-copilot-sdk>=1.0.0,<2; python_version >= '3.11'"]
+dev = ["pytest>=8.0", "build>=1.0"]
+
+[project.scripts]
+canaryweave-fides = "canaryweave_fides.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+canaryweave_fides = ["assets/**/*.yaml", "assets/**/*.yml", "assets/**/*.war", "assets/**/*.md"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"
