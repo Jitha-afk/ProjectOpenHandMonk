@@ -3,7 +3,11 @@
 > Build a source-backed corpus of vulnerable or intentionally unsafe AI model artifacts for controlled-lab security testing.
 
 ## Status
-`researching`
+`complete — research inventory and engineering handoff`
+
+The issue #3 research scope is complete. This workspace provides a source-backed candidate inventory, format coverage matrix, controlled-lab testing playbook, and executive summary. It does not contain acquired model artifacts, a downloader, a scanner, or product-efficacy results. Any acquisition or execution work requires a separately approved implementation phase.
+
+See `FINAL_STATUS.md` for the closure record and validation boundaries.
 
 ## Objective
 Create a comprehensive, evidence-backed inventory of AI model artifacts that are either intentionally vulnerable, incidentally unsafe, maliciously crafted, or widely discussed in security research as risky to load or distribute. The immediate goal is to identify strong candidates for later testing of Microsoft Defender for Cloud model security capabilities.
@@ -20,7 +24,7 @@ Create a comprehensive, evidence-backed inventory of AI model artifacts that are
 - **Turing (Engineering):** Define artifact intake, validation, and testability rules aligned to Defender-supported model formats and controlled-lab constraints.
 
 ## Findings
-_Work in progress. See research/, design/, and docs/ for outputs._
+The completed research handoff is organized under `research/`, `design/`, and `docs/`. The strongest candidates favor controlled synthetic reconstruction and non-executing validation over acquiring opaque real-world artifacts.
 
 ## Structure
 ```
