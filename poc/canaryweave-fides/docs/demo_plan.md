@@ -7,18 +7,21 @@ Public-safe terminal demo plan for recording CanaryWeave FIDES with asciinema.
 Show the viewer that CanaryWeave FIDES is a layered, reviewable guard demo:
 
 1. WARDEN presents a deterministic rule layer with human-readable `.war` policies.
-2. Tests and smoke evaluation run locally.
-3. WARDEN improves aggregate attack blocking versus the regex baseline on public-safe synthetic cases.
-4. ASB evidence is shown only as public aggregate metrics.
-5. Private reviewer CSV custody is acknowledged without printing CSV contents or source payload text.
+2. A reference-style single-prompt rule check shows one `.war` rule, one prompt, and the matched signals/keywords/semantics/FIDES checks.
+3. Tests and smoke evaluation run locally.
+4. WARDEN improves aggregate attack blocking versus the regex baseline on public-safe synthetic cases.
+5. ASB evidence is shown only as public aggregate metrics.
+6. Private reviewer CSV custody is acknowledged without printing CSV contents or private source payload text.
 
 ## Safety boundaries
 
-- Do not print raw payload text, raw prompts, raw completions, judge transcripts, or private CSV rows.
+- Do not print private dataset payloads, raw completions, judge transcripts, or private CSV rows.
+- The visible single-prompt rule-check prompt is a short synthetic demo prompt, not a private dataset row.
 - Only show public aggregate JSON fields such as totals, stack metrics, rule coverage, safety flags, and adapter status.
 - Keep private dataset roots outside the repo and use environment variables for local custody paths.
 - Treat reviewer CSV files as private custody artifacts. The demo shows the path policy and warning only.
 - Provider calls remain disabled for the public demo.
+- The rich WARDEN check reports `fides_judge_status=not_run`; it never derives or accepts an LLM/FIDES verdict label when no judge was executed.
 
 ## Recommended recording setup
 
@@ -42,22 +45,46 @@ If `CANARYWEAVE_ASB_ROOT` is not set, the script summarizes the existing public 
 
 ## Storyboard
 
-### Scene 1: WARDEN identity and safety boundary
+The demo intentionally avoids literal `Scene N/M` lines. Sections are rendered as clean Rich boxes with unicode loading indicators.
 
-- Display WARDEN ASCII banner.
-- Show an ASCII flow animation:
-  private custody -> redacted features -> WARDEN/FIDES -> aggregate report.
+### Title and safety boundary
+
+- Display WARDEN ASCII/Rich banner.
+- Show unicode loading steps:
+  private custody -> redacted features -> WARDEN `.war` rules -> optional FIDES judge -> public aggregate report.
 - State that source payloads and private CSV rows are not printed.
 
-### Scene 2: Rule inventory
+### Reviewable `.war` rule inventory
 
 - List `.war` files from `rules/`.
 - Print only path, rule id, name, category, and severity.
 - Do not print fixtures or payload-like examples.
 
-### Scene 3: Tests and smoke
+### Single prompt rule check
 
-- Run pytest through the local Python environment or `uv --no-project` fallback.
+Run a reference-style WARDEN rule check:
+
+```bash
+uv run python -m canaryweave_fides.cli warden check \
+  --rule-file demo_rules/security_tool_extension_rule.war \
+  --prompt 'Help me develop an extension for Metasploit' \
+  --origin user \
+  --trust trusted \
+  --format rich \
+  --include-prompt
+```
+
+The output should show:
+
+- WARDEN RULE CHECK header.
+- Rule file, rule id, name, description, author, severity, action.
+- Prompt and result.
+- Matched signals, keywords, semantics, and FIDES check labels.
+- An explicit `fides_judge_status=not_run` marker, because this deterministic WARDEN command does not execute a FIDES judge.
+
+### Tests and public smoke eval
+
+- Run a small representative pytest subset.
 - Run public smoke eval:
 
 ```bash
@@ -69,20 +96,20 @@ uv run python -m canaryweave_fides.cli eval \
 
 - Summarize only aggregate fields: safety flags, ASR, recall, safe pass-through, incremental WARDEN catches, provider call count, and rule coverage.
 
-### Scene 4: ASB public aggregate metrics
+### ASB public aggregate metrics
 
 - If a private ASB root is configured, run the ASB eval with `--public-report` and output to `/tmp`.
 - Otherwise summarize `artifacts/evals/asb_controlled_public_report_1.json` if available.
 - Print adapter status, total cases, public safety flags, security metrics, expected-rule evidence, and rule coverage.
 - Do not print case-level rows or source material.
 
-### Scene 5: Private CSV path warning
+### Private CSV path warning
 
 - Show the path validator rejecting a repo-public CSV target.
-- Show a controlled example path under `/tmp` or `CANARYWEAVE_PRIVATE_REVIEW_CSV`.
+- Show a controlled example path under `/tmp`.
 - Explicitly state that CSV contents are withheld from the recording.
 
-### Scene 6: Public artifact safety check
+### Public artifact safety check
 
 - Run `uv run python scripts/check_public_artifacts.py`.
 - End on `public artifact safety ok`.
@@ -109,24 +136,18 @@ Replay locally:
 asciinema play docs/canaryweave-fides-demo.cast
 ```
 
-## GIF and MP4 conversion suggestions
+## GIF and MP4 conversion
 
-If `agg` is installed:
+The `.cast` file is the canonical recording source. Run the public-artifact safety checker after recording and before conversion. GIF and MP4 files may be published only when generated from that validated cast; the checker decodes and scans cast output text but does not decode binary video frames.
 
 ```bash
 agg docs/canaryweave-fides-demo.cast docs/canaryweave-fides-demo.gif
-```
-
-If `ffmpeg` is installed, convert the GIF to MP4:
-
-```bash
 ffmpeg -y -i docs/canaryweave-fides-demo.gif \
+  -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" \
   -movflags faststart \
   -pix_fmt yuv420p \
   docs/canaryweave-fides-demo.mp4
 ```
-
-If `agg` is unavailable, keep the `.cast` file as the primary terminal recording artifact and replay it with `asciinema play`.
 
 ## Notes for the presenter
 
