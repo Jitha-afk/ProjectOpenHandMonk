@@ -3,7 +3,9 @@
 > A benchmark suite and live demo corpus for evaluating LLM and security tool resilience against MCP (Model Context Protocol) attacks.
 
 ## Status
-`building`
+`validated / benchmark and research artifact complete`
+
+The benchmark implementation, automated regression suite, Microsoft Agent Governance Toolkit scanner evaluation, and supporting research artifacts are complete for the scope tracked in issues #1 and #4. Runtime prevention and production detection-completeness claims remain explicitly out of scope.
 
 ## Overview
 

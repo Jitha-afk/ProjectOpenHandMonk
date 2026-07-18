@@ -19,6 +19,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "agent-os-kernel>=3.7.0",
     "pytest",
     "pytest-asyncio",
 ]
