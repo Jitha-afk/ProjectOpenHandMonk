@@ -1,0 +1,26 @@
+{
+  "branch": "poc/canaryweave-asr",
+  "completed": [
+    "Renamed project/package/docs to CanaryWeave and removed stale branding terms",
+    "Created Hermes-native GSD-style plan at design/hermes_gsd_autonomous_plan.md",
+    "Implemented 50-loop deterministic local research runner",
+    "Added sampling-focused scenario families and tests",
+    "Generated artifacts/research/loop_results.json",
+    "Created docs/canaryweave_findings.md and artifacts/research/summary_table.md",
+    "Added safe model dry-run model-set support",
+    "Added peer-review regression tests for trace semantics, artifact schema, model registry sync, and documentation consistency",
+    "Reframed the local finding as deterministic simulator validation rather than empirical security evidence"
+  ],
+  "next_steps": [
+    "Commit and push review-fix patch"
+  ],
+  "phase": "peer-review fix validation complete",
+  "project": "CanaryWeave",
+  "updated": "2026-05-16",
+  "validation": {
+    "pytest": "48 passed",
+    "secret_scan": "passed",
+    "stale_name_scan": "passed",
+    "independent_review": "passed_with_warnings_no_blockers"
+  }
+}
