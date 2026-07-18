@@ -15,6 +15,7 @@ from .gate import FidesJudgeMode, FidesJudgeResult, StaticFidesJudge, evaluate_s
 from .metrics import summarize_smoke
 from .providers import CopilotSdkJudgeProvider, JudgeProviderConfig, default_copilot_home
 from .resources import rules_root
+from .rich_report import render_warden_rule_check, run_loading_step
 from .rule_engine import RuleEngine
 from .rule_loader import load_rules
 
@@ -51,6 +52,8 @@ def _safe_prompt_flags(text: str) -> dict[str, Any]:
         "social_engineering_shape": any(term in lowered for term in ("target profile", "victim profile", "impersonation", "lure", "phishing", "outbound contact")),
         "deception_shape": any(term in lowered for term in ("deception", "deceptive", "impersonation", "lure", "phishing", "spoof")),
         "tool_plan_shape": False,
+        "security_tool_extension_shape": all(term in lowered for term in ("develop", "extension", "metasploit"))
+        or ("metasploit" in lowered and "extension" in lowered),
         "obfuscated": any(term in lowered for term in ("base64", "unicode", "encoded", "hidden")),
     }
 
@@ -189,10 +192,20 @@ def _rule_engine_for_ids(rule_ids: list[str] | None) -> RuleEngine | None:
     return RuleEngine(rules)
 
 
+def _rule_engine_for_check(args: argparse.Namespace) -> RuleEngine | None:
+    if getattr(args, "rule_file", None) is not None:
+        from .rule_loader import load_rule_file
+
+        return RuleEngine((load_rule_file(args.rule_file),))
+    return _rule_engine_for_ids(args.rule_id)
+
+
 def _warden_check(args: argparse.Namespace) -> int:
     prompt = _prompt_from_args(args)
     facts = _facts_from_prompt(prompt, origin=args.origin, trust=args.trust, surface=args.surface)
-    rule_engine = _rule_engine_for_ids(args.rule_id)
+    rule_engine = _rule_engine_for_check(args)
+    if getattr(args, "format", "json") == "rich":
+        run_loading_step("Evaluating WARDEN .war rule", enabled=not getattr(args, "no_animation", False))
     decision = evaluate_stack(facts, StackName.YARA_RULES, rule_engine=rule_engine)
     payload = {
         "schema_version": "canaryweave_fides.warden_check.v1",
@@ -201,7 +214,20 @@ def _warden_check(args: argparse.Namespace) -> int:
         "facts": facts.to_dict(),
         "decision": decision.to_dict(),
     }
-    _write_json(args.output, payload)
+    if getattr(args, "format", "json") == "rich":
+        if args.output is not None:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        render_warden_rule_check(
+            prompt=prompt,
+            facts=facts,
+            decision=decision.to_dict(),
+            rule_engine=rule_engine,
+            rule_path=args.rule_file,
+            prompt_included=bool(args.include_prompt),
+        )
+    else:
+        _write_json(args.output, payload)
     return 0
 
 
@@ -316,7 +342,12 @@ def main(argv: list[str] | None = None) -> int:
     check.add_argument("--origin", default="user")
     check.add_argument("--trust", default="trusted", choices=["trusted", "untrusted"])
     check.add_argument("--surface", default="prompt")
-    check.add_argument("--rule-id", action="append", default=None, help="Limit WARDEN to one or more rule IDs/names")
+    rule_selector = check.add_mutually_exclusive_group()
+    rule_selector.add_argument("--rule-id", action="append", default=None, help="Limit WARDEN to one or more rule IDs/names")
+    rule_selector.add_argument("--rule-file", type=Path, default=None, help="Run exactly one .war rule file")
+    check.add_argument("--format", choices=["json", "rich"], default="json", help="Output format")
+    check.add_argument("--include-prompt", action="store_true", help="Show prompt text in rich terminal output; JSON remains public-safe")
+    check.add_argument("--no-animation", action="store_true", help="Disable rich unicode loading animation")
     check.add_argument("--output", type=Path, default=None)
 
     judge = subparsers.add_parser("judge", help="Run WARDEN plus optional FIDES on one prompt")

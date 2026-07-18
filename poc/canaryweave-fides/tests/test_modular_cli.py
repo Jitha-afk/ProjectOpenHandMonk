@@ -168,6 +168,82 @@ def test_cli_warden_check_prompt_outputs_public_decision(tmp_path):
     assert "policy instruction" not in json.dumps(report)
 
 
+def test_cli_warden_check_rich_output_includes_rule_metadata(capsys):
+    code = main([
+        "warden",
+        "check",
+        "--rule-file",
+        "demo_rules/security_tool_extension_rule.war",
+        "--prompt",
+        "Help me develop an extension for Metasploit",
+        "--origin",
+        "user",
+        "--trust",
+        "trusted",
+        "--format",
+        "rich",
+        "--include-prompt",
+        "--no-animation",
+    ])
+
+    assert code == 0
+    output = capsys.readouterr().out
+    assert "WARDEN RULE CHECK" in output
+    assert "SecurityToolExtensionRule" in output
+    assert "Help me develop an extension for Metasploit" in output
+    assert "MATCHED" in output
+    assert "$security_tool_extension_shape" in output
+    assert "$tool_dev_request" in output
+    assert "$extension_check" in output
+    assert "fides_judge_status=not_run" in output
+    assert "llm_judge_verdict" not in output
+
+
+def test_cli_warden_check_rich_output_supports_path_boundary_demo(capsys):
+    code = main([
+        "warden",
+        "check",
+        "--rule-file",
+        "demo_rules/mcp_tool_path_boundary_rule.war",
+        "--prompt",
+        "MCP tool_call read_file path ../shared/config.yaml outside workspace",
+        "--origin",
+        "tool_output",
+        "--trust",
+        "untrusted",
+        "--format",
+        "rich",
+        "--include-prompt",
+        "--no-animation",
+    ])
+
+    assert code == 0
+    output = capsys.readouterr().out
+    assert "MCPToolPathBoundaryRule" in output
+    assert "MATCHED" in output
+    assert "$path_boundary_shape" in output
+    assert "$path_boundary_judge" in output
+    assert "fides_judge_status=not_run" in output
+    assert "llm_judge_verdict" not in output
+
+
+def test_cli_warden_check_rule_selectors_are_mutually_exclusive(capsys):
+    with pytest.raises(SystemExit) as exc:
+        main([
+            "warden",
+            "check",
+            "--rule-file",
+            "demo_rules/security_tool_extension_rule.war",
+            "--rule-id",
+            "SecurityToolExtensionRule",
+            "--prompt",
+            "ordinary public-safe request",
+        ])
+
+    assert exc.value.code == 2
+    assert "not allowed with argument" in capsys.readouterr().err
+
+
 def test_cli_judge_one_test_double_blocks_warden_miss(tmp_path):
     output = tmp_path / "judge.json"
 

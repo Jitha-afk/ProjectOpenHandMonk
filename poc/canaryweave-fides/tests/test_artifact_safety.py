@@ -1,3 +1,5 @@
+import json
+import runpy
 from pathlib import Path
 
 
@@ -26,3 +28,22 @@ def test_public_artifacts_do_not_contain_disallowed_raw_shapes():
                 text = path.read_text(encoding="utf-8", errors="ignore").lower()
                 hits = [needle for needle in bad if needle in text]
                 assert hits == [], f"{path} contains disallowed public artifact shapes: {hits}"
+
+
+def test_public_artifact_checker_decodes_cast_output_events(tmp_path):
+    namespace = runpy.run_path(str(ROOT / "scripts" / "check_public_artifacts.py"), run_name="cast_checker_test")
+    read_public_text = namespace["read_public_text"]
+    cast_path = tmp_path / "demo.cast"
+    cast_path.write_text(
+        "\n".join(
+            [
+                json.dumps({"version": 2, "width": 80, "height": 24}),
+                json.dumps([0.1, "o", "public-safe output"]),
+                json.dumps([0.2, "i", "input is not published output"]),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    assert read_public_text(cast_path) == "public-safe output"
